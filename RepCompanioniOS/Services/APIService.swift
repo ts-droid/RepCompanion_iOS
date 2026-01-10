@@ -5,16 +5,72 @@ import Foundation
 class APIService {
     static let shared = APIService()
     
-    // TODO: Update with your actual server URL
-    // Using port 5001 because 5000 is often used by macOS AirPlay
-    private let baseURL = "http://localhost:5001"
+    // Backend server URL
+    // IMPORTANT: Use 127.0.0.1 instead of localhost to force IPv4
+    // iOS Simulator sometimes resolves localhost to IPv6 (::1) which causes connection issues
+    // For physical device, use your Mac's IP address (Local) or Production URL (Cloud)
+    private let useCloud = false // SET TO TRUE ONCE DEPLOYED
+    private let productionURL = "https://your-app-name.railway.app"
+    
+    #if targetEnvironment(simulator)
+    // Simulator: Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 issues
+    private let baseURL = "http://127.0.0.1:5002"
+    #else
+    // Physical device needs Mac's IP address or Cloud URL
+    // Current Mac IP: 192.168.68.82 (auto-detected)
+    private let baseURL = useCloud ? productionURL : "http://192.168.68.82:5002"
+    #endif
+    
+    // Log baseURL on initialization to verify configuration
+    init() {
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[APIService] 🔧 INITIALIZED")
+        print("[APIService] 🌐 Base URL: \(baseURL)")
+        #if targetEnvironment(simulator)
+        print("[APIService] 📱 Running on: iOS Simulator")
+        #else
+        print("[APIService] 📱 Running on: Physical Device")
+        #endif
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    }
     
     private var authToken: String? {
         // Get from keychain or user defaults
         UserDefaults.standard.string(forKey: "authToken")
     }
     
-    private init() {}
+    // MARK: - Request Helper
+    
+    private func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            return (data, response)
+        } catch let error as NSError {
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[APIService] ❌ NETWORK ERROR")
+            print("[APIService] 🌐 URL: \(request.url?.absoluteString ?? "Unknown")")
+            print("[APIService] 🏷️ Domain: \(error.domain)")
+            print("[APIService] 🔢 Code: \(error.code)")
+            print("[APIService] 💬 Description: \(error.localizedDescription)")
+            
+            // Check for Local Network Prohibited
+            if error.domain == NSURLErrorDomain {
+                let errorString = "\(error)"
+                if errorString.contains("Local network prohibited") {
+                    print("[APIService] ⚠️ CRITICAL: Local Network access is prohibited!")
+                    print("[APIService] 👉 Please ensure you have accepted the Local Network permission dialog.")
+                    print("[APIService] 👉 Go to Settings > RepCompanion > Local Network and toggle it ON.")
+                } else if error.code == -1004 {
+                    print("[APIService] ⚠️ Could not connect to server. Ensure the backend is running at \(baseURL)")
+                } else if error.code == -1009 {
+                    print("[APIService] ⚠️ Internet appears to be offline.")
+                }
+            }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            throw error
+        }
+    }
+    
     
     // MARK: - Authentication
     
@@ -31,7 +87,7 @@ class APIService {
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -62,7 +118,7 @@ class APIService {
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -92,7 +148,7 @@ class APIService {
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -123,7 +179,7 @@ class APIService {
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -157,7 +213,7 @@ class APIService {
         let body = ["force": force]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -208,6 +264,8 @@ class APIService {
         let profile: UserProfileResponse
         let gym: GymResponse?
         let program: ProgramGenerationResponse?
+        let hasProgram: Bool?
+        let templatesCreated: Int?
     }
     
     struct ProgramGenerationResponse: Codable {
@@ -247,11 +305,23 @@ class APIService {
         let oneRmLatpull: Int
     }
     
-    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String]) async throws -> OnboardingCompleteResponse {
+    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], useV3: Bool = true) async throws -> OnboardingCompleteResponse {
         // TEMPORARY: Skip token requirement for testing
         print("[APIService] ✅ Completing onboarding without authentication (testing mode)...")
+        print("[APIService] 🚀 Using V3 AI architecture: \(useV3)")
         
-        let url = URL(string: "\(baseURL)/api/onboarding/complete")!
+        var urlComponents = URLComponents(string: "\(baseURL)/api/onboarding/complete")!
+        if useV3 {
+            urlComponents.queryItems = [URLQueryItem(name: "useV3", value: "true")]
+        }
+        
+        guard let url = urlComponents.url else {
+            print("[APIService] ❌ ERROR: Failed to create URL from components")
+            throw APIError.invalidResponse
+        }
+        
+        print("[APIService] 🌐 Request URL: \(url.absoluteString)")
+        print("[APIService] 📋 Base URL: \(baseURL)")
         
         // Create custom URLSessionConfiguration with extended timeout for AI generation
         let config = URLSessionConfiguration.default
@@ -268,26 +338,41 @@ class APIService {
         request.httpBody = try JSONEncoder().encode(body)
         
         print("[APIService] ⏱️ Starting onboarding completion (timeout: 5 minutes for AI generation)...")
-        let (data, response) = try await session.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+        // Check server health before making request
+        do {
+            let healthURL = URL(string: "\(baseURL)/api/health")!
+            let healthRequest = URLRequest(url: healthURL, timeoutInterval: 5.0)
+            let (_, healthResponse) = try await URLSession.shared.data(for: healthRequest)
+            if let httpResponse = healthResponse as? HTTPURLResponse {
+                print("[APIService] ✅ Server health check: \(httpResponse.statusCode)")
+            }
+        } catch {
+            print("[APIService] ⚠️  Server health check failed: \(error.localizedDescription)")
+            print("[APIService] ⚠️  Continuing with request anyway...")
         }
         
-        guard (200...299).contains(httpResponse.statusCode) else {
-            // Try to decode error message for better feedback
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                print("[APIService] ❌ Onboarding failed: \(errorResponse.message)")
-                throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
             }
             
-            // If status is 401, provide specific message
-            if httpResponse.statusCode == 401 {
-                throw NSError(domain: "APIService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Du är inte inloggad. Vänligen logga in igen."])
+            guard (200...299).contains(httpResponse.statusCode) else {
+                // Try to decode error message for better feedback
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    print("[APIService] ❌ Onboarding failed: \(errorResponse.message)")
+                    throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
+                }
+                
+                // If status is 401, provide specific message
+                if httpResponse.statusCode == 401 {
+                    throw NSError(domain: "APIService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Du är inte inloggad. Vänligen logga in igen."])
+                }
+                
+                throw APIError.httpError(httpResponse.statusCode)
             }
-            
-            throw APIError.httpError(httpResponse.statusCode)
-        }
         
         // Try to decode response - add better error handling
         do {
@@ -305,12 +390,55 @@ class APIService {
             }
             
             return onboardingResponse
-        } catch {
+        } catch let decodeError {
             // Log the actual JSON for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("[APIService] ❌ Failed to decode response. JSON: \(jsonString)")
             }
-            print("[APIService] ❌ Decoding error: \(error)")
+            print("[APIService] ❌ Decoding error: \(decodeError)")
+            throw decodeError
+        }
+        } catch let error as URLError {
+            print("[APIService] ❌ NETWORK ERROR in onboarding completion:")
+            print("[APIService] Error code: \(error.code.rawValue)")
+            print("[APIService] Error description: \(error.localizedDescription)")
+            print("[APIService] Failed to connect to \(baseURL)")
+            
+            // Retry logic for connection errors
+            if error.code == .cannotConnectToHost || error.code == .timedOut || error.code == .networkConnectionLost {
+                print("[APIService] 🔄 Retrying onboarding completion (connection error detected)...")
+                // Simple retry without recursive call
+                for attempt in 1...2 {
+                    let waitTime = 3.0 * Double(attempt)
+                    print("[APIService] ⏳ Retry attempt \(attempt)/2 after \(waitTime)s...")
+                    try await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+                    
+                    do {
+                        // Recreate request for retry
+                        var retryRequest = URLRequest(url: url)
+                        retryRequest.httpMethod = "POST"
+                        retryRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                        retryRequest.httpBody = try JSONEncoder().encode(body)
+                        retryRequest.timeoutInterval = 300.0
+                        
+                        let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                        if let retryHttpResponse = retryResponse as? HTTPURLResponse,
+                           (200...299).contains(retryHttpResponse.statusCode) {
+                            let decoder = JSONDecoder()
+                            decoder.dateDecodingStrategy = .iso8601
+                            return try decoder.decode(OnboardingCompleteResponse.self, from: retryData)
+                        }
+                    } catch {
+                        if attempt == 2 {
+                            throw APIError.networkError("Failed after 2 retry attempts: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[APIService] ❌ ERROR in onboarding completion: \(error.localizedDescription)")
             throw error
         }
     }
@@ -382,15 +510,42 @@ class APIService {
     }
     
     /// Get suggested 1RM values based on user profile
+    /// Uses V3 AI analysis if available, otherwise falls back to local calculation
     func suggestOneRmValues(
         motivationType: String,
         trainingLevel: String,
         age: Int,
         sex: String,
         bodyWeight: Int,
-        height: Int
+        height: Int,
+        useV3: Bool = false
     ) async throws -> SuggestedOneRmResponse {
-        let url = URL(string: "\(baseURL)/api/profile/suggest-onerm")!
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[APIService] 🚀 STARTING 1RM SUGGESTION REQUEST")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[APIService] 📋 Request Parameters:")
+        print("  • motivationType: \(motivationType)")
+        print("  • trainingLevel: \(trainingLevel)")
+        print("  • age: \(age)")
+        print("  • sex: \(sex)")
+        print("  • bodyWeight: \(bodyWeight) kg")
+        print("  • height: \(height) cm")
+        print("  • useV3: \(useV3)")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
+        var urlComponents = URLComponents(string: "\(baseURL)/api/profile/suggest-onerm")!
+        if useV3 {
+            urlComponents.queryItems = [URLQueryItem(name: "useV3", value: "true")]
+        }
+        
+        guard let url = urlComponents.url else {
+            print("[APIService] ❌ ERROR: Failed to create URL from components")
+            throw APIError.invalidResponse
+        }
+        
+        print("[APIService] 🌐 Request URL: \(url.absoluteString)")
+        print("[APIService] 📋 Base URL: \(baseURL)")
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -404,22 +559,135 @@ class APIService {
             "height": height
         ]
         
+        print("[APIService] 📦 Request Body:")
+        if let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
+        }
+        
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        print("[APIService] ⏳ Sending HTTP request...")
+        let startTime = Date()
         
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
+        // Check server health before making request
+        do {
+            let healthURL = URL(string: "\(baseURL)/api/health")!
+            let healthRequest = URLRequest(url: healthURL, timeoutInterval: 5.0)
+            let (_, healthResponse) = try await URLSession.shared.data(for: healthRequest)
+            if let httpResponse = healthResponse as? HTTPURLResponse {
+                print("[APIService] ✅ Server health check: \(httpResponse.statusCode)")
             }
-            throw APIError.httpError(httpResponse.statusCode)
+        } catch {
+            print("[APIService] ⚠️  Server health check failed: \(error.localizedDescription)")
+            print("[APIService] ⚠️  Continuing with request anyway...")
         }
         
-        return try JSONDecoder().decode(SuggestedOneRmResponse.self, from: data)
+        // Create custom URLSessionConfiguration with extended timeout for V3 AI analysis
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30.0 // 30 seconds for V3 AI analysis
+        config.timeoutIntervalForResource = 30.0 // 30 seconds total
+        let session = URLSession(configuration: config)
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            let duration = Date().timeIntervalSince(startTime)
+            
+            print("[APIService] ⏱️  Request completed in \(String(format: "%.2f", duration)) seconds")
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[APIService] ❌ ERROR: Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[APIService] 📡 HTTP Response:")
+            print("  • Status Code: \(httpResponse.statusCode)")
+            print("  • Headers: \(httpResponse.allHeaderFields)")
+            print("  • Data Size: \(data.count) bytes")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                print("[APIService] ❌ ERROR: HTTP status code \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("[APIService] Response body: \(responseString)")
+                }
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    print("[APIService] Decoded error: \(errorResponse.message)")
+                    throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
+                }
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+            
+            print("[APIService] ✅ HTTP Status: SUCCESS")
+            
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("[APIService] 📄 Response Body:")
+                print(responseString)
+            }
+            
+            let decodedResponse = try JSONDecoder().decode(SuggestedOneRmResponse.self, from: data)
+            
+            print("[APIService] ✅ Decoded Response:")
+            print("  • oneRmBench: \(decodedResponse.oneRmBench) kg")
+            print("  • oneRmOhp: \(decodedResponse.oneRmOhp) kg")
+            print("  • oneRmDeadlift: \(decodedResponse.oneRmDeadlift) kg")
+            print("  • oneRmSquat: \(decodedResponse.oneRmSquat) kg")
+            print("  • oneRmLatpull: \(decodedResponse.oneRmLatpull) kg")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[APIService] ✅ REQUEST COMPLETED SUCCESSFULLY")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            
+            return decodedResponse
+        } catch let error as URLError {
+            let duration = Date().timeIntervalSince(startTime)
+            print("[APIService] ❌ NETWORK ERROR after \(String(format: "%.2f", duration)) seconds:")
+            print("[APIService] Error code: \(error.code.rawValue)")
+            print("[APIService] Error description: \(error.localizedDescription)")
+            print("[APIService] Failed to connect to \(baseURL)")
+            
+            // Retry logic for connection errors
+            if error.code == .cannotConnectToHost || error.code == .timedOut || error.code == .networkConnectionLost {
+                print("[APIService] 🔄 Retrying request (connection error detected)...")
+                // Simple retry without recursive call to avoid infinite loop
+                for attempt in 1...2 {
+                    let waitTime = 2.0 * Double(attempt)
+                    print("[APIService] ⏳ Retry attempt \(attempt)/2 after \(waitTime)s...")
+                    try await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+                    
+                    do {
+                        // Recreate request for retry
+                        var retryRequest = URLRequest(url: url)
+                        retryRequest.httpMethod = "POST"
+                        retryRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                        retryRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
+                        retryRequest.timeoutInterval = 30.0
+                        
+                        let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                        if let retryHttpResponse = retryResponse as? HTTPURLResponse,
+                           (200...299).contains(retryHttpResponse.statusCode) {
+                            return try JSONDecoder().decode(SuggestedOneRmResponse.self, from: retryData)
+                        }
+                    } catch {
+                        if attempt == 2 {
+                            throw APIError.networkError("Failed after 2 retry attempts: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            let duration = Date().timeIntervalSince(startTime)
+            print("[APIService] ❌ ERROR after \(String(format: "%.2f", duration)) seconds:")
+            print("[APIService] Error type: \(type(of: error))")
+            print("[APIService] Error description: \(error.localizedDescription)")
+            if let nsError = error as NSError? {
+                print("[APIService] Error domain: \(nsError.domain)")
+                print("[APIService] Error code: \(nsError.code)")
+                print("[APIService] Error userInfo: \(nsError.userInfo)")
+            }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            throw error
+        }
     }
     
     /// Get generation job status
@@ -472,27 +740,91 @@ class APIService {
         return try decoder.decode(UserProfileResponse.self, from: data)
     }
     
+    // MARK: - Program Status
+    
+    /// Get current program generation status (doesn't require jobId)
+    func getProgramStatus() async throws -> ProgramStatusResponse {
+        let url = URL(string: "\(baseURL)/api/program/status")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[API] ❌ Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[API] Program status response: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+            
+            return try JSONDecoder().decode(ProgramStatusResponse.self, from: data)
+        } catch let error as URLError {
+            print("[API] ❌ Network error: \(error.localizedDescription)")
+            print("[API] ❌ Failed to connect to \(baseURL)")
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[API] ❌ Unknown error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    struct ProgramStatusResponse: Codable {
+        let status: String
+        let message: String
+        let hasTemplates: Bool
+        let templatesCount: Int
+        let progress: Int?
+        let jobId: String?
+        let error: String?
+    }
+    
     // MARK: - Program Templates
     
     func fetchProgramTemplates() async throws -> [ProgramTemplateResponse] {
-        guard let token = authToken else {
-            throw APIError.unauthorized
-        }
-        
         let url = URL(string: "\(baseURL)/api/program/templates")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[API] 🔑 Using auth token for templates request")
+        } else {
+            print("[API] ⚠️ No auth token available, trying without (dev mode)")
         }
         
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.httpError(httpResponse.statusCode)
-        }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[API] ❌ Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[API] 📡 Templates response: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+        
+            // Log raw response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("[API] 📄 Raw response (first 1000 chars): \(String(responseString.prefix(1000)))")
+            }
         
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -504,8 +836,140 @@ class APIService {
             let isNext: Bool
         }
         
-        let templatesWithMetadata = try decoder.decode([TemplateWithMetadata].self, from: data)
-        return templatesWithMetadata.map { $0.template }
+            let templatesWithMetadata = try decoder.decode([TemplateWithMetadata].self, from: data)
+            let templates = templatesWithMetadata.map { $0.template }
+            print("[API] ✅ Decoded \(templates.count) templates from response")
+            return templates
+        } catch let error as URLError {
+            print("[API] ❌ Network error: \(error.localizedDescription)")
+            print("[API] ❌ Failed to connect to \(baseURL)")
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[API] ❌ Decoding error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func deleteAllTemplates() async throws {
+        let url = URL(string: "\(baseURL)/api/program/templates")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[API] 🔑 Using auth token for delete templates request")
+        } else {
+            print("[API] ⚠️ No auth token available, trying without (dev mode)")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[API] ❌ Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[API] 📡 Delete templates response: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+            
+            print("[API] ✅ Successfully deleted all templates on server")
+        } catch let error as URLError {
+            print("[API] ❌ Network error: \(error.localizedDescription)")
+            print("[API] ❌ Failed to connect to \(baseURL)")
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[API] ❌ Error deleting templates: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func deleteAllGyms() async throws {
+        let url = URL(string: "\(baseURL)/api/gyms")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[API] 🔑 Using auth token for delete gyms request")
+        } else {
+            print("[API] ⚠️ No auth token available, trying without (dev mode)")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[API] ❌ Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[API] 📡 Delete gyms response: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+            
+            print("[API] ✅ Successfully deleted all gyms on server")
+        } catch let error as URLError {
+            print("[API] ❌ Network error: \(error.localizedDescription)")
+            print("[API] ❌ Failed to connect to \(baseURL)")
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[API] ❌ Error deleting gyms: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    /// Reset user profile values to defaults on server (for debug "Återställ onboarding" function)
+    func resetProfile() async throws {
+        let url = URL(string: "\(baseURL)/api/profile/reset")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[API] 🔑 Using auth token for reset profile request")
+        } else {
+            print("[API] ⚠️ No auth token available, trying without (dev mode)")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[API] ❌ Invalid response type")
+                throw APIError.invalidResponse
+            }
+            
+            print("[API] 📡 Reset profile response: \(httpResponse.statusCode)")
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                throw APIError.httpError(httpResponse.statusCode)
+            }
+            
+            print("[API] ✅ Successfully reset profile on server")
+        } catch let error as URLError {
+            print("[API] ❌ Network error: \(error.localizedDescription)")
+            print("[API] ❌ Failed to connect to \(baseURL)")
+            throw APIError.networkError(error.localizedDescription)
+        } catch {
+            print("[API] ❌ Error resetting profile: \(error.localizedDescription)")
+            throw error
+        }
     }
     
     // MARK: - Workout Sessions
@@ -726,6 +1190,7 @@ class APIService {
         // Can be called without auth for public catalog
         let url = URL(string: "\(baseURL)/api/equipment/catalog")!
         print("[APIService] 🔄 Fetching equipment catalog from: \(url.absoluteString)")
+        print("[APIService] 📋 Base URL: \(baseURL)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -738,18 +1203,13 @@ class APIService {
             print("[APIService] ⚠️ No auth token - using public endpoint")
         }
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            print("[APIService] ❌ Invalid response type")
             throw APIError.invalidResponse
         }
         
-        print("[APIService] 📡 Response status: \(httpResponse.statusCode)")
-        
         guard (200...299).contains(httpResponse.statusCode) else {
-            let errorBody = String(data: data, encoding: .utf8) ?? "No error body"
-            print("[APIService] ❌ HTTP error: \(httpResponse.statusCode), body: \(errorBody)")
             throw APIError.httpError(httpResponse.statusCode)
         }
         
@@ -1515,6 +1975,11 @@ struct UserEquipmentResponse: Codable {
     let createdAt: Date
 }
 
+struct AiProgramDataResponse: Codable {
+    let type: String?
+    let generatedAt: String?
+}
+
 struct UserProfileResponse: Codable {
     let id: String?
     let userId: String?
@@ -1551,7 +2016,7 @@ struct UserProfileResponse: Codable {
     let appleHealthConnected: Bool?
     let equipmentRegistered: Bool?
     let hasAiProgram: Bool?
-    let aiProgramData: String?
+    let aiProgramData: AiProgramDataResponse?
     let selectedGymId: String?
     let lastCompletedTemplateId: String?
     let lastSessionType: String?
@@ -1578,7 +2043,7 @@ struct ProgramTemplateExerciseResponse: Codable {
     let orderIndex: Int
     let targetSets: Int
     let targetReps: String
-    let targetWeight: Int?
+    let targetWeight: Double?
     let requiredEquipment: [String]
     let muscles: [String]
     let notes: String?
@@ -1749,6 +2214,7 @@ enum APIError: LocalizedError {
     case httpError(Int)
     case rateLimited(String)
     case decodingError
+    case networkError(String)
     
     var errorDescription: String? {
         switch self {
@@ -1762,6 +2228,8 @@ enum APIError: LocalizedError {
             return message
         case .decodingError:
             return "Kunde inte tolka svaret från servern"
+        case .networkError(let message):
+            return "Nätverksfel: \(message). Kontrollera din internetanslutning och att servern körs."
         }
     }
 }

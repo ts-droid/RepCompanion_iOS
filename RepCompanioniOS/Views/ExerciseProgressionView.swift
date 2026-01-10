@@ -1,0 +1,182 @@
+import SwiftUI
+import SwiftData
+import Charts
+
+/// View for displaying exercise weight progression over time
+struct ExerciseProgressionView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+    
+    let exerciseKey: String
+    let exerciseName: String
+    let userId: String
+    
+    @StateObject private var statsService = ExerciseStatsService.shared
+    @State private var selectedDays = 30
+    @State private var progressionData: [WeightDataPoint] = []
+    
+    private var stats: ExerciseStats? {
+        statsService.getStats(for: exerciseKey, userId: userId, modelContext: modelContext)
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Stats Overview
+                if let stats = stats {
+                    VStack(spacing: 16) {
+                        HStack(spacing: 20) {
+                            StatBox(
+                                title: "Max vikt",
+                                value: "\(stats.maxWeight?.formattedWeight ?? "0") kg",
+                                colorScheme: colorScheme
+                            )
+                            StatBox(
+                                title: "Snitt vikt",
+                                value: "\(stats.avgWeight?.formattedWeight ?? "0") kg",
+                                colorScheme: colorScheme
+                            )
+                            StatBox(
+                                title: "Senaste",
+                                value: "\(stats.lastWeight?.formattedWeight ?? "0") kg",
+                                colorScheme: colorScheme
+                            )
+                        }
+                        
+                        HStack(spacing: 20) {
+                            StatBox(
+                                title: "Total volym",
+                                value: "\(stats.totalVolume.formattedWeight) kg",
+                                colorScheme: colorScheme
+                            )
+                            StatBox(
+                                title: "Totala sets",
+                                value: "\(stats.totalSets)",
+                                colorScheme: colorScheme
+                            )
+                            StatBox(
+                                title: "Sessioner",
+                                value: "\(stats.totalSessions)",
+                                colorScheme: colorScheme
+                            )
+                        }
+                    }
+                    .padding()
+                }
+                
+                // Progression Chart
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Viktprogression")
+                            .font(.headline)
+                            .foregroundStyle(Color.textPrimary(for: colorScheme))
+                        
+                        Spacer()
+                        
+                        Picker("Period", selection: $selectedDays) {
+                            Text("7 dagar").tag(7)
+                            Text("30 dagar").tag(30)
+                            Text("90 dagar").tag(90)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 200)
+                    }
+                    .padding(.horizontal)
+                    
+                    if progressionData.isEmpty {
+                        VStack(spacing: 16) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray)
+                            Text("Ingen data ännu")
+                                .font(.headline)
+                                .foregroundStyle(Color.textSecondary(for: colorScheme))
+                            Text("Logga övningar för att se progression")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.textSecondary(for: colorScheme))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 60)
+                    } else {
+                        Chart {
+                            ForEach(progressionData) { point in
+                                LineMark(
+                                    x: .value("Datum", point.date, unit: .day),
+                                    y: .value("Vikt", point.weight)
+                                )
+                                .foregroundStyle(Color.accentBlue)
+                                .interpolationMethod(.catmullRom)
+                                
+                                PointMark(
+                                    x: .value("Datum", point.date, unit: .day),
+                                    y: .value("Vikt", point.weight)
+                                )
+                                .foregroundStyle(Color.accentBlue)
+                            }
+                        }
+                        .frame(height: 250)
+                        .chartXAxis {
+                            AxisMarks(values: .stride(by: .day, count: selectedDays / 7)) { _ in
+                                AxisGridLine()
+                                AxisValueLabel(format: .dateTime.month().day())
+                            }
+                        }
+                        .chartYAxis {
+                            AxisMarks { _ in
+                                AxisGridLine()
+                                AxisValueLabel()
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                .padding()
+                .background(Color.cardBackground(for: colorScheme))
+                .cornerRadius(16)
+                .padding(.horizontal)
+            }
+            .padding(.vertical)
+        }
+        .background(Color.appBackground(for: colorScheme))
+        .navigationTitle(exerciseName)
+        .navigationBarTitleDisplayMode(.large)
+        .onAppear {
+            loadProgression()
+        }
+        .onChange(of: selectedDays) { oldValue, newValue in
+            loadProgression()
+        }
+    }
+    
+    private func loadProgression() {
+        progressionData = statsService.getWeightProgression(
+            for: exerciseKey,
+            userId: userId,
+            days: selectedDays,
+            modelContext: modelContext
+        )
+    }
+}
+
+struct StatBox: View {
+    let title: String
+    let value: String
+    let colorScheme: ColorScheme
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(Color.textSecondary(for: colorScheme))
+            Text(value)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundStyle(Color.textPrimary(for: colorScheme))
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.cardBackground(for: colorScheme))
+        .cornerRadius(12)
+    }
+}
+

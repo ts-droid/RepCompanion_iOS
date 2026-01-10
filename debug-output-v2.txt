@@ -1,0 +1,38 @@
+Checking user: dev-user-123 (Profile ID: 228e9bd9-9d88-440f-ba11-67e9177c9b63)
+Requested Sessions/Week: 5
+
+Found 3 Programs:
+1. ID: 125e653d-c911-4d58-9ec6-8fe877029b6a (0 sessions) - Created: Sun Dec 07 2025 19:15:42 GMT+0100 (Central European Standard Time)
+2. ID: fe61ab57-badb-485e-8812-07ce9a02d20f (0 sessions) - Created: Sun Dec 07 2025 19:11:25 GMT+0100 (Central European Standard Time)
+3. ID: 4bebf826-3825-476f-a166-f92eba5a081c (0 sessions) - Created: Sun Dec 07 2025 19:07:06 GMT+0100 (Central European Standard Time)
+
+[DB TEMPLATES] Found 3 recent templates.
+
+Template: Full Body Strength & Endurance A (ID: 3b3f4931-c398-4a7b-84ef-4a3d5c9ff050)
+Exercise Count: 7
+0. Barbell Squat [3x8-10] (ID: 42912107-3fcd-415a-9cb0-554430f7a6d3)
+1. Barbell Bench Press [3x8-10] (ID: a4a92bae-b463-4664-b7ce-c04c2fbdaf36)
+2. Lat Pulldown [3x10-12] (ID: 59eed94c-42ad-4bce-9f99-7214ce420b35)
+3. Romanian Deadlift [3x10-12] (ID: 2f50a3cb-afe3-4b96-9969-f840ef37e7ae)
+4. Overhead Press [2x10-12] (ID: a9ceea56-5c4d-48da-8eb7-b5470c5a26d0)
+5. Barbell Row [2x12-15] (ID: a7c828a6-ac19-4239-accc-83be1f79ffb9)
+6. Treadmill [1x8 min] (ID: 8ab61cd1-aa83-4fa8-84ce-9d595e8b081f)
+
+Template: Full Body Hypertrophy & Cardio B (ID: a1e92a71-59bd-4b94-82ba-ba4baf2e5609)
+Exercise Count: 7
+0. Romanian Deadlift [3x6-8] (ID: fd7a3ae5-4ffa-47e1-add6-cd6d0967ceb0)
+1. Dumbbell Bench Press [3x10-12] (ID: cfc55caa-9b3a-41c9-9838-0b21bfcaa89b)
+2. Leg Press [3x12-15] (ID: 6a5c1daf-501f-4f82-b915-732b3ba6cf23)
+3. Barbell Curl [2x12-15] (ID: 5f68df28-bdb2-4a98-813b-c9c92cc126e9)
+4. Cable Triceps Pushdown [2x12-15] (ID: 38390e1a-f17d-46c2-89c6-0340499fa795)
+5. Plank [3x30-45 sec] (ID: 31e90857-1149-4a31-992a-06b71746b0b0)
+6. Stationary Bike [1x10 min] (ID: 9908a1b8-fb8d-4432-a12d-71b85949ebcd)
+
+Template: Full Body Endurance & Conditioning C (ID: 8cbe98ae-bb2d-4916-b614-6eaa3ecfcfb1)
+Exercise Count: 6
+0. Overhead Press [3x10-12] (ID: 8b467ddf-eb6c-4cb6-9259-ca3a4e8cd48c)
+1. Barbell Squat [3x12-15] (ID: 2b2ed0be-cb1c-4c47-adcd-90c3f4b9abdf)
+2. Barbell Row [3x12-15] (ID: bf05d7b1-257a-4c53-a9bc-f32eb33e3f19)
+3. Lunges [2x10-12 per leg] (ID: 62f251ef-3836-459e-b219-fc2741f4edf9)
+4. Pull-ups [2x15-20] (ID: 0abc998a-b2cb-4df8-aab9-935e59935fa5)
+6. Rowing Machine [1x8 min] (ID: d05e9da8-0b66-4a25-9f9e-e74a14783246)

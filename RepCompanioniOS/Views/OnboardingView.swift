@@ -8,6 +8,7 @@ struct OnboardingView: View {
     @Environment(\.colorScheme) private var colorScheme
     
     @StateObject private var authService = AuthService.shared
+    @StateObject private var languageService = AppLanguageService.shared
     
     // Step management
     @State private var currentStep = 1
@@ -16,11 +17,13 @@ struct OnboardingView: View {
     // Program generation
     @State private var isGeneratingProgram = false
     @State private var generationError: String?
+    @State private var showGenerationErrorAlert = false
     @State private var generationJobId: String?
     @State private var generationProgress = 0
     @State private var generationStatus = ""
     @State private var showGenerationProgress = false
     @State private var showTimeoutMessage = false
+    @State private var programGenerationStartedEarly = false // Track if generation started from Equipment step
     
     // Onboarding data
     @State private var motivationType = ""
@@ -30,6 +33,9 @@ struct OnboardingView: View {
     @State private var sex = ""
     @State private var bodyWeight: Int?
     @State private var height: Int?
+    @State private var birthDay: Int?
+    @State private var birthMonth: Int?
+    @State private var birthYear: Int?
     @State private var healthDataFetched = false
     @State private var goalStrength = 25
     @State private var goalVolume = 25
@@ -47,7 +53,24 @@ struct OnboardingView: View {
     @State private var selectedEquipment: [String] = []
     @State private var selectedTheme = "Main" // Default theme
     @State private var selectedColorScheme: String = "auto"
+    @State private var dailyStepGoal: Int = 10000 // Default step goal
     @AppStorage("savedColorScheme") private var savedColorScheme: String = "auto"
+    
+    // Validation alerts
+    @State private var showValueValidationAlert = false
+    @State private var valueValidationMessage = ""
+    @State private var lastValidatedAge: Int? = nil
+    @State private var lastValidatedWeight: Int? = nil
+    @State private var lastValidatedHeight: Int? = nil
+    @State private var displayedBMI: Double? = nil // BMI value to display (only updated when focus leaves fields)
+    
+    // Focus state for input fields
+    @FocusState private var focusedField: Field?
+    enum Field {
+        case age
+        case weight
+        case height
+    }
     
     // Equipment catalog
     @State private var availableEquipment: [EquipmentCatalog] = []
@@ -55,8 +78,8 @@ struct OnboardingView: View {
     @State private var showCamera = false
     
     private var totalSteps: Int {
-        // New order: Motivation → Training Level → Personal Info → Goals → 1RM → Frequency → Equipment → Theme
-        motivationType == "sport" ? 9 : 8
+        // New order: Motivation → Training Level → Health Data → Personal Info → Goals → 1RM → Frequency → Equipment → Step Goal → Theme
+        motivationType == "sport" ? 9 : 10
     }
     
     private var progressPercentage: Double {
@@ -73,13 +96,10 @@ struct OnboardingView: View {
             }
             return !trainingLevel.isEmpty
         case 3:
-            if motivationType == "sport" {
-                return !trainingLevel.isEmpty
-            }
             // Health data step is optional - user can proceed even if they skip it
             return true
         case 4:
-            return age != nil && sex != "" && bodyWeight != nil && height != nil
+            return age != nil && sex != "" && bodyWeight != nil && height != nil && birthDay != nil && birthMonth != nil && birthYear != nil
         case 5:
             return goalStrength + goalVolume + goalEndurance + goalCardio == 100
         case 6:
@@ -89,6 +109,8 @@ struct OnboardingView: View {
         case 8:
             return !selectedEquipment.isEmpty
         case 9:
+            return true // Step Goal (shown while Program AI works)
+        case 10:
             return true // Theme selection (only if not sport)
         default:
             return false
@@ -129,7 +151,7 @@ struct OnboardingView: View {
                             Button(action: goToPreviousStep) {
                                 HStack {
                                     Image(systemName: "chevron.left")
-                                    Text("Tillbaka")
+                                    Text("Back", comment: "Back button")
                                 }
                                 .foregroundColor(Color.textPrimary(for: colorScheme))
                                 .padding()
@@ -140,15 +162,22 @@ struct OnboardingView: View {
                         }
                         
                         Button(action: {
-                            if currentStep == totalSteps {
+                            // Step Goal step (step 9) - show progress and complete onboarding when "Finish" is clicked
+                            if currentStep == 9 && (motivationType == "sport" || currentStep == totalSteps) {
+                                // This is the last step (sport mode) or Step Goal is last, complete onboarding
+                                completeOnboarding()
+                            } else if currentStep == totalSteps {
+                                // Last step (Theme in non-sport mode), complete onboarding
                                 completeOnboarding()
                             } else {
                                 goToNextStep()
                             }
                         }) {
                             HStack {
-                                Text(currentStep == totalSteps ? "Slutför" : "Fortsätt")
-                                if currentStep < totalSteps {
+                                // Show "Finish" on Step Goal step if it's the last step, or on actual last step
+                                let isFinishStep = (currentStep == 9 && (motivationType == "sport" || currentStep == totalSteps)) || currentStep == totalSteps
+                                Text(isFinishStep ? String(localized: "Finish") : String(localized: "Continue"))
+                                if !isFinishStep {
                                     Image(systemName: "chevron.right")
                                 }
                             }
@@ -191,14 +220,32 @@ struct OnboardingView: View {
                 }
             }
             .navigationBarHidden(true)
-            .alert("Fel", isPresented: .constant(generationError != nil)) {
-                Button("OK") {
+            .alert("Programgenerering misslyckades", isPresented: $showGenerationErrorAlert) {
+                Button(String(localized: "Försöka igen")) {
                     generationError = nil
+                    showGenerationErrorAlert = false
+                    // Retry program generation
+                    completeOnboarding()
+                }
+                Button(String(localized: "Gå vidare"), role: .cancel) {
+                    generationError = nil
+                    showGenerationErrorAlert = false
+                    // Complete onboarding without program
+                    completeOnboardingWithoutProgram()
                 }
             } message: {
                 if let error = generationError {
-                    Text(error)
+                    Text(String(localized: "Programgenerering lyckades inte just nu. \(error)\n\nVill du försöka igen eller gå vidare till din startsida?"))
+                } else {
+                    Text(String(localized: "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller gå vidare till din startsida?"))
                 }
+            }
+            .alert("Kontrollera värde", isPresented: $showValueValidationAlert) {
+                Button(String(localized: "OK")) {
+                    showValueValidationAlert = false
+                }
+            } message: {
+                Text(valueValidationMessage)
             }
             .sheet(isPresented: $showCamera) {
                 EquipmentCameraView { equipment in
@@ -211,6 +258,20 @@ struct OnboardingView: View {
                     await autoLoginForAlphaTesting()
                 }
                 syncEquipmentCatalogEarly()
+            }
+            .onChange(of: motivationType) { _, newValue in
+                // Recalculate preset goals when motivation type changes
+                if !newValue.isEmpty && !trainingLevel.isEmpty {
+                    goalsCalculated = false // Reset to allow recalculation
+                    calculatePresetGoals()
+                }
+            }
+            .onChange(of: trainingLevel) { _, newValue in
+                // Recalculate preset goals when training level changes
+                if !newValue.isEmpty && !motivationType.isEmpty {
+                    goalsCalculated = false // Reset to allow recalculation
+                    calculatePresetGoals()
+                }
             }
         }
     }
@@ -229,22 +290,28 @@ struct OnboardingView: View {
                 trainingLevelStep
             }
         case 3:
-            if motivationType == "sport" {
-                trainingLevelStep
-            } else {
-                healthDataStep
-            }
+            // Always show Health Data step (optional, user can skip)
+            healthDataStep
         case 4:
+            // Personal Info (shows imported data if Health import was done)
             personalInfoStep
         case 5:
+            // Training Goals → Starts 1RM AI query when user clicks "Continue"
             trainingGoalsStep
         case 6:
+            // 1RM (shows standardized values while AI works)
             oneRmStep
         case 7:
+            // Training Frequency
             trainingFrequencyStep
         case 8:
+            // Equipment → Starts Program AI query when user clicks "Continue", saves gym as "Mitt Gym"
             equipmentStep
         case 9:
+            // Step Goal (shown while Program AI works)
+            stepGoalStep
+        case 10:
+            // Theme (if not sport)
             if motivationType == "sport" {
                 EmptyView() // No theme step for sport
             } else {
@@ -259,21 +326,16 @@ struct OnboardingView: View {
     
     private var motivationStep: some View {
         VStack(spacing: 24) {
-            Text("Vad motiverar dig att träna?")
+            Text(String(localized: "What is your primary training goal?"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Välj ditt primära träningsmål")
-                .font(.subheadline)
-                .foregroundColor(Color.textSecondary(for: colorScheme))
-                .multilineTextAlignment(.center)
-            
             VStack(spacing: 16) {
                 MotivationOption(
-                    title: "Viktminskning",
-                    description: "Gå ner i vikt och förbättra hälsan",
+                    title: LocalizedStringKey("Lose weight"),
+                    description: LocalizedStringKey("Lose weight and improve your health."),
                     isSelected: motivationType == "viktminskning",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -281,8 +343,8 @@ struct OnboardingView: View {
                 )
                 
                 MotivationOption(
-                    title: "Rehabilitering",
-                    description: "Återhämta dig efter skada eller sjukdom",
+                    title: LocalizedStringKey("Rehabilitation"),
+                    description: LocalizedStringKey("Recover from injury or illness."),
                     isSelected: motivationType == "rehabilitering",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -290,21 +352,39 @@ struct OnboardingView: View {
                 )
                 
                 MotivationOption(
-                    title: "Hälsa & Livsstil",
-                    description: "Förbättra uthållighet och kondition",
-                    isSelected: motivationType == "hälsa_livsstil",
+                    title: LocalizedStringKey("Better health"),
+                    description: LocalizedStringKey("Improve stamina, fitness and energy."),
+                    isSelected: motivationType == "bättre_hälsa",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "hälsa_livsstil" }
+                    action: { motivationType = "bättre_hälsa" }
                 )
                 
                 MotivationOption(
-                    title: "Sport",
-                    description: "Träna för en specifik sport",
+                    title: LocalizedStringKey("Build muscle"),
+                    description: LocalizedStringKey("Build muscle mass and get stronger."),
+                    isSelected: motivationType == "bygga_muskler",
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme,
+                    action: { motivationType = "bygga_muskler" }
+                )
+                
+                MotivationOption(
+                    title: LocalizedStringKey("Sports performance"),
+                    description: LocalizedStringKey("Train to perform better in your sport."),
                     isSelected: motivationType == "sport",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: { motivationType = "sport" }
+                )
+                
+                MotivationOption(
+                    title: LocalizedStringKey("Mobility"),
+                    description: LocalizedStringKey("Increase mobility, reduce stiffness and prevent injury."),
+                    isSelected: motivationType == "bli_rörligare",
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme,
+                    action: { motivationType = "bli_rörligare" }
                 )
             }
         }
@@ -314,7 +394,7 @@ struct OnboardingView: View {
     
     private var sportSelectionStep: some View {
         VStack(spacing: 24) {
-            Text("Vilken sport tränar du för?")
+            Text(String(localized: "Which sport are you training for?"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -358,21 +438,21 @@ struct OnboardingView: View {
     
     private var trainingLevelStep: some View {
         VStack(spacing: 24) {
-            Text("Vilken är din träningsnivå?")
+            Text(String(localized: "What is your training level?"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Detta hjälper oss att anpassa programmet")
+            Text(String(localized: "This helps us adapt the program"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 16) {
                 LevelOption(
-                    title: "Nybörjare",
-                    description: "Ny till träning eller återkommer efter lång paus",
+                    title: "Beginner",
+                    description: "New to training or returning after a long break",
                     isSelected: trainingLevel == "nybörjare",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -380,8 +460,8 @@ struct OnboardingView: View {
                 )
                 
                 LevelOption(
-                    title: "Van",
-                    description: "Tränat regelbundet i 6+ månader",
+                    title: "Intermediate",
+                    description: "Trained regularly for 6+ months",
                     isSelected: trainingLevel == "van",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -389,8 +469,8 @@ struct OnboardingView: View {
                 )
                 
                 LevelOption(
-                    title: "Mycket van",
-                    description: "Tränat konsekvent i 2+ år",
+                    title: "Advanced",
+                    description: "Trained consistently for 2+ years",
                     isSelected: trainingLevel == "mycket_van",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -398,8 +478,8 @@ struct OnboardingView: View {
                 )
                 
                 LevelOption(
-                    title: "Elit",
-                    description: "Professionell eller tävlingsidrottare",
+                    title: "Elite",
+                    description: "Professional or competitive athlete",
                     isSelected: trainingLevel == "elit",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -413,13 +493,13 @@ struct OnboardingView: View {
     
     private var healthDataStep: some View {
         VStack(spacing: 24) {
-            Text("Hämta hälsodata")
+            Text(String(localized: "Connect health data"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Vi kan hämta din vikt, längd och ålder från Apple Health")
+            Text(String(localized: "We can import your weight, height and age from Apple Health"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
@@ -427,7 +507,7 @@ struct OnboardingView: View {
             Button(action: fetchHealthData) {
                 HStack {
                     Image(systemName: healthDataFetched ? "checkmark.circle.fill" : "heart.fill")
-                    Text(healthDataFetched ? "Hälsodata hämtat" : "Hämta från Apple Health")
+                    Text(healthDataFetched ? LocalizedStringKey("Health data imported") : LocalizedStringKey("Import from Apple Health"))
                 }
                 .foregroundColor(.white)
                 .padding()
@@ -446,11 +526,11 @@ struct OnboardingView: View {
             
             if healthDataFetched {
                 if bodyWeight != nil || height != nil {
-                    Text("Hälsodata hämtat. Du kan ändra värdena manuellt på nästa steg")
+                    Text(String(localized: "Health data imported. You can manually edit the values in the next step"))
                         .font(.caption)
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                 } else {
-                    Text("Inga hälsodata hittades. Du kan fylla i värdena manuellt på nästa steg")
+                    Text(String(localized: "No health data found. You can manually fill in the values in the next step"))
                         .font(.caption)
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                 }
@@ -461,32 +541,33 @@ struct OnboardingView: View {
     // MARK: - Step 4: Personal Info
     
     private var personalInfoStep: some View {
-        VStack(spacing: 24) {
-            Text("Personlig information")
-                .font(.title2)
+        VStack(spacing: 12) {
+            Text(String(localized: "Personal Information"))
+                .font(.title3)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Ålder")
-                        .font(.subheadline)
-                        .foregroundColor(Color.textPrimary(for: colorScheme))
-                    TextField("Ålder", value: $age, format: .number)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardType(.numberPad)
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Kön")
-                        .font(.subheadline)
-                        .foregroundColor(Color.textPrimary(for: colorScheme))
-                    HStack(spacing: 16) {
-                        Button(action: { sex = "man" }) {
-                            Text("Man")
+            Text("Vi behöver lite information om dig för att anpassa din träning")
+                .font(.subheadline)
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 4)
+            
+            VStack(spacing: 10) {
+                // 1. Gender
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(String(localized: "Gender"))
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            sex = "man"
+                        }) {
+                            Text(String(localized: "Male"))
+                                .font(.subheadline)
                                 .foregroundColor(sex == "man" ? .white : Color.textPrimary(for: colorScheme))
-                                .padding()
+                                .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     Group {
@@ -497,13 +578,16 @@ struct OnboardingView: View {
                                         }
                                     }
                                 )
-                                .cornerRadius(12)
+                                .cornerRadius(10)
                         }
                         
-                        Button(action: { sex = "kvinna" }) {
-                            Text("Kvinna")
+                        Button(action: {
+                            sex = "kvinna"
+                        }) {
+                            Text(String(localized: "Female"))
+                                .font(.subheadline)
                                 .foregroundColor(sex == "kvinna" ? .white : Color.textPrimary(for: colorScheme))
-                                .padding()
+                                .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     Group {
@@ -514,29 +598,363 @@ struct OnboardingView: View {
                                         }
                                     }
                                 )
-                                .cornerRadius(12)
+                                .cornerRadius(10)
                         }
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Vikt (kg)")
-                        .font(.subheadline)
-                        .foregroundColor(Color.textPrimary(for: colorScheme))
-                    TextField("Vikt", value: $bodyWeight, format: .number)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardType(.numberPad)
+                // 2. Date of Birth
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(String(localized: "Date of Birth"))
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                    HStack(spacing: 8) {
+                        ScrollablePicker(
+                            label: "Dag",
+                            value: $birthDay,
+                            range: 1...31,
+                            colorScheme: colorScheme,
+                            selectedTheme: selectedTheme
+                        )
+                        .frame(maxWidth: .infinity)
+                        
+                        ScrollablePicker(
+                            label: "Månad",
+                            value: $birthMonth,
+                            range: 1...12,
+                            colorScheme: colorScheme,
+                            selectedTheme: selectedTheme,
+                            displayFormatter: { month in
+                                monthName(for: month)
+                            }
+                        )
+                        .frame(maxWidth: .infinity)
+                        
+                        ScrollablePicker(
+                            label: "År",
+                            value: $birthYear,
+                            range: 1920...2010,
+                            colorScheme: colorScheme,
+                            selectedTheme: selectedTheme
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .onChange(of: birthDay) { _, _ in
+                        calculateAgeFromBirthDate()
+                    }
+                    .onChange(of: birthMonth) { _, _ in
+                        calculateAgeFromBirthDate()
+                    }
+                    .onChange(of: birthYear) { _, _ in
+                        calculateAgeFromBirthDate()
+                    }
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Längd (cm)")
+                // 3. Height
+                ScrollablePicker(
+                    label: String(localized: "Height"),
+                    value: $height,
+                    range: 100...250,
+                    unit: "cm",
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
+                )
+                .onChange(of: height) { _, _ in
+                    updateBMI()
+                }
+                
+                // 4. Weight
+                ScrollablePicker(
+                    label: String(localized: "Weight"),
+                    value: $bodyWeight,
+                    range: 30...200,
+                    unit: "kg",
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
+                )
+                .onChange(of: bodyWeight) { _, _ in
+                    updateBMI()
+                }
+                
+                // 5. Summary
+                if !summaryText.isEmpty {
+                    Text(summaryText)
                         .font(.subheadline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
-                    TextField("Längd", value: $height, format: .number)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardType(.numberPad)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.15))
+                        )
                 }
             }
+            
+            Spacer()
+        }
+        .onAppear {
+            applyDefaultPersonalInfoIfNeeded(for: sex.isEmpty ? "man" : sex)
+        }
+        .onChange(of: sex) { _, newValue in
+            applyDefaultPersonalInfoIfNeeded(for: newValue)
+        }
+    }
+    
+    private func calculateAgeFromBirthDate() {
+        guard let day = birthDay, let month = birthMonth, let year = birthYear else {
+            return
+        }
+        
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.year = year
+        dateComponents.month = month
+        dateComponents.day = day
+        
+        guard let birthDate = calendar.date(from: dateComponents) else {
+            return
+        }
+        
+        let ageComponents = calendar.dateComponents([.year], from: birthDate, to: Date())
+        if let calculatedAge = ageComponents.year {
+            age = calculatedAge
+        }
+    }
+    
+    // MARK: - BMI Calculation
+    
+    private func updateBMI() {
+        guard let weight = bodyWeight, let height = height,
+              weight > 0, height > 0 else {
+            displayedBMI = nil
+            return
+        }
+        let heightInMeters = Double(height) / 100.0
+        displayedBMI = Double(weight) / (heightInMeters * heightInMeters)
+    }
+    
+    private func bmiCategory(for bmi: Double) -> String? {
+        if bmi < 18.5 {
+            return "Underweight"
+        } else if bmi < 25.0 {
+            return "Normal weight"
+        } else if bmi < 30.0 {
+            return "Overweight"
+        } else {
+            return "Obese"
+        }
+    }
+    
+    private func bmiCategoryColor(for bmi: Double) -> Color {
+        if bmi < 18.5 {
+            return .blue
+        } else if bmi < 25.0 {
+            return .green
+        } else if bmi < 30.0 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
+    
+    // MARK: - Helper Functions
+    
+    private func applyDefaultPersonalInfoIfNeeded(for selectedSex: String) {
+        // Choose sensible defaults for height/weight based on sex
+        let normalizedSex = selectedSex.lowercased()
+        let defaultHeight: Int
+        let defaultWeight: Int
+        
+        switch normalizedSex {
+        case "kvinna":
+            defaultHeight = 165
+            defaultWeight = 65
+        case "man":
+            defaultHeight = 175
+            defaultWeight = 75
+        default:
+            defaultHeight = 170
+            defaultWeight = 70
+        }
+        
+        // If DOB is still at the initial minimum year, move it to 1 Jan 2000
+        if birthYear == nil || birthYear == 1920 {
+            birthYear = 2000
+            birthMonth = 1
+            birthDay = 1
+        }
+        
+        // Height/weight: only override when still unset or at minimum picker values
+        if height == nil || height == 100 {
+            height = defaultHeight
+        }
+        if bodyWeight == nil || bodyWeight == 30 {
+            bodyWeight = defaultWeight
+        }
+        
+        // Update derived fields
+        calculateAgeFromBirthDate()
+        updateBMI()
+    }
+    
+    private func monthName(for month: Int) -> String {
+        let months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni",
+                      "Juli", "Augusti", "September", "Oktober", "November", "December"]
+        guard month >= 1 && month <= 12 else { return "" }
+        return months[month - 1]
+    }
+    
+    private var summaryText: String {
+        var parts: [String] = []
+        
+        // Start with gender
+        if !sex.isEmpty {
+            parts.append(sex == "man" ? "Man" : "Kvinna")
+        }
+        
+        // Add birth date with "född" (born)
+        if let day = birthDay, let month = birthMonth, let year = birthYear {
+            parts.append("född \(day) \(monthName(for: month)) \(year)")
+        }
+        
+        // Add height and weight
+        if let heightValue = height {
+            parts.append("\(heightValue) cm")
+        }
+        
+        if let weightValue = bodyWeight {
+            parts.append("\(weightValue) kg")
+        }
+        
+        return parts.joined(separator: ", ")
+    }
+    
+    // MARK: - Validation Functions
+    
+    private func validateAge() {
+        guard let ageValue = age else { return }
+        
+        // Only show alert if this is a new value (not the same as last validated)
+        let shouldShowAlert = lastValidatedAge != ageValue
+        
+        if ageValue > 110 {
+            // Hard limit: 10% over max
+            age = 110
+            if shouldShowAlert {
+                valueValidationMessage = "Age exceeds 110 years. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedAge = 110
+            }
+        } else if ageValue < 9 {
+            // Hard limit: 10% under min
+            age = 9
+            if shouldShowAlert {
+                valueValidationMessage = "Age is below 9 years. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedAge = 9
+            }
+        } else if ageValue > 100 {
+            // Over normal max, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Entered age (\(ageValue) years) is higher than normal. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedAge = ageValue
+            }
+        } else if ageValue < 10 {
+            // Under normal min, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Entered age (\(ageValue) years) is lower than normal. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedAge = ageValue
+            }
+        } else {
+            // Within normal range - clear last validated
+            lastValidatedAge = nil
+        }
+    }
+    
+    private func validateWeight() {
+        guard let weight = bodyWeight else { return }
+        
+        // Only show alert if this is a new value (not the same as last validated)
+        let shouldShowAlert = lastValidatedWeight != weight
+        
+        if weight > 330 {
+            // Hard limit: 10% over max
+            bodyWeight = 330
+            if shouldShowAlert {
+                valueValidationMessage = "Weight exceeds 330 kg. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedWeight = 330
+            }
+        } else if weight < 18 {
+            // Hard limit: 10% under min
+            bodyWeight = 18
+            if shouldShowAlert {
+                valueValidationMessage = "Weight is below 18 kg. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedWeight = 18
+            }
+        } else if weight > 300 {
+            // Over normal max, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Entered weight (\(weight) kg) is higher than normal. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedWeight = weight
+            }
+        } else if weight < 20 {
+            // Under normal min, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Entered weight (\(weight) kg) is lower than normal. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedWeight = weight
+            }
+        } else {
+            // Within normal range - clear last validated
+            lastValidatedWeight = nil
+        }
+    }
+    
+    private func validateHeight() {
+        guard let heightValue = height else { return }
+        
+        // Only show alert if this is a new value (not the same as last validated)
+        let shouldShowAlert = lastValidatedHeight != heightValue
+        
+        if heightValue > 253 {
+            // Hard limit: 10% over max
+            height = 253
+            if shouldShowAlert {
+                valueValidationMessage = "Height exceeds 253 cm. Please check your value."
+                showValueValidationAlert = true
+                lastValidatedHeight = 253
+            }
+        } else if heightValue < 90 {
+            // Hard limit: 10% under min
+            height = 90
+            if shouldShowAlert {
+                valueValidationMessage = "Längd understiger 90 cm. Vänligen kontrollera ditt angivna värde."
+                showValueValidationAlert = true
+                lastValidatedHeight = 90
+            }
+        } else if heightValue > 230 {
+            // Over normal max, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Angiven längd (\(heightValue) cm) är högre än normalt. Vänligen kontrollera ditt angivna värde."
+                showValueValidationAlert = true
+                lastValidatedHeight = heightValue
+            }
+        } else if heightValue < 100 {
+            // Under normal min, but within 10% tolerance - show warning, don't change value
+            if shouldShowAlert {
+                valueValidationMessage = "Angiven längd (\(heightValue) cm) är lägre än normalt. Vänligen kontrollera ditt angivna värde."
+                showValueValidationAlert = true
+                lastValidatedHeight = heightValue
+            }
+        } else {
+            // Within normal range - clear last validated
+            lastValidatedHeight = nil
         }
     }
     
@@ -544,64 +962,69 @@ struct OnboardingView: View {
     
     private var trainingGoalsStep: some View {
         VStack(spacing: 24) {
-            Text("Träningsmål")
+            Text(String(localized: "Training Goals"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Fördela 100% mellan dina träningsmål")
+            Text(String(localized: "Distribute 100% between your training goals"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 20) {
                 GoalSlider(
-                    title: "Styrka",
+                    title: "Strength",
                     value: Binding(
                         get: { goalStrength },
                         set: { newValue in
                             adjustGoals(changed: .strength, to: newValue)
                         }
                     ),
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
                 )
                 
                 GoalSlider(
-                    title: "Volym",
+                    title: "Volume",
                     value: Binding(
                         get: { goalVolume },
                         set: { newValue in
                             adjustGoals(changed: .volume, to: newValue)
                         }
                     ),
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
                 )
                 
                 GoalSlider(
-                    title: "Uthållighet",
+                    title: "Endurance",
                     value: Binding(
                         get: { goalEndurance },
                         set: { newValue in
                             adjustGoals(changed: .endurance, to: newValue)
                         }
                     ),
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
                 )
                 
                 GoalSlider(
-                    title: "Kondition",
+                    title: "Cardio",
                     value: Binding(
                         get: { goalCardio },
                         set: { newValue in
                             adjustGoals(changed: .cardio, to: newValue)
                         }
                     ),
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    selectedTheme: selectedTheme
                 )
             }
             
-            Text("Totalt: \(goalStrength + goalVolume + goalEndurance + goalCardio)%")
+            let total = goalStrength + goalVolume + goalEndurance + goalCardio
+            Text(String(localized: "Total: \(total)%%"))
                 .font(.caption)
                 .foregroundColor(
                     goalStrength + goalVolume + goalEndurance + goalCardio == 100
@@ -610,9 +1033,15 @@ struct OnboardingView: View {
                 )
         }
         .onAppear {
-            // Auto-calculate goals if not already calculated and we have required data
+            // Auto-calculate preset goals if not already calculated and we have required data
             if !goalsCalculated && !motivationType.isEmpty && !trainingLevel.isEmpty {
-                calculateSuggestedGoals()
+                calculatePresetGoals()
+            }
+            
+            // 1RM calculation should already be started when user clicked "Fortsätt" on Personal Info step
+            // Values should be ready by the time user reaches 1RM step
+            if oneRmCalculated {
+                print("[Onboarding] ✅ 1RM values already calculated and ready")
             }
         }
     }
@@ -621,7 +1050,7 @@ struct OnboardingView: View {
     
     private var trainingFrequencyStep: some View {
         VStack(spacing: 24) {
-            Text("Träningsfrekvens")
+            Text(String(localized: "Training Frequency"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -629,7 +1058,7 @@ struct OnboardingView: View {
             
             VStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Pass per vecka: \(sessionsPerWeek)")
+                    Text(String(localized: "Sessions per week: \(sessionsPerWeek)"))
                         .font(.headline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                     Slider(value: Binding(
@@ -640,7 +1069,7 @@ struct OnboardingView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Passlängd: \(sessionDuration) minuter")
+                    Text(String(localized: "Session duration: \(sessionDuration) minutes"))
                         .font(.headline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                     Slider(value: Binding(
@@ -657,20 +1086,20 @@ struct OnboardingView: View {
     
     private var oneRmStep: some View {
         VStack(spacing: 24) {
-            Text("Maxvikt (1RM)")
+            Text(String(localized: "One Rep Max (1RM)"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Valfritt - hjälper oss att anpassa vikter")
+            Text(String(localized: "Optional - helps us adapt weights"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 16) {
                 OneRmField(
-                    title: "Bänkpress",
+                    title: "Bench Press",
                     value: Binding(
                         get: { oneRmBench },
                         set: { oneRmBench = $0 }
@@ -679,7 +1108,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Stående press",
+                    title: "Overhead Press",
                     value: Binding(
                         get: { oneRmOhp },
                         set: { oneRmOhp = $0 }
@@ -688,7 +1117,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Marklyft",
+                    title: "Deadlift",
                     value: Binding(
                         get: { oneRmDeadlift },
                         set: { oneRmDeadlift = $0 }
@@ -697,7 +1126,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Knäböj",
+                    title: "Squat",
                     value: Binding(
                         get: { oneRmSquat },
                         set: { oneRmSquat = $0 }
@@ -706,7 +1135,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Lat pulldown",
+                    title: "Lat Pulldown",
                     value: Binding(
                         get: { oneRmLatpull },
                         set: { oneRmLatpull = $0 }
@@ -715,25 +1144,67 @@ struct OnboardingView: View {
                 )
             }
             
-            Text("Värdena ovan är förslag baserat på din profil. Du kan ändra dem om du vet dina exakta 1RM-värden.")
+            Text(String(localized: "The values above are suggestions based on your profile. You can change them if you know your exact 1RM values."))
                 .font(.caption)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
                 .padding(.top, 8)
         }
         .onAppear {
-            // Auto-calculate 1RM values when user reaches this step (after training goals)
-            if !oneRmCalculated && age != nil && bodyWeight != nil && !trainingLevel.isEmpty {
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[Onboarding] 💪 1RM STEP - onAppear")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[Onboarding] 📊 Current 1RM State:")
+            print("  • oneRmCalculated: \(oneRmCalculated)")
+            print("  • oneRmBench: \(oneRmBench?.description ?? "nil") kg")
+            print("  • oneRmOhp: \(oneRmOhp?.description ?? "nil") kg")
+            print("  • oneRmDeadlift: \(oneRmDeadlift?.description ?? "nil") kg")
+            print("  • oneRmSquat: \(oneRmSquat?.description ?? "nil") kg")
+            print("  • oneRmLatpull: \(oneRmLatpull?.description ?? "nil") kg")
+            print("[Onboarding] 📊 Required Data:")
+            print("  • age: \(age?.description ?? "nil")")
+            print("  • bodyWeight: \(bodyWeight?.description ?? "nil") kg")
+            print("  • height: \(height?.description ?? "nil") cm")
+            print("  • sex: \(sex.isEmpty ? "empty" : sex)")
+            print("  • trainingLevel: \(trainingLevel)")
+            print("  • motivationType: \(motivationType)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            
+            // 1RM values should already be calculated from Training Goals step
+            // If not, try to calculate now (fallback)
+            if !oneRmCalculated && age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
+                print("[Onboarding] ⚠️ 1RM values not ready, calculating now (fallback)...")
+                print("[Onboarding] 📊 Data: age=\(age!), weight=\(bodyWeight!), height=\(height!), sex=\(sex), level=\(trainingLevel), motivation=\(motivationType)")
                 calculateSuggestedOneRm()
+            } else if oneRmCalculated {
+                print("[Onboarding] ✅ 1RM values already calculated and ready")
+                print("[Onboarding] 📊 Current values: Bench=\(oneRmBench?.description ?? "nil"), OHP=\(oneRmOhp?.description ?? "nil"), Deadlift=\(oneRmDeadlift?.description ?? "nil"), Squat=\(oneRmSquat?.description ?? "nil"), Latpull=\(oneRmLatpull?.description ?? "nil")")
+            } else {
+                print("[Onboarding] ⚠️ Cannot calculate 1RM - missing data:")
+                print("  • age: \(age?.description ?? "nil")")
+                print("  • bodyWeight: \(bodyWeight?.description ?? "nil")")
+                print("  • height: \(height?.description ?? "nil")")
+                print("  • sex: \(sex.isEmpty ? "empty" : sex)")
+                print("  • trainingLevel: \(trainingLevel)")
+                print("  • motivationType: \(motivationType)")
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }
     }
     
     // MARK: - Step 8: Equipment
     
     private var equipmentStep: some View {
-        VStack(spacing: 24) {
-            Text("Tillgänglig utrustning")
+        func getEquipmentName(_ equipment: EquipmentCatalog) -> String {
+            if languageService.currentLanguage == "sv" {
+                return equipment.name
+            } else {
+                return equipment.nameEn ?? equipment.name
+            }
+        }
+        
+        return VStack(spacing: 24) {
+            Text(LocalizedStringKey("Available Equipment"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -742,7 +1213,7 @@ struct OnboardingView: View {
             Button(action: { showCamera = true }) {
                 HStack {
                     Image(systemName: "camera.fill")
-                    Text("Skanna utrustning")
+                    Text(LocalizedStringKey("Scan Equipment"))
                 }
                 .foregroundColor(.white)
                 .padding()
@@ -751,14 +1222,14 @@ struct OnboardingView: View {
                 .cornerRadius(12)
             }
             
-            Text("Eller välj manuellt")
+            Text(LocalizedStringKey("Or select manually"))
                 .font(.caption)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
             
             if isLoadingEquipment {
                 ProgressView()
             } else if availableEquipment.isEmpty {
-                Text("Laddar utrustningslista...")
+                Text(String(localized: "Loading equipment list..."))
                     .foregroundColor(Color.textSecondary(for: colorScheme))
             } else {
                 ScrollView {
@@ -775,7 +1246,7 @@ struct OnboardingView: View {
                                 }
                             }) {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text(equipment.name)
+                                    Text(getEquipmentName(equipment))
                                         .font(.headline)
                                         .foregroundColor(Color.textPrimary(for: colorScheme))
                                         .lineLimit(2)
@@ -813,29 +1284,182 @@ struct OnboardingView: View {
             }
         }
         .onAppear {
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[Onboarding] 🔧 EQUIPMENT STEP - onAppear")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("[Onboarding] 📊 Current state:")
+            print("  • availableEquipment.count: \(availableEquipment.count)")
+            print("  • isLoadingEquipment: \(isLoadingEquipment)")
+            print("  • selectedEquipment.count: \(selectedEquipment.count)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            
             loadEquipmentCatalog()
             
             // If no equipment loaded, try syncing again
             if availableEquipment.isEmpty && !isLoadingEquipment {
+                print("[Onboarding] ⚠️ No equipment found, will retry sync in 0.5 seconds...")
                 Task {
                     try? await Task.sleep(nanoseconds: 500_000_000) // Wait 0.5 seconds
+                    print("[Onboarding] 🔄 Retrying equipment sync...")
                     syncEquipmentCatalogEarly()
                 }
             }
         }
     }
     
-    // MARK: - Step 9: Theme
+    // MARK: - Step 9: Step Goal
     
-    private var themeStep: some View {
+    private var stepGoalStep: some View {
         VStack(spacing: 24) {
-            Text("Välj tema")
+            stepGoalHeader
+            stepGoalInput
+        }
+    }
+    
+    private var stepGoalHeader: some View {
+        VStack(spacing: 8) {
+            Text(String(localized: "Daily Step Goal"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Anpassa appens utseende")
+            Text(String(localized: "Set your daily step goal to track your activity"))
+                .font(.subheadline)
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private var stepGoalInput: some View {
+        VStack(spacing: 16) {
+            stepGoalControls
+            stepGoalPresets
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.textSecondary(for: colorScheme).opacity(0.05))
+        )
+    }
+    
+    private var stepGoalControls: some View {
+        HStack(spacing: 20) {
+            stepGoalDecreaseButton
+            stepGoalDisplay
+            stepGoalIncreaseButton
+        }
+        .padding()
+    }
+    
+    private var stepGoalDecreaseButton: some View {
+        Button(action: {
+            if dailyStepGoal > 1000 {
+                dailyStepGoal -= 1000
+            }
+        }) {
+            Image(systemName: "minus.circle.fill")
+                .font(.title2)
+                .foregroundStyle(dailyStepGoal > 1000 ? AnyShapeStyle(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme)) : AnyShapeStyle(Color.textSecondary(for: colorScheme).opacity(0.3)))
+        }
+        .disabled(dailyStepGoal <= 1000)
+    }
+    
+    private var stepGoalDisplay: some View {
+        VStack(spacing: 8) {
+            Text("\(dailyStepGoal)")
+                .font(.system(size: 48, weight: .bold))
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+            Text(String(localized: "steps"))
+                .font(.subheadline)
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+        }
+        .frame(minWidth: 120)
+    }
+    
+    private var stepGoalIncreaseButton: some View {
+        Button(action: {
+            if dailyStepGoal < 50000 {
+                dailyStepGoal += 1000
+            }
+        }) {
+            Image(systemName: "plus.circle.fill")
+                .font(.title2)
+                .foregroundStyle(dailyStepGoal < 50000 ? AnyShapeStyle(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme)) : AnyShapeStyle(Color.textSecondary(for: colorScheme).opacity(0.3)))
+        }
+        .disabled(dailyStepGoal >= 50000)
+    }
+    
+    private var stepGoalPresets: some View {
+        HStack(spacing: 12) {
+            ForEach([5000, 10000, 15000, 20000], id: \.self) { preset in
+                stepGoalPresetButton(preset: preset)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private func stepGoalPresetButton(preset: Int) -> some View {
+        let isSelected = dailyStepGoal == preset
+        return Button(action: {
+            dailyStepGoal = preset
+        }) {
+            Text("\(preset / 1000)k")
+                .font(.subheadline)
+                .fontWeight(isSelected ? .bold : .regular)
+                .foregroundColor(isSelected ? .white : Color.textPrimary(for: colorScheme))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isSelected ? AnyShapeStyle(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme)) : AnyShapeStyle(Color.textSecondary(for: colorScheme).opacity(0.1)))
+                )
+        }
+    }
+    
+    private var programGenerationStatusView: some View {
+        Group {
+            if showGenerationProgress {
+                VStack(spacing: 12) {
+                    ProgressView(value: Double(generationProgress), total: 100)
+                        .progressViewStyle(LinearProgressViewStyle())
+                    Text(generationStatus.isEmpty ? String(localized: "Generating your workout program...") : generationStatus)
+                        .font(.subheadline)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                    Text("\(generationProgress)%")
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                }
+                .padding()
+            } else {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                    Text(String(localized: "Preparing your workout program..."))
+                        .font(.subheadline)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                }
+                .padding()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.textSecondary(for: colorScheme).opacity(0.1))
+        )
+    }
+    
+    // MARK: - Step 10: Theme
+    
+    private var themeStep: some View {
+        VStack(spacing: 24) {
+            Text(String(localized: "Choose Theme"))
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+                .multilineTextAlignment(.center)
+            
+            Text(String(localized: "Customize app appearance"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
@@ -883,13 +1507,13 @@ struct OnboardingView: View {
             
             // Color scheme selection
             VStack(alignment: .leading, spacing: 12) {
-                Text("Färgschema")
+                Text(String(localized: "Color Scheme"))
                     .font(.headline)
                     .foregroundColor(Color.textPrimary(for: colorScheme))
                 
                 HStack(spacing: 16) {
                     ColorSchemeButton(
-                        title: "Ljus",
+                        title: "Light",
                         icon: "sun.max.fill",
                         isSelected: selectedColorScheme == "light",
                         colorScheme: colorScheme,
@@ -900,7 +1524,7 @@ struct OnboardingView: View {
                     )
                     
                     ColorSchemeButton(
-                        title: "Mörk",
+                        title: "Dark",
                         icon: "moon.fill",
                         isSelected: selectedColorScheme == "dark",
                         colorScheme: colorScheme,
@@ -929,6 +1553,35 @@ struct OnboardingView: View {
     
     private func goToNextStep() {
         if currentStep < totalSteps {
+            // Start 1RM calculation when user proceeds from Personal Info step (step 4) to Training Goals step (step 5)
+            // This ensures the calculation runs in the background while user adjusts training goals
+            if currentStep == 4 && !oneRmCalculated {
+                // Check if we have all required data for 1RM calculation
+                if age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
+                    print("[Onboarding] 🚀 Starting 1RM calculation in background (user clicked Fortsätt on Personal Info step)...")
+                    print("[Onboarding] 📊 Data: age=\(age!), weight=\(bodyWeight!), height=\(height!), sex=\(sex), level=\(trainingLevel), motivation=\(motivationType)")
+                    calculateSuggestedOneRm()
+                } else {
+                    print("[Onboarding] ⚠️ Missing data for 1RM calculation: age=\(age?.description ?? "nil"), bodyWeight=\(bodyWeight?.description ?? "nil"), height=\(height?.description ?? "nil"), sex=\(sex.isEmpty ? "empty" : sex), trainingLevel=\(trainingLevel), motivationType=\(motivationType)")
+                }
+            }
+            
+            // Start Program AI query when user clicks "Continue" on Equipment step (step 8)
+            // Save gym as "Mitt Gym" and start program generation in background
+            if currentStep == 8 {
+                print("[Onboarding] 🚀 Starting program generation from Equipment step...")
+                startProgramGeneration()
+            }
+            
+            // Handle Step Goal step (step 9) - if user clicks "Continue", go to Theme
+            // If user clicks "Finish" (which happens when currentStep == totalSteps), complete onboarding
+            if currentStep == 9 && currentStep < totalSteps {
+                // Just proceed to next step (Theme)
+                currentStep += 1
+                updateStepIcon()
+                return
+            }
+            
             currentStep += 1
             updateStepIcon()
         }
@@ -941,6 +1594,86 @@ struct OnboardingView: View {
         }
     }
     
+    // MARK: - Program Generation
+    
+    private func startProgramGeneration() {
+        Task {
+            let userId = authService.currentUserId ?? "dev-user-123"
+            
+            // Save gym as "Mitt Gym" with selected equipment
+            print("[Onboarding] 🏋️ Creating gym 'Mitt Gym' with \(selectedEquipment.count) equipment items")
+            _ = GymService.shared.createGym(
+                name: "Mitt Gym",
+                location: nil,
+                equipmentIds: selectedEquipment,
+                userId: userId,
+                modelContext: modelContext
+            )
+            
+            // Mark that generation started early
+            await MainActor.run {
+                programGenerationStartedEarly = true
+                isGeneratingProgram = true
+            }
+            
+            // Start the actual program generation in background
+            // This will run while user is on Step Goal step
+            print("[Onboarding] 🚀 Starting program generation in background from Equipment step...")
+            
+            do {
+                let profileData = APIService.OnboardingCompleteRequest.ProfileData(
+                    motivationType: motivationType,
+                    trainingLevel: trainingLevel,
+                    specificSport: motivationType == "sport" ? specificSport : nil,
+                    age: age,
+                    sex: sex.isEmpty ? nil : sex,
+                    bodyWeight: bodyWeight,
+                    height: height,
+                    goalStrength: goalStrength,
+                    goalVolume: goalVolume,
+                    goalEndurance: goalEndurance,
+                    goalCardio: goalCardio,
+                    sessionsPerWeek: sessionsPerWeek,
+                    sessionDuration: sessionDuration,
+                    oneRmBench: oneRmBench,
+                    oneRmOhp: oneRmOhp,
+                    oneRmDeadlift: oneRmDeadlift,
+                    oneRmSquat: oneRmSquat,
+                    oneRmLatpull: oneRmLatpull,
+                    theme: selectedTheme
+                )
+                
+                print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
+                let response = try await APIService.shared.completeOnboarding(
+                    profile: profileData,
+                    equipment: selectedEquipment,
+                    useV3: true
+                )
+                
+                print("[Onboarding] ✅ Program generation started, response received")
+                print("[Onboarding] 📋 Response: success=\(response.success), hasProgram=\(response.hasProgram ?? false), templatesCreated=\(response.templatesCreated ?? 0)")
+                
+                // Store jobId if available
+                if let jobId = response.program?.jobId {
+                    await MainActor.run {
+                        generationJobId = jobId
+                    }
+                }
+                
+                // Program generation is now running in background
+                // User can proceed to Step Goal step while it generates
+            } catch {
+                print("[Onboarding] ❌ Error starting program generation: \(error.localizedDescription)")
+                await MainActor.run {
+                    isGeneratingProgram = false
+                    programGenerationStartedEarly = false
+                    generationError = error.localizedDescription
+                    showGenerationErrorAlert = true
+                }
+            }
+        }
+    }
+    
     private func updateStepIcon() {
         switch currentStep {
         case 1:
@@ -948,7 +1681,7 @@ struct OnboardingView: View {
         case 2:
             currentStepIcon = motivationType == "sport" ? "sportscourt.fill" : "chart.bar.fill"
         case 3:
-            currentStepIcon = motivationType == "sport" ? "chart.bar.fill" : "heart.text.square.fill"
+            currentStepIcon = "heart.text.square.fill" // Health Data
         case 4:
             currentStepIcon = "person.fill"
         case 5:
@@ -960,6 +1693,8 @@ struct OnboardingView: View {
         case 8:
             currentStepIcon = "square.grid.2x2.fill"
         case 9:
+            currentStepIcon = "figure.walk" // Step Goal
+        case 10:
             currentStepIcon = "paintpalette.fill"
         default:
             currentStepIcon = "circle.fill"
@@ -1094,10 +1829,110 @@ struct OnboardingView: View {
         case strength, volume, endurance, cardio
     }
     
+    /// Calculate preset goals based on motivationType and trainingLevel (local calculation)
+    private func calculatePresetGoals() {
+        print("[Onboarding] 🎯 Calculating preset training goals based on \(motivationType) + \(trainingLevel)...")
+        
+        var strength = 25
+        var volume = 25
+        var endurance = 25
+        var cardio = 25
+        
+        // Base distribution on motivationType
+        switch motivationType.lowercased() {
+        case "viktminskning":
+            cardio = 40
+            endurance = 30
+            strength = 20
+            volume = 10
+        case "rehabilitering":
+            strength = 30
+            endurance = 40
+            volume = 20
+            cardio = 10
+        case "bättre_hälsa":
+            endurance = 35
+            cardio = 35
+            strength = 20
+            volume = 10
+        case "sport":
+            strength = 35
+            endurance = 30
+            volume = 20
+            cardio = 15
+        case "bygga_muskler", "hypertrofi", "fitness":
+            // Focus on strength and volume for muscle building
+            strength = 30
+            volume = 30
+            endurance = 25
+            cardio = 15
+        case "bli_rörligare":
+            // Focus on mobility, flexibility, and injury prevention
+            strength = 25
+            volume = 20
+            endurance = 30
+            cardio = 25
+        default:
+            // Default balanced distribution
+            strength = 30
+            volume = 30
+            endurance = 25
+            cardio = 15
+        }
+        
+        // Adjust based on training level
+        switch trainingLevel.lowercased() {
+        case "nybörjare":
+            // For "bygga_muskler", keep higher strength/volume even for beginners
+            if motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
+                // Smaller adjustment for muscle building - still prioritize strength/volume
+                strength = max(25, strength - 5)
+                volume = max(25, volume - 5)
+                endurance += 5
+                cardio += 5
+            } else {
+                // For other goals, larger adjustment for beginners
+                strength = max(15, strength - 10)
+                volume = max(10, volume - 10)
+                endurance += 10
+                cardio += 10
+            }
+        case "mycket_van", "elit":
+            strength += 10
+            volume += 5
+            endurance = max(15, endurance - 10)
+            cardio = max(10, cardio - 5)
+        default:
+            // "van" (intermediate) - no adjustment
+            break
+        }
+        
+        // Normalize to 100%
+        let total = strength + volume + endurance + cardio
+        let normalizedStrength = Int((Double(strength) / Double(total)) * 100)
+        let normalizedVolume = Int((Double(volume) / Double(total)) * 100)
+        let normalizedEndurance = Int((Double(endurance) / Double(total)) * 100)
+        let normalizedCardio = Int((Double(cardio) / Double(total)) * 100)
+        
+        // Final check to ensure sum is exactly 100
+        let sum = normalizedStrength + normalizedVolume + normalizedEndurance + normalizedCardio
+        let diff = 100 - sum
+        
+        goalStrength = normalizedStrength
+        goalVolume = normalizedVolume
+        goalEndurance = normalizedEndurance
+        goalCardio = normalizedCardio + diff // Add difference to cardio
+        
+        goalsCalculated = true
+        
+        print("[Onboarding] ✅ Preset goals calculated: Strength=\(goalStrength)%, Volume=\(goalVolume)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%")
+    }
+    
+    /// Calculate suggested goals via API (fallback or for refinement)
     private func calculateSuggestedGoals() {
         Task {
             do {
-                print("[Onboarding] 🎯 Calculating suggested training goals...")
+                print("[Onboarding] 🎯 Calculating suggested training goals via API...")
                 let suggestedGoals = try await APIService.shared.suggestTrainingGoals(
                     motivationType: motivationType,
                     trainingLevel: trainingLevel,
@@ -1132,19 +1967,51 @@ struct OnboardingView: View {
     }
     
     private func calculateSuggestedOneRm() {
+        let taskStartTime = Date()
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[Onboarding] 💪 STARTING 1RM CALCULATION")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[Onboarding] 📋 Input Parameters:")
+        print("  • motivationType: \(motivationType)")
+        print("  • trainingLevel: \(trainingLevel)")
+        print("  • age: \(age?.description ?? "nil")")
+        print("  • sex: \(sex.isEmpty ? "empty" : sex)")
+        print("  • bodyWeight: \(bodyWeight?.description ?? "nil") kg")
+        print("  • height: \(height?.description ?? "nil") cm")
+        print("  • useV3: true")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
         Task {
+            // Optimistically calculate local fallback first so the user sees values immediately
+            await calculateLocalFallbackOneRm()
+            
             do {
-                print("[Onboarding] 💪 Calculating suggested 1RM values...")
+                print("[Onboarding] 🚀 Calling APIService.shared.suggestOneRmValues...")
+                let apiCallStartTime = Date()
+                
+                // Use V3 AI analysis for better 1RM estimation based on personal info
                 let suggestedOneRm = try await APIService.shared.suggestOneRmValues(
                     motivationType: motivationType,
                     trainingLevel: trainingLevel,
                     age: age ?? 30,
                     sex: sex.isEmpty ? "man" : sex,
                     bodyWeight: bodyWeight ?? 70,
-                    height: height ?? 175
+                    height: height ?? 175,
+                    useV3: true // Use V3 AI analysis for better accuracy
                 )
                 
+                let apiCallDuration = Date().timeIntervalSince(apiCallStartTime)
+                print("[Onboarding] ⏱️  API call completed in \(String(format: "%.2f", apiCallDuration)) seconds")
+                
+                print("[Onboarding] 📥 Received Response:")
+                print("  • oneRmBench: \(suggestedOneRm.oneRmBench) kg")
+                print("  • oneRmOhp: \(suggestedOneRm.oneRmOhp) kg")
+                print("  • oneRmDeadlift: \(suggestedOneRm.oneRmDeadlift) kg")
+                print("  • oneRmSquat: \(suggestedOneRm.oneRmSquat) kg")
+                print("  • oneRmLatpull: \(suggestedOneRm.oneRmLatpull) kg")
+                
                 await MainActor.run {
+                    print("[Onboarding] 💾 Saving values to state...")
                     oneRmBench = suggestedOneRm.oneRmBench
                     oneRmOhp = suggestedOneRm.oneRmOhp
                     oneRmDeadlift = suggestedOneRm.oneRmDeadlift
@@ -1152,17 +2019,65 @@ struct OnboardingView: View {
                     oneRmLatpull = suggestedOneRm.oneRmLatpull
                     oneRmCalculated = true
                     
-                    print("[Onboarding] ✅ Suggested 1RM calculated: Bench=\(oneRmBench ?? 0)kg, OHP=\(oneRmOhp ?? 0)kg, Deadlift=\(oneRmDeadlift ?? 0)kg, Squat=\(oneRmSquat ?? 0)kg, Latpull=\(oneRmLatpull ?? 0)kg")
+                    let totalDuration = Date().timeIntervalSince(taskStartTime)
+                    print("[Onboarding] ✅ 1RM Calculation Completed Successfully")
+                    print("[Onboarding] 📊 Final Values:")
+                    print("  • Bench: \(oneRmBench ?? 0) kg")
+                    print("  • OHP: \(oneRmOhp ?? 0) kg")
+                    print("  • Deadlift: \(oneRmDeadlift ?? 0) kg")
+                    print("  • Squat: \(oneRmSquat ?? 0) kg")
+                    print("  • Latpull: \(oneRmLatpull ?? 0) kg")
+                    print("[Onboarding] ⏱️  Total time: \(String(format: "%.2f", totalDuration)) seconds")
+                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 }
             } catch {
-                print("[Onboarding] ⚠️ Error calculating suggested 1RM: \(error.localizedDescription)")
-                // Keep default values if calculation fails
-                await MainActor.run {
-                    oneRmCalculated = true // Mark as calculated to avoid retrying
+                let errorDuration = Date().timeIntervalSince(taskStartTime)
+                print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                print("[Onboarding] ❌ ERROR calculating suggested 1RM")
+                print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                print("[Onboarding] ⏱️  Error occurred after: \(String(format: "%.2f", errorDuration)) seconds")
+                print("[Onboarding] Error type: \(type(of: error))")
+                print("[Onboarding] Error description: \(error.localizedDescription)")
+                if let nsError = error as NSError? {
+                    print("[Onboarding] Error domain: \(nsError.domain)")
+                    print("[Onboarding] Error code: \(nsError.code)")
+                    print("[Onboarding] Error userInfo: \(nsError.userInfo)")
                 }
+                print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                
+                // Keep default values if calculation fails
+                // Fallback to local calculation if API fails
+                await calculateLocalFallbackOneRm()
             }
         }
     }
+    
+    private func calculateLocalFallbackOneRm() async {
+        print("[Onboarding] ⚠️ Using local fallback for 1RM calculation")
+        
+        let userWeight = Double(bodyWeight ?? 75)
+        let isMale = (sex == "man" || sex.isEmpty)
+        let isBeginner = (trainingLevel == "nybörjare" || trainingLevel.isEmpty)
+        
+        // Multipliers based on sex and experience (very rough estimates)
+        let benchMultiplier = isMale ? (isBeginner ? 0.6 : 0.9) : (isBeginner ? 0.4 : 0.6)
+        let squatMultiplier = isMale ? (isBeginner ? 0.8 : 1.2) : (isBeginner ? 0.6 : 0.9)
+        let deadliftMultiplier = isMale ? (isBeginner ? 1.0 : 1.4) : (isBeginner ? 0.7 : 1.1)
+        let ohpMultiplier = isMale ? (isBeginner ? 0.4 : 0.6) : (isBeginner ? 0.3 : 0.45)
+        let latpullMultiplier = isMale ? (isBeginner ? 0.5 : 0.7) : (isBeginner ? 0.4 : 0.6)
+        
+        await MainActor.run {
+            oneRmBench = Int(userWeight * benchMultiplier)
+            oneRmSquat = Int(userWeight * squatMultiplier)
+            oneRmDeadlift = Int(userWeight * deadliftMultiplier)
+            oneRmOhp = Int(userWeight * ohpMultiplier)
+            oneRmLatpull = Int(userWeight * latpullMultiplier)
+            
+            oneRmCalculated = true
+            print("[Onboarding] ✅ Local fallback calculation applied")
+        }
+    }
+    
     
     private func fetchHealthData() {
         Task {
@@ -1208,20 +2123,35 @@ struct OnboardingView: View {
     }
     
     private func loadEquipmentCatalog() {
+        print("[Onboarding] 🔄 loadEquipmentCatalog() called")
         Task {
             await MainActor.run {
                 isLoadingEquipment = true
+                print("[Onboarding] 📊 Set isLoadingEquipment = true")
             }
             
             do {
+                print("[Onboarding] 🔍 Fetching equipment from local database...")
                 let descriptor = FetchDescriptor<EquipmentCatalog>(
                     sortBy: [SortDescriptor(\.name)]
                 )
                 let equipment = try modelContext.fetch(descriptor)
                 
+                print("[Onboarding] 📊 Fetched \(equipment.count) items from database")
+                if equipment.count > 0 {
+                    print("[Onboarding] 📋 First 5 items:")
+                    for (index, item) in equipment.prefix(5).enumerated() {
+                        print("  \(index + 1). \(item.name) (id: \(item.id))")
+                    }
+                }
+                
                 await MainActor.run {
                     availableEquipment = equipment
                     isLoadingEquipment = false
+                    
+                    print("[Onboarding] 💾 Updated state:")
+                    print("  • availableEquipment.count: \(availableEquipment.count)")
+                    print("  • isLoadingEquipment: \(isLoadingEquipment)")
                     
                     if equipment.isEmpty {
                         print("[Onboarding] ⚠️ No equipment found in local database. Will retry sync when equipment step is reached.")
@@ -1230,10 +2160,54 @@ struct OnboardingView: View {
                     }
                 }
             } catch {
-                print("[Onboarding] ❌ Error loading equipment: \(error.localizedDescription)")
+                print("[Onboarding] ❌ Error loading equipment:")
+                print("  • Error type: \(type(of: error))")
+                print("  • Error description: \(error.localizedDescription)")
+                if let nsError = error as NSError? {
+                    print("  • Error domain: \(nsError.domain)")
+                    print("  • Error code: \(nsError.code)")
+                    print("  • Error userInfo: \(nsError.userInfo)")
+                }
                 await MainActor.run {
                     isLoadingEquipment = false
+                    print("[Onboarding] 📊 Set isLoadingEquipment = false (after error)")
                 }
+            }
+        }
+    }
+    
+    private func completeOnboardingWithoutProgram() {
+        Task {
+            let userId = authService.currentUserId ?? "dev-user-123"
+            
+            // Sync profile from server to ensure all onboarding data is saved
+            do {
+                let syncService = SyncService.shared
+                try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
+                print("[Onboarding] ✅ Profile synced from server (no program generated)")
+            } catch {
+                print("[Onboarding] ⚠️ Warning: Failed to sync profile from server: \(error.localizedDescription)")
+            }
+            
+            // Update profile to mark onboarding as completed
+            let profileDescriptor = FetchDescriptor<UserProfile>(
+                predicate: #Predicate { $0.userId == userId }
+            )
+            if let profile = try? modelContext.fetch(profileDescriptor).first {
+                profile.onboardingCompleted = true
+                profile.theme = selectedTheme
+                try? modelContext.save()
+                print("[Onboarding] ✅ Profile updated: onboardingCompleted=true (no program generated)")
+            }
+            
+            // Save step goal to UserDefaults
+            UserDefaults.standard.set(dailyStepGoal, forKey: "dailyStepGoal")
+            print("[Onboarding] ✅ Step goal saved: \(dailyStepGoal) steps")
+            
+            await MainActor.run {
+                isGeneratingProgram = false
+                showGenerationProgress = false
+                dismiss()
             }
         }
     }
@@ -1244,75 +2218,232 @@ struct OnboardingView: View {
                 isGeneratingProgram = true
                 showGenerationProgress = true
                 generationError = nil
+                showGenerationErrorAlert = false
             }
             
             do {
                 let userId = authService.currentUserId ?? "dev-user-123"
                 
-                let profileData = APIService.OnboardingCompleteRequest.ProfileData(
-                    motivationType: motivationType,
-                    trainingLevel: trainingLevel,
-                    specificSport: specificSport.isEmpty ? nil : specificSport,
-                    age: age,
-                    sex: sex.isEmpty ? nil : sex,
-                    bodyWeight: bodyWeight,
-                    height: height,
-                    goalStrength: goalStrength,
-                    goalVolume: goalVolume,
-                    goalEndurance: goalEndurance,
-                    goalCardio: goalCardio,
-                    sessionsPerWeek: sessionsPerWeek,
-                    sessionDuration: sessionDuration,
-                    oneRmBench: oneRmBench,
-                    oneRmOhp: oneRmOhp,
-                    oneRmDeadlift: oneRmDeadlift,
-                    oneRmSquat: oneRmSquat,
-                    oneRmLatpull: oneRmLatpull,
-                    theme: selectedTheme
-                )
-                
-                let response = try await APIService.shared.completeOnboarding(
-                    profile: profileData,
-                    equipment: selectedEquipment
-                )
-                
-                // Handle program response
-                if let programResponse = response.program {
-                    if programResponse.cached == true {
-                        // Program from cache - sync immediately
-                        print("[Onboarding] ✅ Program from cache, syncing...")
-                        let syncService = SyncService.shared
-                        
-                        // Poll for program templates if not immediately available (race condition fix)
-                        var pollAttempts = 0
-                        let maxPollAttempts = 5
-                        while pollAttempts < maxPollAttempts {
-                            do {
-                                try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
-                                let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
-                                if !templates.isEmpty {
-                                    print("[Onboarding] ✅ Program templates synced and found after cache hit.")
-                                    break
-                                } else {
-                                    print("[Onboarding] ⚠️ No program templates found after cache hit, retrying...")
-                                    pollAttempts += 1
-                                    try await Task.sleep(nanoseconds: 1_000_000_000)
-                                }
-                            } catch {
-                                print("[Onboarding] ❌ Error syncing program templates after cache hit: \(error.localizedDescription)")
-                                pollAttempts += 1
-                                try await Task.sleep(nanoseconds: 1_000_000_000)
-                            }
+                // Check if program generation was already started from Equipment step
+                if programGenerationStartedEarly {
+                    print("[Onboarding] ✅ Program generation already started from Equipment step, waiting for completion...")
+                    // Just wait for generation to complete and sync templates
+                    // Skip the API call since it was already made
+                } else {
+                    // Start program generation now (original flow)
+                    let profileData = APIService.OnboardingCompleteRequest.ProfileData(
+                        motivationType: motivationType,
+                        trainingLevel: trainingLevel,
+                        specificSport: motivationType == "sport" ? specificSport : nil,
+                        age: age,
+                        sex: sex.isEmpty ? nil : sex,
+                        bodyWeight: bodyWeight,
+                        height: height,
+                        goalStrength: goalStrength,
+                        goalVolume: goalVolume,
+                        goalEndurance: goalEndurance,
+                        goalCardio: goalCardio,
+                        sessionsPerWeek: sessionsPerWeek,
+                        sessionDuration: sessionDuration,
+                        oneRmBench: oneRmBench,
+                        oneRmOhp: oneRmOhp,
+                        oneRmDeadlift: oneRmDeadlift,
+                        oneRmSquat: oneRmSquat,
+                        oneRmLatpull: oneRmLatpull,
+                        theme: selectedTheme
+                    )
+                    
+                    print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
+                    let response = try await APIService.shared.completeOnboarding(
+                        profile: profileData,
+                        equipment: selectedEquipment,
+                        useV3: true // Use V3 AI architecture for program generation
+                    )
+                    
+                    print("[Onboarding] ✅ Received response from completeOnboarding")
+                    print("[Onboarding] 📋 Response structure:")
+                    print("[Onboarding]   • success: \(response.success)")
+                    print("[Onboarding]   • hasProgram: \(response.program != nil)")
+                    if let program = response.program {
+                        print("[Onboarding]   • program.cached: \(program.cached ?? false)")
+                        print("[Onboarding]   • program.jobId: \(program.jobId ?? "nil")")
+                    }
+                    
+                    // Check if program generation failed (no program in response and hasProgram is false)
+                    if response.hasProgram == false && response.templatesCreated == 0 {
+                        print("[Onboarding] ⚠️ Program generation appears to have failed - no templates created")
+                        await MainActor.run {
+                            self.generationError = "Programgenerering misslyckades. Inga pass kunde skapas."
+                            self.showGenerationErrorAlert = true
+                            self.isGeneratingProgram = false
+                            self.showGenerationProgress = false
                         }
+                        return
+                    }
+                    
+                    // Store jobId if available
+                    if let jobId = response.program?.jobId {
+                        await MainActor.run {
+                            generationJobId = jobId
+                        }
+                    }
+                    
+                    // Check if program generation failed (no program in response and hasProgram is false)
+                    if response.hasProgram == false && response.templatesCreated == 0 {
+                        print("[Onboarding] ⚠️ Program generation appears to have failed - no templates created")
+                        await MainActor.run {
+                            self.generationError = "Programgenerering misslyckades. Inga pass kunde skapas."
+                            self.showGenerationErrorAlert = true
+                            self.isGeneratingProgram = false
+                            self.showGenerationProgress = false
+                        }
+                        return
+                    }
+                }
+                
+                // Now wait for program generation to complete and sync templates
+                // This applies to both early-start and normal-start cases
+                print("[Onboarding] ⏳ Waiting for program generation to complete...")
+                
+                // Poll for program templates - check status and sync
+                let syncService = SyncService.shared
+                
+                // Poll for program templates if not immediately available (race condition fix)
+                // First check program status to see if generation is complete
+                var pollAttempts = 0
+                let maxPollAttempts = 45 // Allow up to 90 seconds for AI generation (45 attempts x 2 seconds)
+                var templatesFound = false
+                
+                while pollAttempts < maxPollAttempts {
+                    do {
+                        // Check program status first
+                        let programStatus = try await APIService.shared.getProgramStatus()
+                        print("[Onboarding] Program status: \(programStatus.status), hasTemplates: \(programStatus.hasTemplates), templatesCount: \(programStatus.templatesCount)")
                         
-                        if pollAttempts == maxPollAttempts {
-                            print("[Onboarding] ❌ Failed to sync program templates after multiple retries for cached program.")
+                        if programStatus.status == "ready" && programStatus.hasTemplates {
+                            // Program is ready, sync templates and profile
+                            try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                            try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
+                            let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
+                            if !templates.isEmpty {
+                                print("[Onboarding] ✅ Program templates and profile synced and found after cache hit.")
+                                templatesFound = true
+                                break
+                            } else {
+                                print("[Onboarding] ⚠️ Status says ready but no templates found locally, retrying...")
+                            }
+                        } else if programStatus.status == "generating" || programStatus.status == "queued" || programStatus.status == "no_program" || (programStatus.status == "completed" && !programStatus.hasTemplates) {
+                            // Still generating/waiting - server returns 'no_program' until templates are saved
+                            print("[Onboarding] ⏳ Program still generating (status: \(programStatus.status), hasTemplates: \(programStatus.hasTemplates), progress: \(programStatus.progress ?? 0)%), waiting...")
                             await MainActor.run {
-                                generationError = "Kunde inte ladda ditt program. Försök igen senare."
+                                generationStatus = programStatus.status == "no_program" ? "generating" : programStatus.status
+                                generationProgress = programStatus.progress ?? pollAttempts * 10  // Estimate progress from poll attempts
+                                showGenerationProgress = true
+                            }
+                        } else if programStatus.status == "failed" {
+                            // Generation failed
+                            print("[Onboarding] ❌ Program generation failed: \(programStatus.error ?? "Unknown error")")
+                            await MainActor.run {
+                                generationError = programStatus.error ?? "Programgenerering misslyckades. Försök igen senare."
+                                showGenerationErrorAlert = true
                                 isGeneratingProgram = false
                                 showGenerationProgress = false
                             }
                             return
+                        } else {
+                            // Unknown status, try syncing anyway
+                            try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                            try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
+                            let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
+                            if !templates.isEmpty {
+                                print("[Onboarding] ✅ Program templates and profile synced despite unknown status.")
+                                templatesFound = true
+                                break
+                            }
+                        }
+                        
+                        pollAttempts += 1
+                        try await Task.sleep(nanoseconds: 2_000_000_000) // Wait 2 seconds between attempts
+                    } catch {
+                        print("[Onboarding] ❌ Error checking program status/syncing templates: \(error.localizedDescription)")
+                        print("[Onboarding] ❌ Error type: \(type(of: error))")
+                        if let apiError = error as? APIError {
+                            print("[Onboarding] ❌ API Error: \(apiError.localizedDescription ?? "Unknown")")
+                        }
+                        pollAttempts += 1
+                        
+                        // If it's a network error, show more helpful message
+                        if let apiError = error as? APIError,
+                           case .networkError = apiError {
+                            await MainActor.run {
+                                generationError = "Kunde inte ansluta till servern. Kontrollera att backend-servern körs på port 5001."
+                                showGenerationErrorAlert = true
+                            }
+                        }
+                        
+                        try await Task.sleep(nanoseconds: 2_000_000_000)
+                    }
+                }
+                        
+                        if !templatesFound {
+                            // Final check: try one more time to sync and verify
+                            do {
+                                let finalStatus = try await APIService.shared.getProgramStatus()
+                                if finalStatus.status == "ready" && finalStatus.hasTemplates {
+                                    try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                                    let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
+                                    if templates.isEmpty {
+                                        print("[Onboarding] ❌ Final check: Status says ready but templates still empty after sync.")
+                                        await MainActor.run {
+                                            generationError = "Programmet är klart men kunde inte laddas. Försök öppna appen igen."
+                                            showGenerationErrorAlert = true
+                                            isGeneratingProgram = false
+                                            showGenerationProgress = false
+                                        }
+                                        return
+                                    } else {
+                                        templatesFound = true
+                                    }
+                                } else if finalStatus.status == "generating" || finalStatus.status == "queued" {
+                                    // Still generating - start polling with jobId if available
+                                    if let jobId = finalStatus.jobId {
+                                        print("[Onboarding] ⏳ Program still generating, starting polling with jobId: \(jobId)")
+                                        await MainActor.run {
+                                            generationJobId = jobId
+                                            generationStatus = finalStatus.status
+                                            generationProgress = finalStatus.progress ?? 0
+                                            showGenerationProgress = true
+                                        }
+                                        await pollGenerationStatus(jobId: jobId, userId: userId)
+                                        return
+                                    } else {
+                                        await MainActor.run {
+                                            generationError = "Programgenerering pågår fortfarande. Vänta lite och försök igen."
+                                            showGenerationErrorAlert = true
+                                            isGeneratingProgram = false
+                                            showGenerationProgress = false
+                                        }
+                                        return
+                                    }
+                                } else {
+                                    await MainActor.run {
+                                        generationError = finalStatus.error ?? "Kunde inte ladda ditt program. Försök igen senare."
+                                        showGenerationErrorAlert = true
+                                        isGeneratingProgram = false
+                                        showGenerationProgress = false
+                                    }
+                                    return
+                                }
+                            } catch {
+                                print("[Onboarding] ❌ Final check failed: \(error.localizedDescription)")
+                                await MainActor.run {
+                                    generationError = "Kunde inte ladda ditt program. Kontrollera din internetanslutning och försök igen."
+                                    showGenerationErrorAlert = true
+                                    isGeneratingProgram = false
+                                    showGenerationProgress = false
+                                }
+                                return
+                            }
                         }
                         
                         // Update profile
@@ -1325,34 +2456,19 @@ struct OnboardingView: View {
                             try? modelContext.save()
                         }
                         
+                        // Save step goal to UserDefaults
+                        UserDefaults.standard.set(dailyStepGoal, forKey: "dailyStepGoal")
+                        print("[Onboarding] ✅ Step goal saved: \(dailyStepGoal) steps")
+                        
                         // Dismiss onboarding and go to home
                         await MainActor.run {
                             dismiss()
                         }
-                    } else if let jobId = programResponse.jobId {
-                        // Async generation - start polling
-                        print("[Onboarding] ⏳ Starting async generation, jobId: \(jobId)")
-                        await MainActor.run {
-                            generationJobId = jobId
-                            generationStatus = "queued"
-                            generationProgress = 0
-                        }
-                        
-                        // Start polling
-                        await pollGenerationStatus(jobId: jobId, userId: userId)
-                    }
-                } else {
-                    // No program response - just complete onboarding
-                    await MainActor.run {
-                        isGeneratingProgram = false
-                        showGenerationProgress = false
-                        dismiss()
-                    }
-                }
             } catch {
                 print("[Onboarding] ❌ Error completing onboarding: \(error.localizedDescription)")
                 await MainActor.run {
                     generationError = "Kunde inte slutföra onboarding: \(error.localizedDescription)"
+                    showGenerationErrorAlert = true
                     isGeneratingProgram = false
                     showGenerationProgress = false
                 }
@@ -1364,11 +2480,16 @@ struct OnboardingView: View {
         var pollCount = 0
         let maxPolls = 300 // 5 minutes max (300 * 1 second)
         
+        print("[Onboarding] 🔄 Starting to poll job status: \(jobId)")
+        
         while pollCount < maxPolls {
             do {
                 try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
                 
+                print("[Onboarding] 📡 Polling job status (attempt \(pollCount + 1)/\(maxPolls))...")
                 let status = try await APIService.shared.getGenerationStatus(jobId: jobId)
+                
+                print("[Onboarding] 📊 Job status: \(status.status), progress: \(status.progress)%")
                 
                 await MainActor.run {
                     generationStatus = status.status
@@ -1379,7 +2500,47 @@ struct OnboardingView: View {
                     // Sync program templates
                     print("[Onboarding] ✅ Program generation completed, syncing...")
                     let syncService = SyncService.shared
-                    try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                    
+                    // Try syncing templates multiple times if needed
+                    var syncAttempts = 0
+                    var syncSuccess = false
+                    while syncAttempts < 5 && !syncSuccess {
+                        do {
+                            try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                            try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
+                            let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
+                            if !templates.isEmpty {
+                                print("[Onboarding] ✅ Templates synced successfully: \(templates.count) templates")
+                                syncSuccess = true
+                            } else {
+                                print("[Onboarding] ⚠️ Sync completed but no templates found, attempt \(syncAttempts + 1)/5")
+                                syncAttempts += 1
+                                if syncAttempts < 5 {
+                                    try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second before retry
+                                }
+                            }
+                        } catch {
+                            print("[Onboarding] ❌ Error syncing templates (attempt \(syncAttempts + 1)/5): \(error.localizedDescription)")
+                            syncAttempts += 1
+                            if syncAttempts < 5 {
+                                try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second before retry
+                            }
+                        }
+                    }
+                    
+                    if !syncSuccess {
+                        print("[Onboarding] ❌ Failed to sync templates after 5 attempts")
+                        await MainActor.run {
+                            generationError = "Programmet är klart men kunde inte laddas. Försök öppna appen igen."
+                            showGenerationErrorAlert = true
+                            isGeneratingProgram = false
+                            showGenerationProgress = false
+                        }
+                        return
+                    }
+                    
+                    // Sync profile from server to ensure all onboarding data is saved
+                    try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
                     
                     // Update profile
                     let profileDescriptor = FetchDescriptor<UserProfile>(
@@ -1388,7 +2549,19 @@ struct OnboardingView: View {
                     if let profile = try? modelContext.fetch(profileDescriptor).first {
                         profile.onboardingCompleted = true
                         profile.theme = selectedTheme
+                        
+                        // Create default gym with selected equipment from onboarding
+                        print("[Onboarding] 🏋️ Creating default gym with \(selectedEquipment.count) equipment items")
+                        _ = GymService.shared.createGym(
+                            name: "Mitt första gym",
+                            location: nil,
+                            equipmentIds: selectedEquipment,
+                            userId: userId,
+                            modelContext: modelContext
+                        )
+                        
                         try? modelContext.save()
+                        print("[Onboarding] ✅ Profile updated and Default Gym created")
                     }
                     
                     await MainActor.run {
@@ -1396,10 +2569,12 @@ struct OnboardingView: View {
                         showGenerationProgress = false
                         dismiss()
                     }
+                    print("[Onboarding] ✅ Onboarding completed successfully!")
                     return
                 } else if status.status == "failed" {
                     await MainActor.run {
                         generationError = status.error ?? "Programgenerering misslyckades"
+                        showGenerationErrorAlert = true
                         isGeneratingProgram = false
                         showGenerationProgress = false
                     }
@@ -1423,6 +2598,7 @@ struct OnboardingView: View {
         // Timeout after max polls
         await MainActor.run {
             generationError = "Programgenerering tog för lång tid. Försök igen senare."
+            showGenerationErrorAlert = true
             isGeneratingProgram = false
             showGenerationProgress = false
         }
@@ -1488,6 +2664,10 @@ struct OnboardingView: View {
     }
     
     private func syncEquipmentCatalogEarly() {
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("[Onboarding] 🔄 syncEquipmentCatalogEarly() called")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
         Task {
             var retryCount = 0
             let maxRetries = 3
@@ -1495,9 +2675,15 @@ struct OnboardingView: View {
             while retryCount < maxRetries {
                 do {
                     print("[Onboarding] 🔄 Syncing equipment catalog (attempt \(retryCount + 1)/\(maxRetries))...")
+                    let syncStartTime = Date()
+                    
                     try await ExerciseCatalogService.shared.syncEquipmentCatalog(modelContext: modelContext)
                     
+                    let syncDuration = Date().timeIntervalSince(syncStartTime)
+                    print("[Onboarding] ⏱️  Sync completed in \(String(format: "%.2f", syncDuration)) seconds")
+                    
                     await MainActor.run {
+                        print("[Onboarding] 📥 Calling loadEquipmentCatalog() after sync...")
                         loadEquipmentCatalog()
                     }
                     
@@ -1505,25 +2691,39 @@ struct OnboardingView: View {
                     let descriptor = FetchDescriptor<EquipmentCatalog>()
                     if let equipment = try? modelContext.fetch(descriptor), !equipment.isEmpty {
                         print("[Onboarding] ✅ Equipment catalog synced successfully (\(equipment.count) items)")
+                        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                         return
                     } else {
                         print("[Onboarding] ⚠️ Sync completed but no equipment found in database")
+                        print("[Onboarding] 📊 Checking database state...")
+                        let allEquipment = try? modelContext.fetch(descriptor)
+                        print("[Onboarding] 📊 Total items in database: \(allEquipment?.count ?? 0)")
                     }
                 } catch {
-                    print("[Onboarding] ⚠️ Error syncing equipment catalog (attempt \(retryCount + 1)): \(error.localizedDescription)")
+                    print("[Onboarding] ❌ Error syncing equipment catalog (attempt \(retryCount + 1)):")
+                    print("  • Error type: \(type(of: error))")
+                    print("  • Error description: \(error.localizedDescription)")
+                    if let nsError = error as NSError? {
+                        print("  • Error domain: \(nsError.domain)")
+                        print("  • Error code: \(nsError.code)")
+                    }
                     retryCount += 1
                     
                     if retryCount < maxRetries {
+                        let waitTime = pow(2.0, Double(retryCount))
+                        print("[Onboarding] ⏳ Waiting \(waitTime) seconds before retry...")
                         // Wait before retry (exponential backoff)
-                        try? await Task.sleep(nanoseconds: UInt64(pow(2.0, Double(retryCount)) * 1_000_000_000))
+                        try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
                     }
                 }
             }
             
+            print("[Onboarding] ⚠️ All sync attempts failed, loading from cache...")
             // Final attempt to load from cache even if sync failed
             await MainActor.run {
                 loadEquipmentCatalog()
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }
     }
 }
@@ -1531,8 +2731,8 @@ struct OnboardingView: View {
 // MARK: - Helper Views
 
 struct MotivationOption: View {
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     let isSelected: Bool
     let colorScheme: ColorScheme
     let selectedTheme: String
@@ -1571,8 +2771,8 @@ struct MotivationOption: View {
 }
 
 struct LevelOption: View {
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     let isSelected: Bool
     let colorScheme: ColorScheme
     let selectedTheme: String
@@ -1610,34 +2810,7 @@ struct LevelOption: View {
     }
 }
 
-struct GoalSlider: View {
-    let title: String
-    @Binding var value: Int
-    let colorScheme: ColorScheme
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(Color.textPrimary(for: colorScheme))
-                Spacer()
-                Text("\(value)%")
-                    .font(.headline)
-                    .foregroundColor(Color.primaryColor(for: colorScheme))
-            }
-            
-            Slider(value: Binding(
-                get: { Double(value) },
-                set: { value = Int($0) }
-            ), in: 0...100, step: 1)
-            .tint(Color.primaryColor(for: colorScheme))
-        }
-        .padding()
-        .background(Color.cardBackground(for: colorScheme))
-        .cornerRadius(12)
-    }
-}
+
 
 struct OneRmField: View {
     let title: String
@@ -1667,11 +2840,11 @@ struct GenerationProgressView: View {
     @State private var animateIcon = false
     @State private var animateSparkles = false
     
-    private let buildingSteps = [
-        (text: "Analyserar dina mål...", icon: "target"),
-        (text: "Väljer övningar...", icon: "dumbbell.fill"),
-        (text: "Optimerar schema...", icon: "calendar"),
-        (text: "Bygger ditt träningsprogram...", icon: "sparkles")
+    private let buildingSteps: [(text: LocalizedStringKey, icon: String)] = [
+        (text: "Analyzing your goals...", icon: "target"),
+        (text: "Choosing exercises...", icon: "dumbbell.fill"),
+        (text: "Optimizing schedule...", icon: "calendar"),
+        (text: "Building your workout program...", icon: "sparkles")
     ]
     
     var body: some View {
@@ -1732,7 +2905,7 @@ struct GenerationProgressView: View {
                         .animation(.easeInOut(duration: 0.3), value: stepIndex)
                     
                     if !showTimeoutMessage {
-                        Text("Detta kan ta upp till 2 minuter. Ha lite tålamod...")
+                        Text(String(localized: "This can take up to 2 minutes. Please be patient..."))
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
@@ -1741,7 +2914,7 @@ struct GenerationProgressView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "clock.fill")
                                     .font(.system(size: 16))
-                                Text("Många tränar just nu – det tar lite längre tid än vanligt")
+                                Text(String(localized: "High traffic - taking a bit longer than usual"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                             }
@@ -1754,7 +2927,7 @@ struct GenerationProgressView: View {
                                     .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                             )
                             
-                            Text("Din träningsplan genereras fortfarande. Vi uppskattar ditt tålamod!")
+                            Text(String(localized: "Your training plan is still being generated. We appreciate your patience!"))
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.7))
                                 .multilineTextAlignment(.center)
@@ -1798,9 +2971,10 @@ struct GenerationProgressView: View {
         }
     }
     
-    private var currentStep: (text: String, icon: String) {
+    private var currentStep: (text: LocalizedStringKey, icon: String) {
         buildingSteps[stepIndex]
     }
+
 }
 
 struct TimeoutMessageView: View {
@@ -1813,19 +2987,19 @@ struct TimeoutMessageView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
-                Text("Många tränar just nu...")
+                Text(String(localized: "High traffic right now..."))
                     .font(.headline)
                     .foregroundColor(.white)
                 
-                Text("Programmet genereras, vänta lite. Detta kan ta upp till 2 minuter.")
+                Text(String(localized: "High traffic... Program is generating, please wait. This can take up to 2 minutes."))
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
                 
                 Button(action: onDismiss) {
-                    Text("OK")
+                    Text(String(localized: "OK"))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .background(Color.primary)
                         .cornerRadius(12)

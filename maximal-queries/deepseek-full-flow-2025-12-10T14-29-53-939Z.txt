@@ -1,0 +1,190 @@
+[2025-12-10T14:29:54.070Z] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2025-12-10T14:29:54.070Z] DEEPSEEK API FULL FLOW LOG
+[2025-12-10T14:29:54.070Z] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2025-12-10T14:29:54.070Z] Model: deepseek-chat
+[2025-12-10T14:29:54.070Z] Timestamp: 2025-12-10T14:29:54.070Z
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.070Z] === SYSTEM PROMPT ===
+[2025-12-10T14:29:54.070Z] You are an Elite Strength & Conditioning Coach. Create a detailed workout program based on user data and logistics.
+
+CRITICAL OUTPUT RULES:
+
+1. Output strictly valid JSON.
+2. Do NOT use markdown code blocks. Return the raw JSON string only.
+3. Do NOT include any introductory text or explanations. Start with '{' and end with '}'.
+4. All text values inside the JSON must be in English.
+
+LOGIC GUIDELINES:
+
+1. Exercise Selection: MUST strictly adhere to "Available Equipment". Never suggest an exercise the user cannot perform.
+
+2. Sport Specificity: If a sport is specified, prioritize exercises that improve performance for that sport.
+
+3. Volume & Intensity: Use the "Focus Distribution" and "Level" to determine sets, reps, and rest.
+
+4. Load Calculation:
+
+   - Use the provided "Confirmed 1RM" values to calculate working weights (e.g., 75% of 1RM).
+
+   - If an exercise is not based on the main lifts, use RPE (1-10) or specific notes.
+
+5. Structure: Create a routine that fits the "Frequency" (Days/Week).
+
+   - 1-3 days: Full Body.
+
+   - 4 days: Upper/Lower split.
+
+   - 5-6 days: PPL or Body Part split.
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.070Z] === USER PROMPT ===
+[2025-12-10T14:29:54.070Z] CREATE PROGRAM FOR:
+
+PROFILE (Valid & Confirmed):
+
+- Goal: Build Muscle (Sport: None)
+
+- Level: Intermediate
+
+- Confirmed 1RM (kg): {"bench_press":100,"overhead_press":70,"deadlift":150,"squat":120,"lat_pulldown":90}
+
+- Focus Distribution: {"strength":25,"hypertrophy":25,"endurance":25,"cardio":25}
+
+LOGISTICS:
+
+- Frequency: 7 days/week
+
+- Duration: 120 min/session
+
+- Equipment: UNLIMITED - User has access to ALL possible gym equipment including but not limited to: barbells, dumbbells, machines, cables, free weights, cardio equipment, functional training equipment, and any specialized equipment. You can suggest ANY equipment and exercises without restrictions.
+
+CRITICAL VOLUME REQUIREMENTS:
+
+- Each workout day MUST contain 20-30 exercises to fill the 120-minute session
+- Calculate: ~5 minutes per exercise (including all sets, rest periods, and transitions)
+- Example for 120 min: 20 exercises × 5 min = 100 min (minimum)
+- DO NOT create programs with only 2-3 exercises - this is UNACCEPTABLE for a 120-minute session
+
+CRITICAL STRUCTURE RULES:
+
+1. SESSION COUNT: You MUST generate EXACTLY 7 different workout sessions. Do NOT default to 3 if the user asked for 7.
+2. NO DUPLICATE EXERCISES: Do NOT list the same exercise multiple times in the same session. If you want more volume, increase the 'sets' count (e.g., 6 sets) instead of listing "Barbell Squat" (3 sets) followed by "Barbell Squat" (3 sets).
+3. EXERCISE VARIETY: Use different exercises for the same muscle group if you need more volume (e.g., Squat then Leg Press, NOT Squat then Squat).
+
+CRITICAL EXERCISE SELECTION RULES:
+
+⚠️ EXTREMELY IMPORTANT - READ CAREFULLY:
+
+1. You MUST ONLY use exercises from the "Allowed Exercises" list above
+2. Use the EXACT English names as listed - do NOT modify, translate, or add variations
+3. DO NOT create "warm-up" exercises like "Dynamic Warm-up" or "Arm Circles" - these are NOT in the catalog
+4. DO NOT use exercises like "Kettlebell Swings", "Battle Ropes", "Plyo Box Jumps" unless they appear in the Allowed Exercises list
+5. If you need a warm-up, use light versions of main exercises (e.g., "Barbell Squat" with lighter weight)
+6. Any exercise NOT in the Allowed Exercises list will be AUTOMATICALLY SKIPPED and DELETED from the program
+
+EXAMPLE OF CORRECT USAGE:
+✅ CORRECT: "Barbell Squat" (1 entry with 6 sets)
+❌ WRONG: "Barbell Squat" (3 sets) ... later ... "Barbell Squat" (3 sets)
+✅ CORRECT: "Barbell Bench Press" (if in Allowed Exercises)
+❌ WRONG: "Dynamic Warm-up: Arm Circles" (not in catalog, will be deleted)
+❌ WRONG: "Kettlebell Swings" (not in catalog, will be deleted)
+❌ WRONG: "Barbell Squat (Warm-up)" (modification not allowed, will be deleted)
+
+OUTPUT JSON STRUCTURE:
+
+{
+  "program_name": "CREATIVE & SPECIFIC NAME (e.g., 'Power Hockey Phase 1', 'Hybrid Athlete A', 'Beginner Strength Foundation'). Do NOT use generic names like 'Full Body Day 1'.",
+  "sport_specific_note": "How this helps the specific sport (optional)",
+  "schedule": [
+    {
+      "day_number": 1,
+      "day_name": "e.g., Upper Body Explosiveness or Foundation Leg Day",
+      "warmup_suggestion": "Specific warm-up instructions (e.g., '5 mins Rowing + 2 sets light squats'). DO NOT list as exercises.",
+      "exercises": [
+        {
+          "name": "Exercise Name",
+          "sets": 0,
+          "reps": "e.g., 8-10",
+          "load_guidance": "e.g., 70% of 1RM or RPE 8",
+          "calculated_weight": 0,
+          "rest_seconds": 0,
+          "note": "Technique or intent note"
+        }
+      ]
+    }
+  ]
+}
+
+IMPORTANT: Output ONLY valid JSON. Do not wrap in markdown code blocks. Start with '{' and end with '}'.
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.070Z] ✅ Added response_format: { type: 'json_object' }
+[2025-12-10T14:29:54.070Z] 📦 Request size: 5.0KB
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.070Z] === REQUEST BODY ===
+[2025-12-10T14:29:54.070Z] {
+  "model": "deepseek-chat",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an Elite Strength & Conditioning Coach. Create a detailed workout program based on user data and logistics.\n\nCRITICAL OUTPUT RULES:\n\n1. Output strictly valid JSON.\n2. Do NOT use markdown code blocks. Return the raw JSON string only.\n3. Do NOT include any introductory text or explanations. Start with '{' and end with '}'.\n4. All text values inside the JSON must be in English.\n\nLOGIC GUIDELINES:\n\n1. Exercise Selection: MUST strictly adhere to \"Available Equipment\". Never suggest an exercise the user cannot perform.\n\n2. Sport Specificity: If a sport is specified, prioritize exercises that improve performance for that sport.\n\n3. Volume & Intensity: Use the \"Focus Distribution\" and \"Level\" to determine sets, reps, and rest.\n\n4. Load Calculation:\n\n   - Use the provided \"Confirmed 1RM\" values to calculate working weights (e.g., 75% of 1RM).\n\n   - If an exercise is not based on the main lifts, use RPE (1-10) or specific notes.\n\n5. Structure: Create a routine that fits the \"Frequency\" (Days/Week).\n\n   - 1-3 days: Full Body.\n\n   - 4 days: Upper/Lower split.\n\n   - 5-6 days: PPL or Body Part split."
+    },
+    {
+      "role": "user",
+      "content": "CREATE PROGRAM FOR:\n\nPROFILE (Valid & Confirmed):\n\n- Goal: Build Muscle (Sport: None)\n\n- Level: Intermediate\n\n- Confirmed 1RM (kg): {\"bench_press\":100,\"overhead_press\":70,\"deadlift\":150,\"squat\":120,\"lat_pulldown\":90}\n\n- Focus Distribution: {\"strength\":25,\"hypertrophy\":25,\"endurance\":25,\"cardio\":25}\n\nLOGISTICS:\n\n- Frequency: 7 days/week\n\n- Duration: 120 min/session\n\n- Equipment: UNLIMITED - User has access to ALL possible gym equipment including but not limited to: barbells, dumbbells, machines, cables, free weights, cardio equipment, functional training equipment, and any specialized equipment. You can suggest ANY equipment and exercises without restrictions.\n\nCRITICAL VOLUME REQUIREMENTS:\n\n- Each workout day MUST contain 20-30 exercises to fill the 120-minute session\n- Calculate: ~5 minutes per exercise (including all sets, rest periods, and transitions)\n- Example for 120 min: 20 exercises × 5 min = 100 min (minimum)\n- DO NOT create programs with only 2-3 exercises - this is UNACCEPTABLE for a 120-minute session\n\nCRITICAL STRUCTURE RULES:\n\n1. SESSION COUNT: You MUST generate EXACTLY 7 different workout sessions. Do NOT default to 3 if the user asked for 7.\n2. NO DUPLICATE EXERCISES: Do NOT list the same exercise multiple times in the same session. If you want more volume, increase the 'sets' count (e.g., 6 sets) instead of listing \"Barbell Squat\" (3 sets) followed by \"Barbell Squat\" (3 sets).\n3. EXERCISE VARIETY: Use different exercises for the same muscle group if you need more volume (e.g., Squat then Leg Press, NOT Squat then Squat).\n\nCRITICAL EXERCISE SELECTION RULES:\n\n⚠️ EXTREMELY IMPORTANT - READ CAREFULLY:\n\n1. You MUST ONLY use exercises from the \"Allowed Exercises\" list above\n2. Use the EXACT English names as listed - do NOT modify, translate, or add variations\n3. DO NOT create \"warm-up\" exercises like \"Dynamic Warm-up\" or \"Arm Circles\" - these are NOT in the catalog\n4. DO NOT use exercises like \"Kettlebell Swings\", \"Battle Ropes\", \"Plyo Box Jumps\" unless they appear in the Allowed Exercises list\n5. If you need a warm-up, use light versions of main exercises (e.g., \"Barbell Squat\" with lighter weight)\n6. Any exercise NOT in the Allowed Exercises list will be AUTOMATICALLY SKIPPED and DELETED from the program\n\nEXAMPLE OF CORRECT USAGE:\n✅ CORRECT: \"Barbell Squat\" (1 entry with 6 sets)\n❌ WRONG: \"Barbell Squat\" (3 sets) ... later ... \"Barbell Squat\" (3 sets)\n✅ CORRECT: \"Barbell Bench Press\" (if in Allowed Exercises)\n❌ WRONG: \"Dynamic Warm-up: Arm Circles\" (not in catalog, will be deleted)\n❌ WRONG: \"Kettlebell Swings\" (not in catalog, will be deleted)\n❌ WRONG: \"Barbell Squat (Warm-up)\" (modification not allowed, will be deleted)\n\nOUTPUT JSON STRUCTURE:\n\n{\n  \"program_name\": \"CREATIVE & SPECIFIC NAME (e.g., 'Power Hockey Phase 1', 'Hybrid Athlete A', 'Beginner Strength Foundation'). Do NOT use generic names like 'Full Body Day 1'.\",\n  \"sport_specific_note\": \"How this helps the specific sport (optional)\",\n  \"schedule\": [\n    {\n      \"day_number\": 1,\n      \"day_name\": \"e.g., Upper Body Explosiveness or Foundation Leg Day\",\n      \"warmup_suggestion\": \"Specific warm-up instructions (e.g., '5 mins Rowing + 2 sets light squats'). DO NOT list as exercises.\",\n      \"exercises\": [\n        {\n          \"name\": \"Exercise Name\",\n          \"sets\": 0,\n          \"reps\": \"e.g., 8-10\",\n          \"load_guidance\": \"e.g., 70% of 1RM or RPE 8\",\n          \"calculated_weight\": 0,\n          \"rest_seconds\": 0,\n          \"note\": \"Technique or intent note\"\n        }\n      ]\n    }\n  ]\n}\n\nIMPORTANT: Output ONLY valid JSON. Do not wrap in markdown code blocks. Start with '{' and end with '}'."
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 64000,
+  "response_format": {
+    "type": "json_object"
+  }
+}
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.070Z] 🚀 Sending request to https://api.deepseek.com/v1/chat/completions
+[2025-12-10T14:29:54.070Z] ⏱️  Request started at: 2025-12-10T14:29:54.070Z
+[2025-12-10T14:29:54.070Z] 
+[2025-12-10T14:29:54.916Z] ✅ Response received after 846ms
+[2025-12-10T14:29:54.916Z] 📊 Response status: 401 Unauthorized
+[2025-12-10T14:29:54.917Z] 📋 Response headers: {
+  "access-control-allow-credentials": "true",
+  "connection": "keep-alive",
+  "content-length": "153",
+  "content-type": "application/json",
+  "date": "Wed, 10 Dec 2025 14:29:54 GMT",
+  "server": "elb",
+  "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+  "vary": "origin, access-control-request-method, access-control-request-headers",
+  "via": "1.1 bd3f4df95f7c836cc4eb6a22d92ac2c2.cloudfront.net (CloudFront)",
+  "x-amz-cf-id": "FaIc9rTPPWCUQm1WGeVDkSk4yXA4s1QykmwobqkoMqfKQwYvT4Ez0w==",
+  "x-amz-cf-pop": "IAD12-P4",
+  "x-cache": "Error from cloudfront",
+  "x-content-type-options": "nosniff",
+  "x-ds-trace-id": "6ff162b5f06912b36d4bf7d64e6070a1"
+}
+[2025-12-10T14:29:54.917Z] 
+[2025-12-10T14:29:54.917Z] ❌ Error response body: {"error":{"message":"Authentication Fails, Your api key: ****ars) is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+[2025-12-10T14:29:54.919Z] ❌ ERROR after 849ms
+[2025-12-10T14:29:54.919Z] Error name: Error
+[2025-12-10T14:29:54.919Z] Error message: DeepSeek API error: 401 Unauthorized - {"error":{"message":"Authentication Fails, Your api key: ****ars) is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+
+🔑 AUTHENTICATION ERROR:
+Your DeepSeek API key is invalid or expired.
+1. Get a new API key at: https://platform.deepseek.com/api_keys
+2. Update DEEPSEEK_API_KEY in your .env file
+3. Make sure the key starts with 'sk-' and is ~40-60 characters long
+4. If using deepseek-reasoner, verify you have access to that model
+   (Try deepseek-chat first: set DEEPSEEK_MODEL=deepseek-chat)
+
+[2025-12-10T14:29:54.921Z] Error stack: Error: DeepSeek API error: 401 Unauthorized - {"error":{"message":"Authentication Fails, Your api key: ****ars) is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+
+🔑 AUTHENTICATION ERROR:
+Your DeepSeek API key is invalid or expired.
+1. Get a new API key at: https://platform.deepseek.com/api_keys
+2. Update DEEPSEEK_API_KEY in your .env file
+3. Make sure the key starts with 'sk-' and is ~40-60 characters long
+4. If using deepseek-reasoner, verify you have access to that model
+   (Try deepseek-chat first: set DEEPSEEK_MODEL=deepseek-chat)
+
+    at generateMaximalQueries (/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/server/maximal-query-generator.ts:334:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-12-10T14:29:54.921Z] 
+[2025-12-10T14:29:54.921Z] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -6,10 +6,13 @@ import SwiftData
 
 struct RepCompanioniOSApp: App {
     let persistenceController = PersistenceController.shared
+    @StateObject private var languageService = AppLanguageService.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.locale, Locale(identifier: languageService.currentLanguage))
+                .environmentObject(languageService)
         }
         .modelContainer(persistenceController.container)
     }

@@ -1,0 +1,73 @@
+{
+  "timestamp": "2025-12-09T14:48:42.956Z",
+  "profile": {
+    "age": 30,
+    "sex": "Man",
+    "bodyWeight": 80,
+    "height": 180,
+    "trainingLevel": "Intermediate",
+    "primaryGoal": "Build Muscle",
+    "confirmed1Rm": {
+      "bench_press": 100,
+      "overhead_press": 70,
+      "deadlift": 150,
+      "squat": 120,
+      "lat_pulldown": 90
+    },
+    "focusDistribution": {
+      "strength": 25,
+      "hypertrophy": 25,
+      "endurance": 25,
+      "cardio": 25
+    }
+  },
+  "logistics": {
+    "sessionsPerWeek": 7,
+    "sessionDurationMinutes": 120,
+    "equipmentList": "Barbell, Dumbbells, EZ Bar, Kettlebell, Leg Press Machine, Lat Pulldown Machine, Cable Machine, Smith Machine, Leg Curl Machine, Leg Extension Machine, Rowing Machine, Flat Bench, Adjustable Bench, Power Rack, Hyperextension Bench, Pull-up Bar, Dip Station, Weight Belt, Resistance Bands, Treadmill, Stationary Bike, Elliptical, Stair Climber...",
+    "filteredExerciseNames": [
+      "Barbell Bench Press",
+      "Dumbbell Bench Press",
+      "Incline Barbell Bench Press",
+      "Chest Dips",
+      "Cable Flyes",
+      "Conventional Deadlift",
+      "Barbell Row",
+      "Pull-ups",
+      "Lat Pulldown",
+      "Dumbbell Row",
+      "Barbell Squat",
+      "Leg Press",
+      "Lunges",
+      "Romanian Deadlift",
+      "Leg Curl",
+      "Leg Extension",
+      "Overhead Press",
+      "Seated Dumbbell Press",
+      "Lateral Raises",
+      "Face Pulls",
+      "Barbell Curl",
+      "Dumbbell Curl",
+      "Hammer Curls",
+      "Lying Triceps Extension",
+      "Cable Triceps Pushdown",
+      "Overhead Triceps Extension",
+      "Plank",
+      "Abdominal Crunch",
+      "Hyperextension",
+      "Treadmill",
+      "Rowing Machine",
+      "Stationary Bike",
+      "Triceps Dips (Dip Station)",
+      "Calf Raises (Bodyweight)",
+      "EZ Bar Skull Crushers"
+    ],
+    "totalExerciseCount": 35
+  },
+  "statistics": {
+    "equipmentCount": 23,
+    "exerciseCount": 35,
+    "sessionsPerWeek": 7,
+    "sessionDurationMinutes": 120
+  }
+}

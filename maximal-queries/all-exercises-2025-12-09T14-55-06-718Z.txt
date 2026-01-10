@@ -1,0 +1,35 @@
+Barbell Bench Press
+Dumbbell Bench Press
+Incline Barbell Bench Press
+Chest Dips
+Cable Flyes
+Conventional Deadlift
+Barbell Row
+Pull-ups
+Lat Pulldown
+Dumbbell Row
+Barbell Squat
+Leg Press
+Lunges
+Romanian Deadlift
+Leg Curl
+Leg Extension
+Overhead Press
+Seated Dumbbell Press
+Lateral Raises
+Face Pulls
+Barbell Curl
+Dumbbell Curl
+Hammer Curls
+Lying Triceps Extension
+Cable Triceps Pushdown
+Overhead Triceps Extension
+Plank
+Abdominal Crunch
+Hyperextension
+Treadmill
+Rowing Machine
+Stationary Bike
+Triceps Dips (Dip Station)
+Calf Raises (Bodyweight)
+EZ Bar Skull Crushers

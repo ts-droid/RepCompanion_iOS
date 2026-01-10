@@ -9,53 +9,84 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @AppStorage("colorScheme") private var colorScheme = "System"
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var userProfiles: [UserProfile]
+    @StateObject private var authService = AuthService.shared
+    
+    init() {
+        // Customize TabBar appearance to match dark theme
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(Color.appBackground)
+        
+        // Unselected items
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.textSecondary)
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(Color.textSecondary)]
+        
+        // Selected items
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor.white
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
 
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+    
+    private var currentProfile: UserProfile? {
+        // Filter profiles by current authenticated user
+        guard let userId = authService.currentUserId else { return nil }
+        return userProfiles.first { $0.userId == userId }
+    }
+    
+    private var shouldShowOnboarding: Bool {
+        // TEMPORARY: Always show onboarding if no profile exists or onboarding not completed
+        // Check if any profile exists and is completed
+        if let profile = userProfiles.first {
+            return !profile.onboardingCompleted
+        }
+        // No profile exists, show onboarding
+        return true
+    }
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        // TEMPORARY: Skip login and go directly to onboarding
+        // TODO: Re-enable authentication after onboarding is working
+        if shouldShowOnboarding {
+            OnboardingView()
+        } else {
+            TabView {
+                HomeView()
+                    .tabItem {
+                        Label("Hem", systemImage: "house.fill")
                     }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                
+                WorkoutListView()
+                    .tabItem {
+                        Label("Program", systemImage: "dumbbell.fill")
                     }
-                }
+                
+                StatisticsView()
+                    .tabItem {
+                        Label("Statistik", systemImage: "chart.bar.xaxis")
+                    }
+                
+                ProfileView()
+                    .tabItem {
+                        Label("Profil", systemImage: "person.fill")
+                    }
             }
-        } detail: {
-            Text("Select an item")
+            .preferredColorScheme(preferredColorScheme)
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+    
+    private var preferredColorScheme: ColorScheme? {
+        switch colorScheme {
+        case "Light":
+            return .light
+        case "Dark":
+            return .dark
+        default:
+            return nil // System
         }
     }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

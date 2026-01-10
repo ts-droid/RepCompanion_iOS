@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-12-09T19:29:47.368Z",
+  "profile": {
+    "age": 30,
+    "sex": "Man",
+    "bodyWeight": 80,
+    "height": 180,
+    "trainingLevel": "Intermediate",
+    "primaryGoal": "Build Muscle",
+    "confirmed1Rm": {
+      "bench_press": 100,
+      "overhead_press": 70,
+      "deadlift": 150,
+      "squat": 120,
+      "lat_pulldown": 90
+    },
+    "focusDistribution": {
+      "strength": 25,
+      "hypertrophy": 25,
+      "endurance": 25,
+      "cardio": 25
+    }
+  },
+  "logistics": {
+    "sessionsPerWeek": 7,
+    "sessionDurationMinutes": 120,
+    "equipmentList": "Barbell, Dumbbells, EZ Bar, Kettlebell, Leg Press Machine, Lat Pulldown Machine, Cable Machine, Smith Machine, Leg Curl Machine, Leg Extension Machine, Rowing Machine, Flat Bench, Adjustable Bench, Power Rack, Hyperextension Bench, Pull-up Bar, Dip Station, Weight Belt, Resistance Bands, Treadmill, Stationary Bike, Elliptical, Stair Climber...",
+    "filteredExerciseNames": [
+      "Barbell Bench Press",
+      "Dumbbell Bench Press",
+      "Incline Barbell Bench Press",
+      "Chest Dips",
+      "Cable Flyes",
+      "Conventional Deadlift",
+      "Barbell Row",
+      "Pull-ups",
+      "Lat Pulldown",
+      "Dumbbell Row",
+      "Barbell Squat",
+      "Leg Press",
+      "Lunges",
+      "Romanian Deadlift",
+      "Leg Curl",
+      "Leg Extension",
+      "Overhead Press",
+      "Seated Dumbbell Press",
+      "Lateral Raises",
+      "Face Pulls",
+      "Barbell Curl",
+      "Dumbbell Curl",
+      "Hammer Curls",
+      "Lying Triceps Extension",
+      "Cable Triceps Pushdown",
+      "Overhead Triceps Extension",
+      "Plank",
+      "Abdominal Crunch",
+      "Hyperextension",
+      "Treadmill",
+      "Rowing Machine",
+      "Stationary Bike",
+      "Triceps Dips (Dip Station)",
+      "Calf Raises (Bodyweight)",
+      "EZ Bar Skull Crushers"
+    ],
+    "totalExerciseCount": 35
+  },
+  "statistics": {
+    "equipmentCount": 23,
+    "exerciseCount": 35,
+    "sessionsPerWeek": 7,
+    "sessionDurationMinutes": 120
+  },
+  "queryResults": [
+    {
+      "provider": "gemini",
+      "model": "gemini-1.5-flash",
+      "success": false,
+      "durationMs": 316,
+      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "success": false,
+      "durationMs": 969,
+      "error": "DeepSeek API error: 401 Unauthorized - {\"error\":{\"message\":\"Authentication Fails, Your api key: ****ars) is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}}\n\n🔑 AUTHENTICATION ERROR:\nYour DeepSeek API key is invalid or expired.\n1. Get a new API key at: https://platform.deepseek.com/api_keys\n2. Update DEEPSEEK_API_KEY in your .env file\n3. Make sure the key starts with 'sk-' and is ~40-60 characters long\n4. If using deepseek-reasoner, verify you have access to that model\n   (Try deepseek-chat first: set DEEPSEEK_MODEL=deepseek-chat)\n"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "success": false,
+      "durationMs": 183221,
+      "error": "Connection error."
+    },
+    {
+      "provider": "perplexity",
+      "model": "sonar",
+      "success": false,
+      "durationMs": 60343,
+      "error": "fetch failed"
+    }
+  ]
+}

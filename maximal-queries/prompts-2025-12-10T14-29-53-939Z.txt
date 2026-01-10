@@ -1,0 +1,156 @@
+=== MAXIMAL QUERY PROMPTS ===
+Generated: 2025-12-10T14:33:56.637Z
+
+Equipment Count: 23
+Exercise Count: 35
+Sessions Per Week: 7
+Session Duration: 120 minutes
+
+=== QUERY PERFORMANCE RESULTS ===
+
+GEMINI (gemini-1.5-flash):
+  ❌ Failed after 130ms
+  Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+
+DEEPSEEK (deepseek-chat):
+  ❌ Failed after 851ms
+  Error: DeepSeek API error: 401 Unauthorized - {"error":{"message":"Authentication Fails, Your api key: ****ars) is invalid","type":"authentication_error","param":null,"code":"invalid_request_error"}}
+
+🔑 AUTHENTICATION ERROR:
+Your DeepSeek API key is invalid or expired.
+1. Get a new API key at: https://platform.deepseek.com/api_keys
+2. Update DEEPSEEK_API_KEY in your .env file
+3. Make sure the key starts with 'sk-' and is ~40-60 characters long
+4. If using deepseek-reasoner, verify you have access to that model
+   (Try deepseek-chat first: set DEEPSEEK_MODEL=deepseek-chat)
+
+
+OPENAI (gpt-4o-mini):
+  ❌ Failed after 181608ms
+  Error: Connection error.
+
+PERPLEXITY (sonar):
+  ❌ Failed after 60097ms
+  Error: fetch failed
+
+=== SYSTEM PROMPT ===
+
+You are an Elite Strength & Conditioning Coach. Create a detailed workout program based on user data and logistics.
+
+CRITICAL OUTPUT RULES:
+
+1. Output strictly valid JSON.
+2. Do NOT use markdown code blocks. Return the raw JSON string only.
+3. Do NOT include any introductory text or explanations. Start with '{' and end with '}'.
+4. All text values inside the JSON must be in English.
+
+LOGIC GUIDELINES:
+
+1. Exercise Selection: MUST strictly adhere to "Available Equipment". Never suggest an exercise the user cannot perform.
+
+2. Sport Specificity: If a sport is specified, prioritize exercises that improve performance for that sport.
+
+3. Volume & Intensity: Use the "Focus Distribution" and "Level" to determine sets, reps, and rest.
+
+4. Load Calculation:
+
+   - Use the provided "Confirmed 1RM" values to calculate working weights (e.g., 75% of 1RM).
+
+   - If an exercise is not based on the main lifts, use RPE (1-10) or specific notes.
+
+5. Structure: Create a routine that fits the "Frequency" (Days/Week).
+
+   - 1-3 days: Full Body.
+
+   - 4 days: Upper/Lower split.
+
+   - 5-6 days: PPL or Body Part split.
+
+=== USER PROMPT ===
+
+CREATE PROGRAM FOR:
+
+PROFILE (Valid & Confirmed):
+
+- Goal: Build Muscle (Sport: None)
+
+- Level: Intermediate
+
+- Confirmed 1RM (kg): {"bench_press":100,"overhead_press":70,"deadlift":150,"squat":120,"lat_pulldown":90}
+
+- Focus Distribution: {"strength":25,"hypertrophy":25,"endurance":25,"cardio":25}
+
+LOGISTICS:
+
+- Frequency: 7 days/week
+
+- Duration: 120 min/session
+
+- Equipment: UNLIMITED - User has access to ALL possible gym equipment including but not limited to: barbells, dumbbells, machines, cables, free weights, cardio equipment, functional training equipment, and any specialized equipment. You can suggest ANY equipment and exercises without restrictions.
+
+CRITICAL VOLUME REQUIREMENTS:
+
+- Each workout day MUST contain 20-30 exercises to fill the 120-minute session
+- Calculate: ~5 minutes per exercise (including all sets, rest periods, and transitions)
+- Example for 120 min: 20 exercises × 5 min = 100 min (minimum)
+- DO NOT create programs with only 2-3 exercises - this is UNACCEPTABLE for a 120-minute session
+
+CRITICAL STRUCTURE RULES:
+
+1. SESSION COUNT: You MUST generate EXACTLY 7 different workout sessions. Do NOT default to 3 if the user asked for 7.
+2. NO DUPLICATE EXERCISES: Do NOT list the same exercise multiple times in the same session. If you want more volume, increase the 'sets' count (e.g., 6 sets) instead of listing "Barbell Squat" (3 sets) followed by "Barbell Squat" (3 sets).
+3. EXERCISE VARIETY: Use different exercises for the same muscle group if you need more volume (e.g., Squat then Leg Press, NOT Squat then Squat).
+
+CRITICAL EXERCISE SELECTION RULES:
+
+⚠️ EXTREMELY IMPORTANT - READ CAREFULLY:
+
+1. You MUST ONLY use exercises from the "Allowed Exercises" list above
+2. Use the EXACT English names as listed - do NOT modify, translate, or add variations
+3. DO NOT create "warm-up" exercises like "Dynamic Warm-up" or "Arm Circles" - these are NOT in the catalog
+4. DO NOT use exercises like "Kettlebell Swings", "Battle Ropes", "Plyo Box Jumps" unless they appear in the Allowed Exercises list
+5. If you need a warm-up, use light versions of main exercises (e.g., "Barbell Squat" with lighter weight)
+6. Any exercise NOT in the Allowed Exercises list will be AUTOMATICALLY SKIPPED and DELETED from the program
+
+EXAMPLE OF CORRECT USAGE:
+✅ CORRECT: "Barbell Squat" (1 entry with 6 sets)
+❌ WRONG: "Barbell Squat" (3 sets) ... later ... "Barbell Squat" (3 sets)
+✅ CORRECT: "Barbell Bench Press" (if in Allowed Exercises)
+❌ WRONG: "Dynamic Warm-up: Arm Circles" (not in catalog, will be deleted)
+❌ WRONG: "Kettlebell Swings" (not in catalog, will be deleted)
+❌ WRONG: "Barbell Squat (Warm-up)" (modification not allowed, will be deleted)
+
+OUTPUT JSON STRUCTURE:
+
+{
+  "program_name": "CREATIVE & SPECIFIC NAME (e.g., 'Power Hockey Phase 1', 'Hybrid Athlete A', 'Beginner Strength Foundation'). Do NOT use generic names like 'Full Body Day 1'.",
+  "sport_specific_note": "How this helps the specific sport (optional)",
+  "schedule": [
+    {
+      "day_number": 1,
+      "day_name": "e.g., Upper Body Explosiveness or Foundation Leg Day",
+      "warmup_suggestion": "Specific warm-up instructions (e.g., '5 mins Rowing + 2 sets light squats'). DO NOT list as exercises.",
+      "exercises": [
+        {
+          "name": "Exercise Name",
+          "sets": 0,
+          "reps": "e.g., 8-10",
+          "load_guidance": "e.g., 70% of 1RM or RPE 8",
+          "calculated_weight": 0,
+          "rest_seconds": 0,
+          "note": "Technique or intent note"
+        }
+      ]
+    }
+  ]
+}
+
+=== EQUIPMENT LIST ===
+
+Barbell, Dumbbells, EZ Bar, Kettlebell, Leg Press Machine, Lat Pulldown Machine, Cable Machine, Smith Machine, Leg Curl Machine, Leg Extension Machine, Rowing Machine, Flat Bench, Adjustable Bench, Power Rack, Hyperextension Bench, Pull-up Bar, Dip Station, Weight Belt, Resistance Bands, Treadmill, Stationary Bike, Elliptical, Stair Climber
+
+=== EXERCISE LIST (First 100) ===
+
+Barbell Bench Press, Dumbbell Bench Press, Incline Barbell Bench Press, Chest Dips, Cable Flyes, Conventional Deadlift, Barbell Row, Pull-ups, Lat Pulldown, Dumbbell Row, Barbell Squat, Leg Press, Lunges, Romanian Deadlift, Leg Curl, Leg Extension, Overhead Press, Seated Dumbbell Press, Lateral Raises, Face Pulls, Barbell Curl, Dumbbell Curl, Hammer Curls, Lying Triceps Extension, Cable Triceps Pushdown, Overhead Triceps Extension, Plank, Abdominal Crunch, Hyperextension, Treadmill, Rowing Machine, Stationary Bike, Triceps Dips (Dip Station), Calf Raises (Bodyweight), EZ Bar Skull Crushers
+
+... (-65 more exercises)

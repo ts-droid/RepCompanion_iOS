@@ -1,0 +1,23 @@
+Barbell
+Dumbbells
+EZ Bar
+Kettlebell
+Leg Press Machine
+Lat Pulldown Machine
+Cable Machine
+Smith Machine
+Leg Curl Machine
+Leg Extension Machine
+Rowing Machine
+Flat Bench
+Adjustable Bench
+Power Rack
+Hyperextension Bench
+Pull-up Bar
+Dip Station
+Weight Belt
+Resistance Bands
+Treadmill
+Stationary Bike
+Elliptical
+Stair Climber
