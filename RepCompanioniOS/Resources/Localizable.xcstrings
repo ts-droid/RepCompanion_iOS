@@ -7,6 +7,9 @@
     "—" : {
 
     },
+    "&" : {
+
+    },
     "%.1f kg" : {
 
     },
@@ -205,6 +208,9 @@
     "Anteckningar (valfritt)" : {
 
     },
+    "Användarvillkor – RepCompanion" : {
+
+    },
     "Apple Health" : {
 
     },
@@ -232,6 +238,9 @@
           }
         }
       }
+    },
+    "Avböj" : {
+
     },
     "Avbryt" : {
 
@@ -459,6 +468,9 @@
         }
       }
     },
+    "Companion" : {
+
+    },
     "Connect health data" : {
       "localizations" : {
         "sv" : {
@@ -547,7 +559,7 @@
     "dev@test.com" : {
 
     },
-    "Din AI-drivna träningspartner" : {
+    "Din träningskompanjon" : {
 
     },
     "din@epost.se" : {
@@ -567,6 +579,9 @@
       }
     },
     "Ditt namn" : {
+
+    },
+    "Du ansvarar själv för att:" : {
 
     },
     "Du har genomfört hela ditt träningspass!" : {
@@ -795,6 +810,12 @@
     "Genererar ditt nya program..." : {
 
     },
+    "Genom att fortsätta går du med på" : {
+
+    },
+    "Genom att skapa ett konto eller använda RepCompanion godkänner du dessa villkor." : {
+
+    },
     "Genomför ditt första pass för att se historik här" : {
 
     },
@@ -829,6 +850,9 @@
 
     },
     "Här är en sammanfattning av det du hann med." : {
+
+    },
+    "Har du redan ett konto? Logga in" : {
 
     },
     "Health data imported" : {
@@ -1041,6 +1065,9 @@
     "Ja, uppdatera alla" : {
 
     },
+    "Jag godkänner våra Villkor & Sekretesspolicy för att ta emot skräddarsydda erbjudanden från våra samarbetspartners samt träningsrelaterad marknadsföring." : {
+
+    },
     "Justera Träning" : {
 
     },
@@ -1133,9 +1160,6 @@
     "Logga in" : {
 
     },
-    "Logga in med e-post" : {
-
-    },
     "Logga övningar för att se dina PBs här" : {
 
     },
@@ -1185,6 +1209,9 @@
 
     },
     "Max: %@ kg" : {
+
+    },
+    "Maximera din träning!" : {
 
     },
     "Mellan övningar" : {
@@ -1268,6 +1295,9 @@
 
     },
     "Nytt gym" : {
+
+    },
+    "Oavsett om du vill gå ner i vikt, rehabilitera en skada eller träna för ishockey, hjälper vi dig med rätt fokus." : {
 
     },
     "Obese" : {
@@ -1549,7 +1579,22 @@
         }
       }
     },
-    "RepCompanion" : {
+    "Reklam och affiliate-länkar:" : {
+
+    },
+    "Rep" : {
+
+    },
+    "RepCompanion är en tränings- och planeringsapp som tillhandahåller generell information, vägledning och förslag kring träning och fysisk aktivitet. Innehållet i appen är avsedd för informations- och inspirationssyfte och utgör inte medicinsk rådgivning eller professionell behandling." : {
+
+    },
+    "RepCompanion är ett enkelt och smart verktyg som hjälper dig att sätta ihop ett träningsupplägg som passar just dina mål och din vardag." : {
+
+    },
+    "RepCompanion innehåller annonser och samarbeten med tredjepartsföretag. Detta innebär att appen kan visa reklam, erbjudanden eller länkar till produkter och tjänster." : {
+
+    },
+    "RepCompanion värnar om din integritet och hanterar personuppgifter i enlighet med gällande dataskyddslagstiftning, inklusive GDPR." : {
 
     },
     "Repetitioner" : {
@@ -1575,6 +1620,12 @@
       }
     },
     "Se dina hälsomätvärden över tid" : {
+
+    },
+    "Sekretess & Dataskydd" : {
+
+    },
+    "Sekretesspolicy" : {
 
     },
     "Sekundära" : {
@@ -2043,6 +2094,9 @@
     "Välj utrustning" : {
 
     },
+    "Välkommen!" : {
+
+    },
     "Value" : {
 
     },
@@ -2076,6 +2130,9 @@
     "Vila innan nästa set" : {
 
     },
+    "Vilken information vi samlar in:" : {
+
+    },
     "Vill du avvisa detta objekt? Du kan ange en anledning." : {
 
     },
@@ -2089,6 +2146,12 @@
 
     },
     "Vill du tillämpa dessa värden på alla återstående set för denna övning i detta pass?" : {
+
+    },
+    "Villkor" : {
+
+    },
+    "Villkor & Sekretess" : {
 
     },
     "Vilopuls" : {

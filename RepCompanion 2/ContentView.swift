@@ -32,6 +32,8 @@ struct ContentView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
+    @AppStorage("welcomeAccepted") private var welcomeAccepted = false
+    
     private var currentProfile: UserProfile? {
         // Filter profiles by current authenticated user
         guard let userId = authService.currentUserId else { return nil }
@@ -39,43 +41,46 @@ struct ContentView: View {
     }
     
     private var shouldShowOnboarding: Bool {
-        // TEMPORARY: Always show onboarding if no profile exists or onboarding not completed
         // Check if any profile exists and is completed
-        if let profile = userProfiles.first {
+        if let profile = currentProfile {
             return !profile.onboardingCompleted
         }
-        // No profile exists, show onboarding
+        // No profile exists for this user, show onboarding
         return true
     }
     
     var body: some View {
-        // TEMPORARY: Skip login and go directly to onboarding
-        // TODO: Re-enable authentication after onboarding is working
-        if shouldShowOnboarding {
-            OnboardingView()
-        } else {
-            TabView {
-                HomeView()
-                    .tabItem {
-                        Label("Hem", systemImage: "house.fill")
-                    }
-                
-                WorkoutListView()
-                    .tabItem {
-                        Label("Program", systemImage: "dumbbell.fill")
-                    }
-                
-                StatisticsView()
-                    .tabItem {
-                        Label("Statistik", systemImage: "chart.bar.xaxis")
-                    }
-                
-                ProfileView()
-                    .tabItem {
-                        Label("Profil", systemImage: "person.fill")
-                    }
+        Group {
+            if !authService.isAuthenticated {
+                LoginView()
+            } else if !welcomeAccepted {
+                WelcomeView()
+            } else if shouldShowOnboarding {
+                OnboardingView()
+            } else {
+                TabView {
+                    HomeView()
+                        .tabItem {
+                            Label("Hem", systemImage: "house.fill")
+                        }
+                    
+                    WorkoutListView()
+                        .tabItem {
+                            Label("Program", systemImage: "dumbbell.fill")
+                        }
+                    
+                    StatisticsView()
+                        .tabItem {
+                            Label("Statistik", systemImage: "chart.bar.xaxis")
+                        }
+                    
+                    ProfileView()
+                        .tabItem {
+                            Label("Profil", systemImage: "person.fill")
+                        }
+                }
+                .preferredColorScheme(preferredColorScheme)
             }
-            .preferredColorScheme(preferredColorScheme)
         }
     }
     

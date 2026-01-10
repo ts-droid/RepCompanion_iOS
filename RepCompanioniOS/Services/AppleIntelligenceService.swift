@@ -16,52 +16,45 @@ class AppleIntelligenceService {
     /// Check if Apple Intelligence is available on this device
     func isAvailable() -> Bool {
         #if os(iOS)
-        if #available(iOS 18.0, *) {
-            // Check iOS version
-            let systemVersion = UIDevice.current.systemVersion
-            guard let version = Double(systemVersion), version >= 18.0 else {
-                return false
+        // Check device model for Apple Intelligence compatibility
+        // Apple Intelligence requires A17 Pro or newer (iPhone 15 Pro series and later)
+        // or M1+ Macs
+        let deviceModel = modelIdentifier
+        _ = deviceModel // Silence unused warning
+        
+        // Compatible devices:
+        // iPhone 15 Pro (iPhone16,1), iPhone 15 Pro Max (iPhone16,2)
+        // iPhone 16 series and newer
+        // iPad with M1 or newer
+        // All Macs with M1 or newer
+        let compatibleModels = [
+            "iPhone16,1", // iPhone 15 Pro
+            "iPhone16,2", // iPhone 15 Pro Max
+            "iPhone17,",  // iPhone 16 series (starts with)
+            "iPhone18,",  // iPhone 17 series (starts with)
+            "iPad13,",    // iPad Pro M1 (starts with)
+            "iPad14,",    // iPad Air M1 (starts with)
+            "Mac",        // All Macs (M1+)
+        ]
+        
+        // Check if device model matches compatible models
+        let modelId = modelIdentifier
+        for compatibleModel in compatibleModels {
+            if modelId.hasPrefix(compatibleModel) {
+                // Additional check: Verify Apple Intelligence is enabled
+                // This would check system settings in production
+                print("[Apple Intelligence] ✅ Device \(modelId) is compatible")
+                return true
             }
-            
-            // Check device model for Apple Intelligence compatibility
-            // Apple Intelligence requires A17 Pro or newer (iPhone 15 Pro series and later)
-            // or M1+ Macs
-            let deviceModel = modelIdentifier
-            
-            // Compatible devices:
-            // iPhone 15 Pro (iPhone16,1), iPhone 15 Pro Max (iPhone16,2)
-            // iPhone 16 series and newer
-            // iPad with M1 or newer
-            // All Macs with M1 or newer
-            let compatibleModels = [
-                "iPhone16,1", // iPhone 15 Pro
-                "iPhone16,2", // iPhone 15 Pro Max
-                "iPhone17,",  // iPhone 16 series (starts with)
-                "iPhone18,",  // iPhone 17 series (starts with)
-                "iPad13,",    // iPad Pro M1 (starts with)
-                "iPad14,",    // iPad Air M1 (starts with)
-                "Mac",        // All Macs (M1+)
-            ]
-            
-            // Check if device model matches compatible models
-            let modelId = modelIdentifier
-            for compatibleModel in compatibleModels {
-                if modelId.hasPrefix(compatibleModel) {
-                    // Additional check: Verify Apple Intelligence is enabled
-                    // This would check system settings in production
-                    print("[Apple Intelligence] ✅ Device \(modelId) is compatible")
-                    return true
-                }
-            }
-            
-            print("[Apple Intelligence] ⚠️ Device \(modelId) is not compatible")
-            
-            // For development/testing, allow on simulator if iOS 18+
-            #if targetEnvironment(simulator)
-            print("[Apple Intelligence] ✅ Simulator detected, allowing for testing")
-            return true
-            #endif
         }
+        
+        print("[Apple Intelligence] ⚠️ Device \(modelId) is not compatible")
+        
+        // For development/testing, allow on simulator if iOS 18+
+        #if targetEnvironment(simulator)
+        print("[Apple Intelligence] ✅ Simulator detected, allowing for testing")
+        return true
+        #endif
         #endif
         return false
     }
@@ -96,6 +89,8 @@ class AppleIntelligenceService {
         // Build prompt for Apple Intelligence
         let systemPrompt = buildSystemPrompt()
         let userPrompt = buildUserPrompt(for: input)
+        _ = systemPrompt // Silence unused warning
+        _ = userPrompt   // Silence unused warning
         
         // Use Apple Intelligence Foundation Models API
         // Note: This is a placeholder - actual implementation would use

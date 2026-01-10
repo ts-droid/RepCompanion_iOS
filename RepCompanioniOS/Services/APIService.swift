@@ -9,16 +9,20 @@ class APIService {
     // IMPORTANT: Use 127.0.0.1 instead of localhost to force IPv4
     // iOS Simulator sometimes resolves localhost to IPv6 (::1) which causes connection issues
     // For physical device, use your Mac's IP address (Local) or Production URL (Cloud)
-    private let useCloud = false // SET TO TRUE ONCE DEPLOYED
-    private let productionURL = "https://your-app-name.railway.app"
+    private let useCloud = true // SET TO TRUE ONCE DEPLOYED
+    private let productionURL = "https://repcompanion-production.up.railway.app" // FINAL RAILWAY URL
     
     #if targetEnvironment(simulator)
     // Simulator: Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 issues
-    private let baseURL = "http://127.0.0.1:5002"
+    private lazy var baseURL: String = {
+        return "http://127.0.0.1:5002"
+    }()
     #else
     // Physical device needs Mac's IP address or Cloud URL
     // Current Mac IP: 192.168.68.82 (auto-detected)
-    private let baseURL = useCloud ? productionURL : "http://192.168.68.82:5002"
+    private lazy var baseURL: String = {
+        return useCloud ? productionURL : "http://192.168.68.82:5002"
+    }()
     #endif
     
     // Log baseURL on initialization to verify configuration

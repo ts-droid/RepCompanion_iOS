@@ -160,7 +160,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					B99569AD2ED8D96500E88D56 = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -294,6 +294,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -353,6 +354,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -366,16 +368,16 @@
 				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 8MQ36FR54B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = RepCompanion;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "RepCompanion behöver tillgång till lokalt nätverk för att kommunicera med din träningsserver för synkning av program och data.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -401,21 +403,21 @@
 		B99569BD2ED8D96600E88D56 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 8MQ36FR54B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = RepCompanion;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "RepCompanion behöver tillgång till lokalt nätverk för att kommunicera med din träningsserver för synkning av program och data.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,9 +444,9 @@
 		B99569CE2ED8D99800E88D56 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Watch2 Watch App/Watch2 Watch App.entitlements";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Watch2 Watch App/Watch2 Watch App.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -481,9 +483,9 @@
 		B99569CF2ED8D99800E88D56 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Watch2 Watch App/Watch2 Watch App.entitlements";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Watch2 Watch App/Watch2 Watch App.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

@@ -175,7 +175,7 @@ struct ScrollingText: View {
                             textWidth = textGeometry.size.width
                             containerWidth = geometry.size.width
                         }
-                        .onChange(of: text) { _ in
+                        .onChange(of: text) { _, _ in
                             textWidth = textGeometry.size.width
                         }
                     })
@@ -188,7 +188,7 @@ struct ScrollingText: View {
                 containerWidth = geometry.size.width
                 startAnimation()
             }
-            .onChange(of: text) { _ in
+            .onChange(of: text) { _, _ in
                 // Reset and restart animation if text changes
                 offset = 0
                 startAnimation()

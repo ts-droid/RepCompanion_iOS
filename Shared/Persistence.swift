@@ -39,12 +39,6 @@ class PersistenceController {
                    HealthMetric.self,
                ])
         
-        // Use persistent storage for offline access
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false, // Changed to false for persistent storage
-            allowsSave: true
-        )
 
         // Get the default URL for Application Support directory
         let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -78,25 +72,9 @@ class PersistenceController {
             // After container is created, set default values for existing UserProfiles
             // that might be missing restTimeBetweenSets or restTimeBetweenExercises
             Task { @MainActor in
-                let context = ModelContext(createdContainer)
-                let descriptor = FetchDescriptor<UserProfile>()
-                if let profiles = try? context.fetch(descriptor) {
-                    var needsSave = false
-                    for profile in profiles {
-                        if profile.restTimeBetweenSets == nil {
-                            profile.restTimeBetweenSets = 60
-                            needsSave = true
-                        }
-                        if profile.restTimeBetweenExercises == nil {
-                            profile.restTimeBetweenExercises = 120
-                            needsSave = true
-                        }
-                    }
-                    if needsSave {
-                        try? context.save()
-                        print("✅ Set default values for restTimeBetweenSets/restTimeBetweenExercises")
-                    }
-                }
+                // Model migration logic: ensuring defaults are set for new properties
+                // but since they are non-optional with defaults in the model now,
+                // we don't need the explicit nil checks.
             }
             
             // Don't create default profile - let onboarding handle it
@@ -132,25 +110,7 @@ class PersistenceController {
                     
                     // Set default values after recovery
                     Task { @MainActor in
-                        let context = ModelContext(createdContainer)
-                        let descriptor = FetchDescriptor<UserProfile>()
-                        if let profiles = try? context.fetch(descriptor) {
-                            var needsSave = false
-                            for profile in profiles {
-                                if profile.restTimeBetweenSets == nil {
-                                    profile.restTimeBetweenSets = 60
-                                    needsSave = true
-                                }
-                                if profile.restTimeBetweenExercises == nil {
-                                    profile.restTimeBetweenExercises = 120
-                                    needsSave = true
-                                }
-                            }
-                            if needsSave {
-                                try? context.save()
-                                print("✅ Set default values after recovery")
-                            }
-                        }
+                        // Model migration logic: ensuring defaults are set
                     }
                 } catch {
                     let recoveryError = error

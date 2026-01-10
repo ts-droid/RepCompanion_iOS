@@ -52,14 +52,14 @@ class OfflineSyncService: ObservableObject {
         let sessionDict: [String: Any] = [
             "id": session.id.uuidString,
             "userId": session.userId,
-            "templateId": session.templateId?.uuidString,
+            "templateId": session.templateId?.uuidString as Any,
             "sessionType": session.sessionType,
-            "sessionName": session.sessionName,
+            "sessionName": session.sessionName as Any,
             "status": session.status,
             "startedAt": ISO8601DateFormatter().string(from: session.startedAt),
-            "completedAt": session.completedAt.map { ISO8601DateFormatter().string(from: $0) },
-            "notes": session.notes,
-            "movergyScore": session.movergyScore
+            "completedAt": session.completedAt.map { ISO8601DateFormatter().string(from: $0) } as Any,
+            "notes": session.notes as Any,
+            "movergyScore": session.movergyScore as Any
         ]
         if let sessionData = try? JSONSerialization.data(withJSONObject: sessionDict) {
             queue.append(sessionData)
@@ -79,8 +79,8 @@ class OfflineSyncService: ObservableObject {
             "exerciseTitle": log.exerciseTitle,
             "exerciseOrderIndex": log.exerciseOrderIndex,
             "setNumber": log.setNumber,
-            "weight": log.weight,
-            "reps": log.reps,
+            "weight": log.weight as Any,
+            "reps": log.reps as Any,
             "completed": log.completed,
             "createdAt": ISO8601DateFormatter().string(from: log.createdAt)
         ]
@@ -208,7 +208,7 @@ class OfflineSyncService: ObservableObject {
                   let setNumber = logDict["setNumber"] as? Int,
                   let completed = logDict["completed"] as? Bool,
                   let createdAtString = logDict["createdAt"] as? String,
-                  let createdAt = ISO8601DateFormatter().date(from: createdAtString) else {
+                  let _ = ISO8601DateFormatter().date(from: createdAtString) else {
                 continue
             }
             

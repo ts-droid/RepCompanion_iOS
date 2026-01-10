@@ -18,32 +18,48 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.appBackground(for: colorScheme).ignoresSafeArea()
+                BrandBackground()
                 
-                VStack(spacing: 32) {
+                VStack(spacing: 24) {
                     Spacer()
                     
-                    // Logo/App Name
-                    VStack(spacing: 16) {
-                        Image(systemName: "dumbbell.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.accentBlue)
+                    // Logo and Branding
+                    BrandLogo(size: 100)
+                    
+                    VStack(spacing: 8) {
+                        Text("Välkommen!")
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(hex: "1A237E"))
                         
-                        Text("RepCompanion")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        
-                        Text("Din AI-drivna träningspartner")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                        Text("Din träningskompanjon")
+                            .font(.headline)
+                            .foregroundColor(Color(hex: "546E7A"))
                     }
                     
                     Spacer()
                     
-                    // Login Options
+                    // Authentication Options
                     VStack(spacing: 16) {
-                        // Sign in with Apple
+                        // Google Button
+                        Button(action: { signInWithGoogle() }) {
+                            HStack {
+                                Image(systemName: "globe") // Fallback to system icon
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                Text("Fortsätt med Google")
+                            }
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.white)
+                            .foregroundColor(.black)
+                            .cornerRadius(28)
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        }
+                        .disabled(!GoogleSignInService.shared.isAvailable)
+                        .opacity(GoogleSignInService.shared.isAvailable ? 1.0 : 0.6)
+                        
+                        // Apple Button
                         SignInWithAppleButton(
                             onRequest: { request in
                                 request.requestedScopes = [.fullName, .email]
@@ -52,48 +68,61 @@ struct LoginView: View {
                                 handleAppleSignIn(result: result)
                             }
                         )
-                        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                        .frame(height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .signInWithAppleButtonStyle(.white)
+                        .frame(height: 56)
+                        .frame(maxWidth: 375) // Avoid layout constraint conflicts (max width is 375 for this button)
+                        .clipShape(Capsule())
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                         
-                        // Sign in with Google
-                        Button(action: { signInWithGoogle() }) {
+                        // Email Sign Up (Primary Action)
+                        Button(action: { showEmailSignUp = true }) {
                             HStack {
-                                Image(systemName: "globe")
-                                Text("Fortsätt med Google")
+                                Image(systemName: "envelope.fill")
+                                Text("Skapa konto med e-post")
                             }
                             .font(.headline)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.cardBackground(for: colorScheme))
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.textSecondary(for: colorScheme).opacity(0.2), lineWidth: 1)
+                            .frame(height: 56)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color(hex: "66BB6A"), Color(hex: "43A047")]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
+                            .foregroundColor(.white)
+                            .cornerRadius(28)
+                            .shadow(color: Color(hex: "43A047").opacity(0.3), radius: 10, x: 0, y: 5)
                         }
-                        .disabled(!GoogleSignInService.shared.isAvailable)
-                        .opacity(GoogleSignInService.shared.isAvailable ? 1.0 : 0.6)
                         
-                        // Email sign in/up
-                        VStack(spacing: 12) {
-                            Button(action: { showEmailSignIn = true }) {
-                                Text("Logga in med e-post")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color.accentBlue)
-                            }
-                            
-                            Button(action: { showEmailSignUp = true }) {
-                                Text("Skapa konto med e-post")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color.textSecondary(for: colorScheme))
-                            }
+                        // Already have an account?
+                        Button(action: { showEmailSignIn = true }) {
+                            Text("Har du redan ett konto? Logga in")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(Color(hex: "1A237E"))
                         }
+                        .padding(.top, 8)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 32)
                     
                     Spacer()
+                    
+                    // Terms Footer
+                    VStack(spacing: 4) {
+                        Text("Genom att fortsätta går du med på")
+                            .font(.caption)
+                            .foregroundColor(Color(hex: "546E7A"))
+                        
+                        HStack(spacing: 4) {
+                            Button("Villkor") { /* Show Terms */ }
+                            Text("&")
+                            Button("Sekretesspolicy") { /* Show Privacy */ }
+                        }
+                        .font(.caption.bold())
+                        .foregroundColor(Color(hex: "00ACC1"))
+                    }
+                    .padding(.bottom, 20)
                 }
             }
             .navigationBarHidden(true)
@@ -161,8 +190,8 @@ struct LoginView: View {
                     errorMessage = "Inloggning kunde inte hanteras. Försök igen."
                 case .unknown:
                     errorMessage = "Ett okänt fel uppstod. Försök igen."
-                @unknown default:
-                    errorMessage = "Ett oväntat fel uppstod med Apple Sign-In."
+                default:
+                    errorMessage = "Ett oväntat fel uppstod med Apple Sign-In (\(authError.code.rawValue))."
                 }
             } else {
                 errorMessage = "Kunde inte logga in med Apple: \(error.localizedDescription)"

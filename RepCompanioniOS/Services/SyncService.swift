@@ -98,7 +98,7 @@ class SyncService: ObservableObject {
             print("[SYNC] ❌ Failed to connect to server - is it running on port 5001?")
             print("[SYNC] ❌ URL error details:")
             print("[SYNC]    - Code: \(error.code)")
-            if let url = error.failureURLString {
+            if let url = error.failingURL {
                 print("[SYNC]    - Failed URL: \(url)")
             }
             throw error

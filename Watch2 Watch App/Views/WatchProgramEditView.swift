@@ -58,7 +58,7 @@ struct ExerciseEditRow: View {
                 // Reps
                 HStack(spacing: 3) {
                     Image(systemName: "repeat")
-                    Text("\(exercise.targetReps ?? "8") reps")
+                    Text("\(exercise.targetReps) reps")
                 }
                 
                 // Sets
@@ -96,7 +96,7 @@ struct WatchExerciseEditView: View {
     init(exercise: ProgramTemplateExercise) {
         self.exercise = exercise
         _weight = State(initialValue: exercise.targetWeight ?? 0)
-        _reps = State(initialValue: Int(exercise.targetReps ?? "8") ?? 8)
+        _reps = State(initialValue: Int(exercise.targetReps) ?? 8)
         _sets = State(initialValue: exercise.targetSets)
     }
     

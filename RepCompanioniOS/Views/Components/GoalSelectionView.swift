@@ -115,7 +115,7 @@ struct GoalSelectionView: View {
         }
         
         // Get current values of other goals
-        var otherGoals: [(GoalType, Int)] = [
+        let otherGoals: [(GoalType, Int)] = [
             (.strength, goalStrength),
             (.volume, goalVolume),
             (.endurance, goalEndurance),

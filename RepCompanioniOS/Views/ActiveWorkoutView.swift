@@ -409,8 +409,6 @@ struct ActiveWorkoutView: View {
                     .foregroundColor(Color.textSecondary(for: colorScheme))
                 
                 let neededEquipment = Set(exercises.flatMap { $0.requiredEquipment }).filter { $0.lowercased() != "unknown" }
-                let activeGymEquipmentIds = gyms.first(where: { $0.isSelected })?.equipmentIds ?? []
-                let availableEquipment = equipmentCatalog.filter { activeGymEquipmentIds.contains($0.id) }
                 
                 ExerciseFlowLayout(spacing: 8) {
                     ForEach(Array(neededEquipment), id: \.self) { eq in

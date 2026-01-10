@@ -164,10 +164,13 @@ class CameraManager: NSObject, ObservableObject {
             startSession()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                Task { @MainActor in
-                    self?.permissionGranted = granted
-                    if granted {
-                        self?.startSession()
+                Task { [weak self] in
+                    guard let self = self else { return }
+                    await MainActor.run {
+                        self.permissionGranted = granted
+                        if granted {
+                            self.startSession()
+                        }
                     }
                 }
             }
@@ -210,16 +213,16 @@ class CameraManager: NSObject, ObservableObject {
     
     func startSession() {
         if !session.isRunning {
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.session.startRunning()
+             Task.detached(priority: .userInitiated) { [weak session] in
+                session?.startRunning()
             }
         }
     }
     
     func stopSession() {
         if session.isRunning {
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.session.stopRunning()
+             Task.detached(priority: .userInitiated) { [weak session] in
+                session?.stopRunning()
             }
         }
     }

@@ -104,9 +104,9 @@ struct ActiveWorkoutView: View {
                     
                     // Debug Info
                     VStack(spacing: 4) {
-                         Text("Sessions: \(allSessions.count)")
-                         Text("WCSession: \(WatchPersistenceManager.shared.sessionActivationState.rawValue)")
-                         Text("Reachable: \(WatchPersistenceManager.shared.isReachable)")
+                         Text("Sessions: \(allSessions.count.description)")
+                         Text("WCSession: \(WatchPersistenceManager.shared.sessionActivationState.rawValue.description)")
+                         Text("Reachable: \(WatchPersistenceManager.shared.isReachable.description)")
                     }
                     .font(.system(size: 10))
                     .foregroundColor(.gray)
@@ -146,14 +146,14 @@ struct ActiveWorkoutView: View {
         } message: {
             Text("Tillämpa dessa värden på alla återstående set för denna övning?")
         }
-        .onChange(of: autoCountEnabled) { enabled in
+        .onChange(of: autoCountEnabled) { _, enabled in
             if enabled && !isResting {
                 motionManager.startDetecting()
             } else {
                 motionManager.stopDetecting()
             }
         }
-        .onChange(of: motionManager.repCount) { newCount in
+        .onChange(of: motionManager.repCount) { _, newCount in
             if autoCountEnabled {
                 reps = newCount
             }
@@ -166,7 +166,7 @@ struct ActiveWorkoutView: View {
             }
         }
         // Reset dialog and motion manager when resting
-        .onChange(of: isResting) { resting in
+        .onChange(of: isResting) { _, resting in
             if resting {
                 motionManager.stopDetecting()
             } else if autoCountEnabled {
@@ -176,7 +176,7 @@ struct ActiveWorkoutView: View {
                 originalReps = 0
             }
         }
-        .onChange(of: allSessions) { _ in
+        .onChange(of: allSessions) { _, _ in
             if activeSession != nil {
                 if !hadActiveSession {
                     hadActiveSession = true
@@ -208,7 +208,7 @@ struct ActiveWorkoutView: View {
             predicate: #Predicate { $0.workoutSessionId == sessionId }
         )
         
-        guard let logs = try? modelContext.fetch(descriptor) else { return }
+        let _ = try? modelContext.fetch(descriptor)
         
         // This logic is a simplification. Ideally we find the first exercise/set that hasn't been logged.
         // For now, let's just use the current state or derive it if we want to support mid-workout resuming.

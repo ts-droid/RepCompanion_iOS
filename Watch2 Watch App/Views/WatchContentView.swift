@@ -68,7 +68,7 @@ struct WatchContentView: View {
             ScrollView {
                 VStack(spacing: 8) {
                     // Quick Action for starting a workout
-                    if let activeSession = activeSessions.first {
+                    if !activeSessions.isEmpty {
                         // Resume Active Session
                         Button(action: {
                             if healthKit.isAuthorized {

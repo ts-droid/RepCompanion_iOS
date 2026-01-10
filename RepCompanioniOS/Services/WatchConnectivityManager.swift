@@ -101,7 +101,7 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                  // No-reply version - fallback, sends via transferUserInfo
                  print("[iOS] Received fetch_program request from Watch (no reply expected)")
                  Task {
-                     await handleSyncRequest()
+                     handleSyncRequest()
                  }
              }
         }
@@ -160,9 +160,8 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
         if let type = userInfo["type"] as? String {
              if type == "fetch_program" {
-                 print("[iOS] Received fetch_program request via UserInfo")
                  Task {
-                     await handleSyncRequest()
+                     handleSyncRequest()
                  }
              }
         }
@@ -179,7 +178,7 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         }
         
         Task {
-            await handleSyncRequest()
+            handleSyncRequest()
         }
     }
     

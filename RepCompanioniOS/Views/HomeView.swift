@@ -324,23 +324,16 @@ struct HomeView: View {
         isLoadingHealthData = true
         
         Task {
-            do {
-                // Calculate activity from workouts and HealthKit
-                let activity = await calculateActivityFromData()
-                
-                // Calculate recovery from rest time and HealthKit
-                let recovery = await calculateRecoveryFromData()
-                
-                await MainActor.run {
-                    activityPercent = activity
-                    recoveryPercent = recovery
-                    isLoadingHealthData = false
-                }
-            } catch {
-                await MainActor.run {
-                    isLoadingHealthData = false
-                    print("Error calculating activity/recovery: \(error)")
-                }
+            // Calculate activity from workouts and HealthKit
+            let activity = await calculateActivityFromData()
+            
+            // Calculate recovery from rest time and HealthKit
+            let recovery = await calculateRecoveryFromData()
+            
+            await MainActor.run {
+                activityPercent = activity
+                recoveryPercent = recovery
+                isLoadingHealthData = false
             }
         }
     }

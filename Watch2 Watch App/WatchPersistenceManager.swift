@@ -364,13 +364,12 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         var remainingQueue: [[String: Any]] = []
         
         for item in queue {
-            guard let sessionIdString = item["sessionId"] as? String,
-                  // ... checks ...
+            guard let _ = item["sessionId"] as? String,
                   let exerciseName = item["exerciseName"] as? String,
-                  let exerciseOrderIndex = item["exerciseOrderIndex"] as? Int,
-                  let setNumber = item["setNumber"] as? Int,
-                  let reps = item["reps"] as? Int,
-                  let weight = item["weight"] as? Double else {
+                  let _ = item["exerciseOrderIndex"] as? Int,
+                  let _ = item["setNumber"] as? Int,
+                  let _ = item["reps"] as? Int,
+                  let _ = item["weight"] as? Double else {
                 continue
             }
             

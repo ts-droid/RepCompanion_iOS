@@ -1737,7 +1737,7 @@ struct OnboardingView: View {
         }
         
         // Get current values of other goals
-        var otherGoals: [(GoalType, Int)] = [
+        let otherGoals: [(GoalType, Int)] = [
             (.strength, goalStrength),
             (.volume, goalVolume),
             (.endurance, goalEndurance),
@@ -2368,7 +2368,7 @@ struct OnboardingView: View {
                         print("[Onboarding] ❌ Error checking program status/syncing templates: \(error.localizedDescription)")
                         print("[Onboarding] ❌ Error type: \(type(of: error))")
                         if let apiError = error as? APIError {
-                            print("[Onboarding] ❌ API Error: \(apiError.localizedDescription ?? "Unknown")")
+                            print("[Onboarding] ❌ API Error: \(apiError.localizedDescription)")
                         }
                         pollAttempts += 1
                         
@@ -2651,7 +2651,6 @@ struct OnboardingView: View {
     private func autoLoginForAlphaTesting() async {
         print("[Onboarding] 🔐 Auto-login for alpha testing...")
         do {
-            let userId = authService.currentUserId ?? "dev-user-123"
             try await authService.signInWithEmail(
                 email: "dev@recompute.it",
                 password: "dev123",
