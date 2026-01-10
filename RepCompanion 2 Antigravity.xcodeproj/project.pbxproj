@@ -375,6 +375,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "RepCompanion behöver tillgång till lokalt nätverk för att kommunicera med din träningsserver för synkning av program och data.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -414,6 +415,7 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "RepCompanion behöver tillgång till lokalt nätverk för att kommunicera med din träningsserver för synkning av program och data.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
