@@ -6,14 +6,58 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B99569CC2ED8D99800E88D56 /* Watch2 Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B99569CA2ED8D99800E88D56 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B99569A62ED8D96500E88D56 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B99569C12ED8D99600E88D56;
+			remoteInfo = "Watch2 Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B99569D02ED8D99800E88D56 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				B99569CC2ED8D99800E88D56 /* Watch2 Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		B99569AE2ED8D96500E88D56 /* RepCompanion 2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RepCompanion 2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch2 Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B99569B02ED8D96500E88D56 /* RepCompanion 2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "RepCompanion 2";
+			sourceTree = "<group>";
+		};
+		B99569C32ED8D99600E88D56 /* Watch2 Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Watch2 Watch App";
+			sourceTree = "<group>";
+		};
+		B99569E92ED8E9CC00E88D56 /* RepCompanioniOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RepCompanioniOS;
+			sourceTree = "<group>";
+		};
+		B99569FC2ED8ECC700E88D56 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,13 +70,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B99569BF2ED8D99600E88D56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		B99569A52ED8D96500E88D56 = {
 			isa = PBXGroup;
 			children = (
+				B99569FC2ED8ECC700E88D56 /* Shared */,
+				B99569E92ED8E9CC00E88D56 /* RepCompanioniOS */,
 				B99569B02ED8D96500E88D56 /* RepCompanion 2 */,
+				B99569C32ED8D99600E88D56 /* Watch2 Watch App */,
 				B99569AF2ED8D96500E88D56 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				B99569AE2ED8D96500E88D56 /* RepCompanion 2.app */,
+				B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,19 +110,46 @@
 				B99569AA2ED8D96500E88D56 /* Sources */,
 				B99569AB2ED8D96500E88D56 /* Frameworks */,
 				B99569AC2ED8D96500E88D56 /* Resources */,
+				B99569D02ED8D99800E88D56 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B99569CB2ED8D99800E88D56 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B99569B02ED8D96500E88D56 /* RepCompanion 2 */,
+				B99569E92ED8E9CC00E88D56 /* RepCompanioniOS */,
+				B99569FC2ED8ECC700E88D56 /* Shared */,
 			);
 			name = "RepCompanion 2";
 			packageProductDependencies = (
 			);
 			productName = "RepCompanion 2";
 			productReference = B99569AE2ED8D96500E88D56 /* RepCompanion 2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B99569C12ED8D99600E88D56 /* Watch2 Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B99569CD2ED8D99800E88D56 /* Build configuration list for PBXNativeTarget "Watch2 Watch App" */;
+			buildPhases = (
+				B99569BE2ED8D99600E88D56 /* Sources */,
+				B99569BF2ED8D99600E88D56 /* Frameworks */,
+				B99569C02ED8D99600E88D56 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B99569C32ED8D99600E88D56 /* Watch2 Watch App */,
+				B99569FC2ED8ECC700E88D56 /* Shared */,
+			);
+			name = "Watch2 Watch App";
+			packageProductDependencies = (
+			);
+			productName = "Watch2 Watch App";
+			productReference = B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -81,6 +163,9 @@
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					B99569AD2ED8D96500E88D56 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+					B99569C12ED8D99600E88D56 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
 				};
@@ -100,12 +185,20 @@
 			projectRoot = "";
 			targets = (
 				B99569AD2ED8D96500E88D56 /* RepCompanion 2 */,
+				B99569C12ED8D99600E88D56 /* Watch2 Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B99569AC2ED8D96500E88D56 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B99569C02ED8D99600E88D56 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +215,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B99569BE2ED8D99600E88D56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B99569CB2ED8D99800E88D56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B99569C12ED8D99600E88D56 /* Watch2 Watch App */;
+			targetProxy = B99569CA2ED8D99800E88D56 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B99569B92ED8D96600E88D56 /* Debug */ = {
@@ -249,10 +357,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +395,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "RepCompanion behöver skriva träningsdata till Apple Health för att spara dina träningspass, kaloriförbrukning och hjärtfrekvens så att all din hälsodata finns på ett ställe.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -306,6 +419,70 @@
 			};
 			name = Release;
 		};
+		B99569CE2ED8D99800E88D56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Watch2;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "RecomputeIT.RepCompanion-2";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "RecomputeIT.RepCompanion-2.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Debug;
+		};
+		B99569CF2ED8D99800E88D56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Watch2;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "RecomputeIT.RepCompanion-2";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "RecomputeIT.RepCompanion-2.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -323,6 +500,15 @@
 			buildConfigurations = (
 				B99569BC2ED8D96600E88D56 /* Debug */,
 				B99569BD2ED8D96600E88D56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B99569CD2ED8D99800E88D56 /* Build configuration list for PBXNativeTarget "Watch2 Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B99569CE2ED8D99800E88D56 /* Debug */,
+				B99569CF2ED8D99800E88D56 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
