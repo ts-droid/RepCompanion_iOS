@@ -1,0 +1,902 @@
+[
+  {
+    "id": "CH_Barbell_Bench_Press",
+    "name": "Barbell Bench Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Bench+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Incline_Barbell_Bench_Press",
+    "name": "Incline Barbell Bench Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Incline+Barbell+Bench+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Decline_Barbell_Bench_Press",
+    "name": "Decline Barbell Bench Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Decline+Barbell+Bench+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Flat_Dumbbell_Press",
+    "name": "Flat Dumbbell Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Flat+Dumbbell+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Incline_Dumbbell_Press",
+    "name": "Incline Dumbbell Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Incline+Dumbbell+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Decline_Dumbbell_Press",
+    "name": "Decline Dumbbell Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Decline+Dumbbell+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Push_Up",
+    "name": "Push-Up",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Push+Up+exercise+no+talk"
+  },
+  {
+    "id": "CH_Wide_Push_Up",
+    "name": "Wide Push-Up",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Wide+Push+Up+exercise+no+talk"
+  },
+  {
+    "id": "CH_Close_Grip_Push_Up",
+    "name": "Close-Grip Push-Up",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Close+Grip+Push+Up+exercise+no+talk"
+  },
+  {
+    "id": "CH_Standing_Cable_Fly",
+    "name": "Standing Cable Fly",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Standing+Cable+Fly+exercise+no+talk"
+  },
+  {
+    "id": "CH_Cable_Crossover_High_to_Low",
+    "name": "Cable Crossover (High to Low)",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Crossover+High+to+Low+exercise+no+talk"
+  },
+  {
+    "id": "CH_Cable_Crossover_Low_to_High",
+    "name": "Cable Crossover (Low to High)",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Crossover+Low+to+High+exercise+no+talk"
+  },
+  {
+    "id": "CH_Machine_Chest_Press",
+    "name": "Machine Chest Press",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Machine+Chest+Press+exercise+no+talk"
+  },
+  {
+    "id": "CH_Pec_Deck_Fly",
+    "name": "Pec Deck Fly",
+    "primary_muscle_group": "Chest",
+    "category": "Upper Body Push",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Pec+Deck+Fly+exercise+no+talk"
+  },
+  {
+    "id": "BA_Conventional_Deadlift",
+    "name": "Conventional Deadlift",
+    "primary_muscle_group": "Back",
+    "category": "Hip Hinge",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Conventional+Deadlift+exercise+no+talk"
+  },
+  {
+    "id": "BA_Romanian_Deadlift",
+    "name": "Romanian Deadlift",
+    "primary_muscle_group": "Hamstrings",
+    "category": "Hip Hinge",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Romanian+Deadlift+exercise+no+talk"
+  },
+  {
+    "id": "BA_Sumo_Deadlift",
+    "name": "Sumo Deadlift",
+    "primary_muscle_group": "Back",
+    "category": "Hip Hinge",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Sumo+Deadlift+exercise+no+talk"
+  },
+  {
+    "id": "BA_Barbell_Bent_Over_Row",
+    "name": "Barbell Bent-Over Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Bent+Over+Row+exercise+no+talk"
+  },
+  {
+    "id": "BA_Pendlay_Row",
+    "name": "Pendlay Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Pendlay+Row+exercise+no+talk"
+  },
+  {
+    "id": "BA_One_Arm_Dumbbell_Row",
+    "name": "One-Arm Dumbbell Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=One+Arm+Dumbbell+Row+exercise+no+talk"
+  },
+  {
+    "id": "BA_T_Bar_Row",
+    "name": "T-Bar Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Machine",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=T+Bar+Row+exercise+no+talk"
+  },
+  {
+    "id": "BA_Seated_Cable_Row_Wide",
+    "name": "Seated Cable Row (Wide Grip)",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Seated+Cable+Row+Wide+Grip+exercise+no+talk"
+  },
+  {
+    "id": "BA_Seated_Cable_Row_Close",
+    "name": "Seated Cable Row (Close Grip)",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Seated+Cable+Row+Close+Grip+exercise+no+talk"
+  },
+  {
+    "id": "BA_Lat_Pulldown_Wide",
+    "name": "Lat Pulldown (Wide Grip)",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Lat+Pulldown+Wide+Grip+exercise+no+talk"
+  },
+  {
+    "id": "BA_Lat_Pulldown_Close",
+    "name": "Lat Pulldown (Close/Neutral Grip)",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Lat+Pulldown+Close+Grip+Neutral+Grip+exercise+no+talk"
+  },
+  {
+    "id": "BA_Pull_Up",
+    "name": "Pull-Up",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Bodyweight",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Pull+Up+exercise+no+talk"
+  },
+  {
+    "id": "BA_Chin_Up",
+    "name": "Chin-Up",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Bodyweight",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Chin+Up+exercise+no+talk"
+  },
+  {
+    "id": "BA_Inverted_Row",
+    "name": "Inverted Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Inverted+Row+exercise+no+talk"
+  },
+  {
+    "id": "BA_Straight_Arm_Pulldown",
+    "name": "Straight-Arm Pulldown",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Straight+Arm+Pulldown+exercise+no+talk"
+  },
+  {
+    "id": "BA_Face_Pull",
+    "name": "Face Pull",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Pull",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Face+Pull+exercise+no+talk"
+  },
+  {
+    "id": "BA_Machine_Row",
+    "name": "Machine Row",
+    "primary_muscle_group": "Back",
+    "category": "Upper Body Pull",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Machine+Row+exercise+no+talk"
+  },
+  {
+    "id": "SH_Overhead_Press_Barbell",
+    "name": "Overhead Press",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Push",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Overhead+Press+Barbell+exercise+no+talk"
+  },
+  {
+    "id": "SH_Seated_Dumbbell_Shoulder_Press",
+    "name": "Seated Dumbbell Shoulder Press",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Push",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Seated+Dumbbell+Shoulder+Press+exercise+no+talk"
+  },
+  {
+    "id": "SH_Arnold_Press",
+    "name": "Arnold Press",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Push",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Arnold+Press+exercise+no+talk"
+  },
+  {
+    "id": "SH_Lateral_Raise",
+    "name": "Lateral Raise",
+    "primary_muscle_group": "Shoulders",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Lateral+Raise+exercise+no+talk"
+  },
+  {
+    "id": "SH_Front_Raise",
+    "name": "Front Raise",
+    "primary_muscle_group": "Shoulders",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Front+Raise+exercise+no+talk"
+  },
+  {
+    "id": "SH_Rear_Delt_Fly_Dumbbell",
+    "name": "Rear Delt Fly (Dumbbell)",
+    "primary_muscle_group": "Shoulders",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Rear+Delt+Fly+Dumbbell+exercise+no+talk"
+  },
+  {
+    "id": "SH_Rear_Delt_Cable_Fly",
+    "name": "Rear Delt Cable Fly",
+    "primary_muscle_group": "Shoulders",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Rear+Delt+Cable+Fly+exercise+no+talk"
+  },
+  {
+    "id": "SH_Upright_Row",
+    "name": "Upright Row",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Pull",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Upright+Row+exercise+no+talk"
+  },
+  {
+    "id": "SH_Machine_Shoulder_Press",
+    "name": "Machine Shoulder Press",
+    "primary_muscle_group": "Shoulders",
+    "category": "Upper Body Push",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Machine+Shoulder+Press+exercise+no+talk"
+  },
+  {
+    "id": "SH_Cable_Lateral_Raise",
+    "name": "Cable Lateral Raise",
+    "primary_muscle_group": "Shoulders",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Lateral+Raise+exercise+no+talk"
+  },
+  {
+    "id": "BI_Barbell_Curl",
+    "name": "Barbell Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_EZ_Bar_Curl",
+    "name": "EZ-Bar Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=EZ+Bar+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Dumbbell_Curl",
+    "name": "Dumbbell Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Dumbbell+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Hammer_Curl",
+    "name": "Hammer Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Hammer+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Incline_Dumbbell_Curl",
+    "name": "Incline Dumbbell Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Incline+Dumbbell+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Preacher_Curl",
+    "name": "Preacher Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Preacher+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Cable_Curl",
+    "name": "Cable Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Concentration_Curl",
+    "name": "Concentration Curl",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Concentration+Curl+exercise+no+talk"
+  },
+  {
+    "id": "BI_Cable_Hammer_Curl",
+    "name": "Cable Hammer Curl (Rope)",
+    "primary_muscle_group": "Biceps",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Hammer+Curl+Rope+exercise+no+talk"
+  },
+  {
+    "id": "TR_Close_Grip_Bench_Press",
+    "name": "Close-Grip Bench Press",
+    "primary_muscle_group": "Triceps",
+    "category": "Upper Body Push",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Close+Grip+Bench+Press+exercise+no+talk"
+  },
+  {
+    "id": "TR_Barbell_Skullcrusher",
+    "name": "Barbell Skullcrusher",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Skullcrusher+exercise+no+talk"
+  },
+  {
+    "id": "TR_Dumbbell_Skullcrusher",
+    "name": "Dumbbell Skullcrusher",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Dumbbell+Skullcrusher+exercise+no+talk"
+  },
+  {
+    "id": "TR_Overhead_Dumbbell_Extension",
+    "name": "Overhead Dumbbell Triceps Extension",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Overhead+Dumbbell+Triceps+Extension+exercise+no+talk"
+  },
+  {
+    "id": "TR_Cable_Triceps_Pushdown_Bar",
+    "name": "Cable Triceps Pushdown (Bar)",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Triceps+Pushdown+Bar+exercise+no+talk"
+  },
+  {
+    "id": "TR_Cable_Triceps_Pushdown_Rope",
+    "name": "Cable Triceps Pushdown (Rope)",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Triceps+Pushdown+Rope+exercise+no+talk"
+  },
+  {
+    "id": "TR_Cable_Overhead_Triceps_Extension",
+    "name": "Cable Overhead Triceps Extension (Rope)",
+    "primary_muscle_group": "Triceps",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Overhead+Triceps+Extension+Rope+exercise+no+talk"
+  },
+  {
+    "id": "TR_Bench_Dip",
+    "name": "Bench Dip",
+    "primary_muscle_group": "Triceps",
+    "category": "Upper Body Push",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Bench+Dip+exercise+no+talk"
+  },
+  {
+    "id": "TR_Parallel_Bar_Dip",
+    "name": "Parallel Bar Dip",
+    "primary_muscle_group": "Triceps",
+    "category": "Upper Body Push",
+    "equipment": "Bodyweight",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Parallel+Bar+Dip+exercise+no+talk"
+  },
+  {
+    "id": "FO_Barbell_Wrist_Curl",
+    "name": "Barbell Wrist Curl",
+    "primary_muscle_group": "Forearms",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Wrist+Curl+exercise+no+talk"
+  },
+  {
+    "id": "FO_Barbell_Reverse_Wrist_Curl",
+    "name": "Barbell Reverse Wrist Curl",
+    "primary_muscle_group": "Forearms",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Reverse+Wrist+Curl+exercise+no+talk"
+  },
+  {
+    "id": "FO_Farmers_Walk",
+    "name": "Farmer's Walk",
+    "primary_muscle_group": "Forearms",
+    "category": "Carry",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Farmer%27s+Walk+exercise+no+talk"
+  },
+  {
+    "id": "FO_Reverse_Curl",
+    "name": "Reverse Curl (EZ-Bar)",
+    "primary_muscle_group": "Forearms",
+    "category": "Isolation",
+    "equipment": "Barbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Reverse+Curl+EZ+Bar+exercise+no+talk"
+  },
+  {
+    "id": "LG_Back_Squat",
+    "name": "Back Squat",
+    "primary_muscle_group": "Quads",
+    "category": "Squat",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Back+Squat+exercise+no+talk"
+  },
+  {
+    "id": "LG_Front_Squat",
+    "name": "Front Squat",
+    "primary_muscle_group": "Quads",
+    "category": "Squat",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Front+Squat+exercise+no+talk"
+  },
+  {
+    "id": "LG_Hack_Squat",
+    "name": "Hack Squat (Machine)",
+    "primary_muscle_group": "Quads",
+    "category": "Squat",
+    "equipment": "Machine",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Hack+Squat+Machine+exercise+no+talk"
+  },
+  {
+    "id": "LG_Leg_Press",
+    "name": "Leg Press",
+    "primary_muscle_group": "Quads",
+    "category": "Squat",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Leg+Press+exercise+no+talk"
+  },
+  {
+    "id": "LG_Walking_Lunge",
+    "name": "Walking Lunge",
+    "primary_muscle_group": "Quads",
+    "category": "Lunge",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Walking+Lunge+exercise+no+talk"
+  },
+  {
+    "id": "LG_Stationary_Lunge",
+    "name": "Stationary Lunge",
+    "primary_muscle_group": "Quads",
+    "category": "Lunge",
+    "equipment": "Dumbbell",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Stationary+Lunge+exercise+no+talk"
+  },
+  {
+    "id": "LG_Bulgarian_Split_Squat",
+    "name": "Bulgarian Split Squat",
+    "primary_muscle_group": "Quads",
+    "category": "Lunge",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Bulgarian+Split+Squat+exercise+no+talk"
+  },
+  {
+    "id": "LG_Leg_Extension",
+    "name": "Leg Extension",
+    "primary_muscle_group": "Quads",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Leg+Extension+exercise+no+talk"
+  },
+  {
+    "id": "LG_Good_Morning",
+    "name": "Good Morning",
+    "primary_muscle_group": "Hamstrings",
+    "category": "Hip Hinge",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Good+Morning+exercise+no+talk"
+  },
+  {
+    "id": "LG_Lying_Leg_Curl",
+    "name": "Lying Leg Curl",
+    "primary_muscle_group": "Hamstrings",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Lying+Leg+Curl+exercise+no+talk"
+  },
+  {
+    "id": "LG_Seated_Leg_Curl",
+    "name": "Seated Leg Curl",
+    "primary_muscle_group": "Hamstrings",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Seated+Leg+Curl+exercise+no+talk"
+  },
+  {
+    "id": "LG_Barbell_Hip_Thrust",
+    "name": "Barbell Hip Thrust",
+    "primary_muscle_group": "Glutes",
+    "category": "Hip Hinge",
+    "equipment": "Barbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Barbell+Hip+Thrust+exercise+no+talk"
+  },
+  {
+    "id": "LG_Glute_Bridge",
+    "name": "Glute Bridge",
+    "primary_muscle_group": "Glutes",
+    "category": "Hip Hinge",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Glute+Bridge+exercise+no+talk"
+  },
+  {
+    "id": "LG_Cable_Pull_Through",
+    "name": "Cable Pull-Through",
+    "primary_muscle_group": "Glutes",
+    "category": "Hip Hinge",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Pull+Through+exercise+no+talk"
+  },
+  {
+    "id": "LG_Step_Up",
+    "name": "Step-Up",
+    "primary_muscle_group": "Glutes",
+    "category": "Lunge",
+    "equipment": "Dumbbell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Step+Up+exercise+no+talk"
+  },
+  {
+    "id": "LG_Cable_Glute_Kickback",
+    "name": "Cable Glute Kickback",
+    "primary_muscle_group": "Glutes",
+    "category": "Isolation",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Glute+Kickback+exercise+no+talk"
+  },
+  {
+    "id": "CV_Standing_Calf_Raise",
+    "name": "Standing Calf Raise",
+    "primary_muscle_group": "Calves",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Standing+Calf+Raise+exercise+no+talk"
+  },
+  {
+    "id": "CV_Seated_Calf_Raise",
+    "name": "Seated Calf Raise",
+    "primary_muscle_group": "Calves",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Seated+Calf+Raise+exercise+no+talk"
+  },
+  {
+    "id": "CV_Leg_Press_Calf_Press",
+    "name": "Calf Press on Leg Press",
+    "primary_muscle_group": "Calves",
+    "category": "Isolation",
+    "equipment": "Machine",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Calf+Press+on+Leg+Press+exercise+no+talk"
+  },
+  {
+    "id": "CO_Plank",
+    "name": "Plank",
+    "primary_muscle_group": "Core",
+    "category": "Anti-Extension",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Plank+core+exercise+no+talk"
+  },
+  {
+    "id": "CO_Side_Plank",
+    "name": "Side Plank",
+    "primary_muscle_group": "Core",
+    "category": "Anti-Lateral Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Side+Plank+core+exercise+no+talk"
+  },
+  {
+    "id": "CO_Crunch",
+    "name": "Crunch",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Crunch+ab+exercise+no+talk"
+  },
+  {
+    "id": "CO_Reverse_Crunch",
+    "name": "Reverse Crunch",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Reverse+Crunch+ab+exercise+no+talk"
+  },
+  {
+    "id": "CO_Hanging_Leg_Raise",
+    "name": "Hanging Leg Raise",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Hanging+Leg+Raise+exercise+no+talk"
+  },
+  {
+    "id": "CO_Lying_Leg_Raise",
+    "name": "Lying Leg Raise",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Lying+Leg+Raise+exercise+no+talk"
+  },
+  {
+    "id": "CO_Cable_Crunch",
+    "name": "Cable Crunch",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Cable",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Cable+Crunch+exercise+no+talk"
+  },
+  {
+    "id": "CO_Russian_Twist",
+    "name": "Russian Twist",
+    "primary_muscle_group": "Core",
+    "category": "Rotation",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Russian+Twist+exercise+no+talk"
+  },
+  {
+    "id": "CO_Bicycle_Crunch",
+    "name": "Bicycle Crunch",
+    "primary_muscle_group": "Core",
+    "category": "Flexion",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Bicycle+Crunch+exercise+no+talk"
+  },
+  {
+    "id": "CO_Dead_Bug",
+    "name": "Dead Bug",
+    "primary_muscle_group": "Core",
+    "category": "Stability",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Dead+Bug+core+exercise+no+talk"
+  },
+  {
+    "id": "CO_Bird_Dog",
+    "name": "Bird Dog",
+    "primary_muscle_group": "Core",
+    "category": "Stability",
+    "equipment": "Bodyweight",
+    "difficulty": "Beginner",
+    "video_url": "https://www.youtube.com/results?search_query=Bird+Dog+core+exercise+no+talk"
+  },
+  {
+    "id": "CO_Ab_Wheel_Rollout",
+    "name": "Ab Wheel Rollout",
+    "primary_muscle_group": "Core",
+    "category": "Anti-Extension",
+    "equipment": "Other",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Ab+Wheel+Rollout+exercise+no+talk"
+  },
+  {
+    "id": "FB_Power_Clean",
+    "name": "Power Clean",
+    "primary_muscle_group": "Full Body",
+    "category": "Olympic",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Power+Clean+weightlifting+exercise+no+talk"
+  },
+  {
+    "id": "FB_Clean_and_Jerk",
+    "name": "Clean and Jerk",
+    "primary_muscle_group": "Full Body",
+    "category": "Olympic",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Clean+and+Jerk+weightlifting+exercise+no+talk"
+  },
+  {
+    "id": "FB_Snatch",
+    "name": "Snatch",
+    "primary_muscle_group": "Full Body",
+    "category": "Olympic",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Snatch+weightlifting+exercise+no+talk"
+  },
+  {
+    "id": "FB_Kettlebell_Swing",
+    "name": "Kettlebell Swing",
+    "primary_muscle_group": "Full Body",
+    "category": "Hip Hinge",
+    "equipment": "Kettlebell",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Kettlebell+Swing+exercise+no+talk"
+  },
+  {
+    "id": "FB_Thruster",
+    "name": "Thruster",
+    "primary_muscle_group": "Full Body",
+    "category": "Squat to Press",
+    "equipment": "Barbell",
+    "difficulty": "Advanced",
+    "video_url": "https://www.youtube.com/results?search_query=Thruster+barbell+exercise+no+talk"
+  },
+  {
+    "id": "FB_Burpee",
+    "name": "Burpee",
+    "primary_muscle_group": "Full Body",
+    "category": "Conditioning",
+    "equipment": "Bodyweight",
+    "difficulty": "Intermediate",
+    "video_url": "https://www.youtube.com/results?search_query=Burpee+exercise+no+talk"
+  }
+]

@@ -1,0 +1,314 @@
+/**
+ * AI Prompts V2 - Ultrafast Implementation with Auto-1RM
+ * New prompt system with automatic 1RM generation and simplified structure
+ * 
+ * Key improvements:
+ * - Auto-generates 1RM values based on age, sex, weight, training level
+ * - Simplified JSON structure (no warmup/cooldown blocks)
+ * - Faster generation (900 tokens, 25s timeout)
+ * - Includes bodyFat%, muscleMass%, height
+ * - Better time calculation model (10 reps ≈ 30 sec)
+ */
+
+export interface PromptContextV2 {
+  profile: {
+    age?: number;
+    sex?: string;
+    bodyWeight?: number;
+    height?: number;
+    bodyFatPercent?: number;
+    muscleMassPercent?: number;
+    trainingLevel?: string;
+    motivationType?: string;
+    trainingGoals?: string;
+    specificSport?: string;
+    oneRmBench?: number | null;
+    oneRmOhp?: number | null;
+    oneRmDeadlift?: number | null;
+    oneRmSquat?: number | null;
+    oneRmLatpull?: number | null;
+    currentPassNumber?: number;
+    goalStrength: number;
+    goalVolume: number;
+    goalEndurance: number;
+    goalCardio: number;
+    sessionsPerWeek: number;
+  };
+  sessionDuration: number;
+  weekdayList: string;
+  equipmentList: string;
+}
+
+/**
+ * Build ULTRAFAST system prompt with auto-1RM generation
+ * Optimized for speed: 900 tokens, 25s timeout
+ */
+export function buildSystemPromptV2Ultrafast(): string {
+  return `Du är en effektiv träningsplanerare. Du ska snabbt generera ett veckoschema med fokus på struktur, tid och enkelhet. Mindre text, mer data.
+
+REGLER (KORT):
+- Använd bara utrustning som finns.
+- Anpassa efter trainingLevel.
+- Använd målen (goalStrength, goalVolume, goalEndurance, goalCardio) för passens fokus.
+- ANVÄND ENDAST ENGELSKA ÖVNINGSNAMN (t.ex. "Bench Press", "Squat").
+
+AUTO-GENERERING AV 1RM:
+Om 1RM saknas ska du uppskatta 1RM baserat på kön, ålder, kroppsvikt och trainingLevel enligt samma ungefärliga riktlinjer som i styrketabeller (nybörjare/intermediate/avancerad). Justera nedåt vid högre ålder och använd lägre relativa värden för kvinnor. Använd dessa uppskattningar internt för att ange intensitet, men skapa inga separata 1RM-fält i JSON.
+
+Uppskattningsriktlinjer:
+- Nybörjare: ca 0.6–0.8 × kroppsvikt i press, 1.0–1.3 × kroppsvikt i böj/mark
+- Intermediate: ca 0.8–1.2 × kroppsvikt i press, 1.3–1.8 × kroppsvikt i böj/mark
+- Avancerad: ca 1.2–1.5 × kroppsvikt i press, 1.8–2.5 × kroppsvikt i böj/mark
+- Kvinnor: ungefär 55–70 % av motsvarande mansnivå
+- 40–59 år: ungefär −5 % till −15 %
+- 60+ år: ungefär −10 % till −25 %
+
+TIDSKRAV:
+- targetSessionDurationMinutes finns i user-meddelandet.
+- Varje pass: estimatedDurationMinutes inom ±10 %.
+- Inget pass kortare än 80 % av längsta passet.
+
+FÖRENKLAD TIDSMODELL:
+- 10 reps ≈ 30 sek (+ vila enligt restSeconds).
+- Grov uppskattning räcker, men respektera tidsreglerna.
+
+OUTPUTFORMAT (FÖRENKLAD FÖR HASTIGHET):
+Svara ENDAST med JSON:
+{
+  "meta": {
+    "sessionsPerWeek": number,
+    "targetSessionDurationMinutes": number,
+    "allowedDurationRangeMinutes": { "min": number, "max": number },
+    "totalPlannedWeeklyMinutes": number
+  },
+  "sessions": [
+    {
+      "name": string,
+      "muscleFocus": string (kort namn baserat på muskelgrupper, t.ex. "Överkropp - Push", "Ben & Rumpa", "Rygg & Biceps", "Helkropp", "Core & Kondition"),
+      "day": string,
+      "focus": string,
+      "targetDurationMinutes": number,
+      "estimatedDurationMinutes": number,
+      "exercises": [
+        {
+          "name": string,
+          "equipment": string,
+          "sets": number,
+          "reps": string,
+          "restSeconds": number
+        }
+      ]
+    }
+  ]
+}
+
+Ingen text utanför JSON.`;
+}
+
+/**
+ * Build ULTRAFAST user prompt with all profile data
+ */
+export function buildUserPromptV2Ultrafast(context: PromptContextV2): string {
+  const { profile, sessionDuration, weekdayList, equipmentList } = context;
+
+  return `Här är användardata. Skapa ett veckoschema enligt system-reglerna med fokus på hastighet och enkelhet.
+
+PROFIL:
+- age: ${profile.age || 'Ej angiven'}
+- sex: ${profile.sex || 'Ej angiven'}
+- bodyWeight: ${profile.bodyWeight || 'Ej angiven'} kg
+- height: ${profile.height || 'Ej angiven'} cm
+- trainingLevel: ${profile.trainingLevel || 'Mellannivå'}
+
+MÅL (0–100):
+- goalStrength: ${profile.goalStrength}
+- goalVolume: ${profile.goalVolume}
+- goalEndurance: ${profile.goalEndurance}
+- goalCardio: ${profile.goalCardio}
+
+1RM (om ifyllda, annars auto-beräknas enligt system-prompten):
+- oneRmBench: ${profile.oneRmBench || ''}
+- oneRmOhp: ${profile.oneRmOhp || ''}
+- oneRmDeadlift: ${profile.oneRmDeadlift || ''}
+- oneRmSquat: ${profile.oneRmSquat || ''}
+- oneRmLatpull: ${profile.oneRmLatpull || ''}
+
+SCHEMA:
+- sessionsPerWeek: ${profile.sessionsPerWeek}
+- targetSessionDurationMinutes: ${sessionDuration}
+- allowedWeekdays: ${weekdayList}
+
+UTRUSTNING:
+${equipmentList || 'Endast kroppsvikt'}
+
+Skapa nu JSON enligt den förenklade strukturen. Fokus: rimlig övningslista, korrekt längd per pass, enkel output.`;
+}
+
+/**
+ * Build COMPACT system prompt with auto-1RM and detailed blocks
+ * More structured: 1400 tokens, 40s timeout
+ */
+export function buildSystemPromptV2Compact(): string {
+  return `Du är en senior tränare med expertis inom styrketräning, kondition och träningsperiodisering. Du är dessutom noggrann med tidsoptimering och följer alltid hårda tidskrav för varje pass.
+
+VIKTIGT:
+- Du får all nödvändig användardata i user-meddelandet.
+- Du ska skapa ett veckoschema med styrke- och/eller konditionspass anpassade efter användarens nivå, mål och utrustning.
+- Du måste ALLTID hålla dig till den angivna passlängden inom ±10 %.
+- Du ska svara ENBART med ett giltigt JSON-objekt (ingen förklarande text före eller efter, inga kommentarer, ingen markdown).
+
+AUTO-GENERERING AV 1RM (OBLIGATORISKT):
+Om 1RM för en övning saknas (bänkpress, OHP, marklyft, knäböj, latsdrag/chins) ska du först uppskatta ett rimligt 1RM baserat på:
+- kön
+- ålder
+- kroppsvikt
+- trainingLevel (nybörjare/intermediate/avancerad)
+
+Använd ungefärliga styrkenivåer (liknande ExRx/NSCA):
+- Nybörjare: ca 0.6–0.8 × kroppsvikt i press, 1.0–1.3 × kroppsvikt i böj/mark.
+- Intermediate: ca 0.8–1.2 × kroppsvikt i press, 1.3–1.8 × kroppsvikt i böj/mark.
+- Avancerad: ca 1.2–1.5 × kroppsvikt i press, 1.8–2.5 × kroppsvikt i böj/mark.
+
+Justera efter ålder:
+- Under 40 år: ingen justering.
+- 40–59 år: ungefär −5 % till −15 %.
+- 60+ år: ungefär −10 % till −25 %.
+
+Justera efter kön:
+- Kvinnor: ungefär 55–70 % av motsvarande mansnivå vid samma vikt och nivå.
+
+Använd dessa uppskattade 1RM internt för att sätta intensitet (t.ex. % av 1RM eller RPE). Skapa inte separata 1RM-fält i JSON om de inte efterfrågas, men låt intensitetsrekommendationerna bygga på dem. Generera inte extrema eller orimliga värden.
+
+TIDSKRAV:
+- targetSessionDurationMinutes anges i user-meddelandet.
+- Varje pass: estimatedDurationMinutes måste ligga inom ±10 % av targetSessionDurationMinutes.
+- Inget pass får vara kortare än 80 % av längsta passet samma vecka.
+
+TIDSBEREKNING (ENKEL MODELL):
+- 10 reps ≈ 30 sek arbetstid.
+- Skala ungefärligt: 5 reps ≈ 15 sek, 8 reps ≈ 24 sek, 12 reps ≈ 36 sek.
+- Tid per set ≈ arbetstid + restSeconds.
+- Lägg till ca 15–30 sek per övning för övningsbyte.
+
+JUSTERA VID FEL TID:
+- Om passet blir för långt: minska set på mindre viktiga övningar, sedan ta bort övningar, sist korta vilan.
+- Om passet blir för kort: lägg till set eller relevanta kompletteringsövningar.
+
+OUTPUTFORMAT (OBLIGATORISKT):
+Svara ENDAST med ett JSON-objekt enligt denna struktur (ingen text före eller efter, ingen markdown):
+
+{
+  "meta": {
+    "sessionsPerWeek": number,
+    "targetSessionDurationMinutes": number,
+    "allowedDurationRangeMinutes": { "min": number, "max": number },
+    "totalPlannedWeeklyMinutes": number,
+    "notes": string
+  },
+  "sessions": [
+    {
+      "name": string,
+      "muscleFocus": string (kort namn baserat på muskelgrupper, t.ex. "Överkropp - Push", "Ben & Rumpa", "Rygg & Biceps", "Helkropp", "Core & Kondition"),
+      "day": string,
+      "focus": string,
+      "targetDurationMinutes": number,
+      "estimatedDurationMinutes": number,
+      "blocks": [
+        {
+          "type": string,
+          "description": string,
+          "exercises": [
+            {
+              "name": string,
+              "equipment": string,
+              "sets": number,
+              "reps": string,
+              "intensity": string,
+              "restSeconds": number,
+              "estimatedExerciseDurationMinutes": number
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+VIKTIGT:
+- ALLT måste vara giltig JSON.
+- Inga kommentarer, ingen extra text, inga markdown-formatteringar.`;
+}
+
+/**
+ * Build COMPACT user prompt with all profile data including bodyFat% and muscleMass%
+ */
+export function buildUserPromptV2Compact(context: PromptContextV2): string {
+  const { profile, sessionDuration, weekdayList, equipmentList } = context;
+
+  return `Nedan följer data för en användare. Skapa ett komplett veckoschema enligt reglerna i system-meddelandet.
+
+ANVÄNDARPROFIL:
+- age: ${profile.age || 'Ej angiven'}
+- sex: ${profile.sex || 'Ej angiven'}
+- bodyWeight: ${profile.bodyWeight || 'Ej angiven'} kg
+- height: ${profile.height || 'Ej angiven'} cm
+- bodyFatPercent: ${profile.bodyFatPercent || 'Ej angiven'} %
+- muscleMassPercent: ${profile.muscleMassPercent || 'Ej angiven'} %
+
+- trainingLevel: ${profile.trainingLevel || 'Mellannivå'}
+- motivationType: ${profile.motivationType || ''}
+- trainingGoals: ${profile.trainingGoals || ''}
+- specificSport: ${profile.specificSport || ''}
+
+1RM (använd användarens värden om de finns, annars auto-beräkna enligt reglerna i system-prompten):
+- oneRmBench: ${profile.oneRmBench || ''}
+- oneRmOhp: ${profile.oneRmOhp || ''}
+- oneRmDeadlift: ${profile.oneRmDeadlift || ''}
+- oneRmSquat: ${profile.oneRmSquat || ''}
+- oneRmLatpull: ${profile.oneRmLatpull || ''}
+
+- currentPassNumber: ${profile.currentPassNumber || 1}
+
+MÅL (0–100):
+- goalStrength: ${profile.goalStrength}
+- goalVolume: ${profile.goalVolume}
+- goalEndurance: ${profile.goalEndurance}
+- goalCardio: ${profile.goalCardio}
+
+SCHEMA:
+- sessionsPerWeek: ${profile.sessionsPerWeek}
+- targetSessionDurationMinutes: ${sessionDuration}
+- allowedWeekdays: ${weekdayList}
+
+UTRUSTNING:
+${equipmentList || 'Endast kroppsvikt'}
+
+UPPGIFT:
+- Skapa ett veckoschema med ${profile.sessionsPerWeek} pass.
+- Alla pass ska använda endast tillgänglig utrustning.
+- Anpassa volym och svårighetsgrad efter trainingLevel.
+- Använd målvikterna (goalStrength/goalVolume/goalEndurance/goalCardio) för att sätta fokus.
+- Alla pass ska hålla sig inom ±10 % av ${sessionDuration} minuter och vara relativt lika långa.
+
+Svara nu ENDAST med JSON-objektet enligt den definierade strukturen.`;
+}
+
+/**
+ * Configuration for different AI generation modes
+ */
+export const AI_CONFIG_V2 = {
+  ultrafast: {
+    max_tokens: 2500,
+    timeout_ms: 45000,
+    buildSystemPrompt: buildSystemPromptV2Ultrafast,
+    buildUserPrompt: buildUserPromptV2Ultrafast,
+  },
+  compact: {
+    max_tokens: 1400,
+    timeout_ms: 40000,
+    buildSystemPrompt: buildSystemPromptV2Compact,
+    buildUserPrompt: buildUserPromptV2Compact,
+  },
+} as const;
+
+export type AIGenerationMode = keyof typeof AI_CONFIG_V2;

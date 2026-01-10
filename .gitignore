@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.DS_Store
+
+# iOS specific
+build/
+*.xcresult
+DerivedData/
+*.moved-aside
+*.xcuserstate

@@ -1,0 +1,623 @@
+/**
+ * AI Prompts V1 - Original Implementation
+ * Backup of existing prompt system for rollback capability
+ */
+
+export interface PromptContext {
+  profile: {
+    goalStrength: number;
+    goalVolume: number;
+    goalEndurance: number;
+    goalCardio: number;
+    sessionsPerWeek: number;
+    sessionDuration?: number;
+  };
+  equipmentList: string;
+  sessionDuration: number;
+  exerciseRange: string;
+  setsPerExerciseRange: string;
+  totalSetRange: string;
+  sessionsCount: number;
+  weekdays: string[];
+  weekdayList: string;
+  language?: string;
+}
+
+/**
+ * Build optimized system prompt for DeepSeek Reasoner
+ * This prompt is designed for structured JSON output with strict time constraints
+ */
+export function buildSystemPromptV1(language: string = 'en'): string {
+  if (language === 'sv') {
+    return `Du är en expert tränare och AI-assistent specialiserad på att skapa personliga träningsprogram.
+
+Din expertis:
+- Träningsperiodisering och progression
+- Muskelanpassning och återhämtning
+- Effektiv tidsplanering
+- Balanserad muskelgruppsfördelning
+
+Primära mål:
+1. Skapa säkra, effektiva träningsprogram anpassade efter användarens mål och utrustning
+2. Balansera muskelgrupper över veckan (48h återhämtning mellan samma muskelgrupp)
+3. Optimera volym och intensitet baserat på målvikter (styrka, volym, uthållighet, kondition)
+4. Följa tidskrav exakt (±10% tolerans)
+
+KRITISKA REGLER:
+- ALLTID använd ENGELSKA övningsnamn (t.ex. "Bench Press", "Squat", "Deadlift")
+- ALLTID inkludera "equipment" array med exakta utrustningsnamn
+- ALLTID inkludera "muscleGroups" array för varje övning
+- Svara ENDAST med giltig JSON (ingen markdown, inga förklaringar)
+
+Du kommer att få användardata och måste generera ett strukturerat 4-veckors träningsprogram.`;
+  } else {
+    return `You are an expert fitness coach and AI assistant specializing in creating personalized workout programs.
+
+Your expertise:
+- Training periodization and progression
+- Muscle adaptation and recovery
+- Effective time management
+- Balanced muscle group distribution
+
+Primary Goals:
+1. Create safe, effective workout programs adapted to the user's goals and equipment
+2. Balance muscle groups over the week (48h recovery between same muscle groups)
+3. Optimize volume and intensity based on goal weights (strength, hypertrophy, endurance, cardio)
+4. Follow time requirements exactly (±10% tolerance)
+
+CRITICAL RULES:
+- ALWAYS use ENGLISH exercise names (e.g., "Bench Press", "Squat", "Deadlift")
+- ALWAYS include "equipment" array with exact equipment names
+- ALWAYS include "muscleGroups" array for each exercise
+- Respond ONLY with valid JSON (no markdown, no explanations)
+
+You will receive user data and must generate a structured 4-week workout program.`;
+  }
+}
+
+/**
+ * Calculate number of passes based on training frequency
+ * 1-2 sessions/week -> 2 passes (A, B cycle)
+ * 3 sessions/week -> 3 passes (A, B, C cycle)
+ * 4+ sessions/week -> 4 passes (A, B, C, D cycle)
+ */
+function calculatePassesPerCycle(sessionsPerWeek: number): number {
+  if (sessionsPerWeek <= 2) return 2;
+  if (sessionsPerWeek === 3) return 3;
+  return 4;
+}
+
+/**
+ * Build optimized user prompt with complete workout parameters
+ */
+export function buildUserPromptV1(context: PromptContext): string {
+  const { 
+    profile, 
+    equipmentList, 
+    sessionDuration, 
+    exerciseRange, 
+    setsPerExerciseRange, 
+    totalSetRange, 
+    sessionsCount, 
+    weekdays, 
+    weekdayList,
+    language = 'en'
+  } = context;
+
+  const passesPerCycle = calculatePassesPerCycle(profile.sessionsPerWeek);
+  const passNames = ['A', 'B', 'C', 'D'].slice(0, passesPerCycle);
+  const cycleDurationWeeks = Math.ceil(passesPerCycle / profile.sessionsPerWeek) * 2; // 2 full weeks per cycle
+
+  /*
+   Updated to support dynamic language selection (en/sv).
+  */
+
+  if (language === 'sv') {
+    return `Du är en expert-tränare med specialistkompetens inom tidsoptimering och träningsperiodisering. Generera ett personligt anpassat träningsprogram baserat på dessa preferenser:
+
+**Träningsmål:**
+- Styrka: ${profile.goalStrength}/100
+- Volym: ${profile.goalVolume}/100
+- Uthållighet: ${profile.goalEndurance}/100
+- Kondition: ${profile.goalCardio}/100
+
+**Schema:**
+- Pass per vecka: ${profile.sessionsPerWeek}
+- Passlängd: ${sessionDuration} minuter (MÅSTE efterföljas exakt ±10%)
+- Träningsdagar: ${weekdayList}
+
+**Tillgänglig utrustning:**
+${equipmentList || "Endast kroppsvikt"}
+
+**⚠️ KRITISK TIDSBERÄKNING (MÅSTE FÖLJAS EXAKT):**
+
+VARJE pass MÅSTE ha en 'estimated_duration_minutes' som beräknas enligt denna formel:
+
+1. **Standardtider:**
+   - 1 set = 1.5 minuter (30 sekunder arbete + 60 sekunder vila)
+   - Uppvärmning = EXAKT 10 minuter (FAST)
+   - Nedvarvning = EXAKT 8 minuter (FAST)
+
+2. **Matematisk formel för huvuddel:**
+   - Tillgänglig tid för övningar = ${sessionDuration} - 10 (uppvärmning) - 8 (nedvarvning) = ${sessionDuration - 18} minuter
+   - Antal set som ryms = ${sessionDuration - 18} min ÷ 1.5 min/set = ${Math.floor((sessionDuration - 18) / 1.5)} set
+
+3. **Beräkna estimated_duration_minutes:**
+   - Räkna totala set i main_work (summa av alla exercises.sets)
+   - estimated_duration_minutes = (totala_set × 1.5) + 10 + 8
+   - Exempel: 28 set → (28 × 1.5) + 18 = 60 minuter ✓
+
+4. **Tolerans:**
+   - MÅSTE vara inom ±10% av ${sessionDuration} min
+   - Acceptabelt: ${Math.floor(sessionDuration * 0.9)}-${Math.ceil(sessionDuration * 1.1)} minuter
+   - Om du hamnar utanför detta intervall, JUSTERA antalet set
+
+**VOLYM-MÅL (baserat på tidsberäkning):**
+- Sikta på ${exerciseRange} övningar per pass
+- Varje övning ska ha ${setsPerExerciseRange} set
+- Totala set per pass: ${totalSetRange} (justerat för ${sessionDuration} min passlängd)
+- Denna volym säkerställer att estimated_duration_minutes = ${sessionDuration} min ±10%
+
+**VIKTIGA PRINCIPER FÖR PROGRAMDESIGN:**
+1. **Muskelgruppsfördelning:** Träna alla stora muskelgrupper så jämnt fördelat som möjligt över veckan
+2. **48-timmarsregeln:** Minst 48 timmars vila innan samma muskelgrupp tränas igen
+3. **Överlappning:** Undvik att träna samma muskelgrupp på närliggande träningsdagar
+4. **Balans:** Se till att varje vecka totalt täcker alla huvudsakliga muskelgrupper (Bröst, Rygg, Ben, Axlar, Biceps, Triceps, Core)
+
+**VECKODAGSSTRUKTUR FÖR ${sessionsCount} PASS/VECKA:**
+${weekdays.map((day: string, i: number) => `- Pass ${i + 1}: ${day}`).join('\n')}
+
+Generera ett träningsprogram med ${passesPerCycle} träningspass (${passNames.join(', ')}-program). Varje pass körs ${Math.ceil(profile.sessionsPerWeek / passesPerCycle)} gånger per vecka och cyklar sedan till nästa pass.
+
+**PASS-STRUKTUR (VIKTIGT):**
+- **${passesPerCycle} PASS: Pass ${passNames.join(', ')}**
+- Användaren kommer att köra dessa pass i cykel: ${passNames.join(' → ')} → ${passNames[0]} → ...
+- Varje pass bör träna olika muskelgrupper för optimal recovery
+- En full cykel tar cirka ${cycleDurationWeeks} veckor
+
+Returnera ENDAST ett giltigt JSON-objekt med denna struktur:
+
+{
+  "programName": "Programnamn baserat på primära mål",
+  "duration": "${cycleDurationWeeks} weeks",
+  "phases": [
+    {
+      "phaseName": "Vecka 1-2: Pass ${passNames[0]}-${passNames[Math.min(1, passesPerCycle - 1)]}",
+      "weekRange": "1-2",
+      "sessions": [
+        {
+          "sessionName": "Pass A - Överkropp",
+          "muscleFocus": "Överkropp - Push",
+          "sessionType": "strength",
+          "weekday": "Måndag",
+          "exercises": [
+            {
+              "exerciseKey": "barbell_bench_press",
+              "exerciseTitle": "Bench Press",
+              "sets": 4,
+              "reps": "6-8",
+              "restSeconds": 180,
+              "notes": "Fokusera på kontrollerad nedåtgående fas",
+              "equipment": ["Skivstång", "Bänk"],
+              "muscleGroups": ["Bröst", "Triceps", "Axlar"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+**KRITISKA REGLER FÖR ${passesPerCycle}-PASS PROGRAM:**
+- Skapa EXAKT ${passesPerCycle} OLIKA PASS (${passNames.join(', ')})
+- Varje pass är ett UNIKT träningspass med olika muskelgruppsfördelning
+- Varje pass körs ${Math.ceil(profile.sessionsPerWeek / passesPerCycle)}-${Math.ceil(profile.sessionsPerWeek / Math.max(1, passesPerCycle - 1))} gånger per vecka beroende på användarens schema
+- **MUSKELGRUPPSFÖRDELNING:** Varje pass måste fokusera på OLIKA muskelgrupper för optimal recovery:
+  ${passesPerCycle === 2 ? '  • Pass A: Överkropp (Bröst, Rygg, Axlar)\n  • Pass B: Ben & Rumpa' : ''}
+  ${passesPerCycle === 3 ? '  • Pass A: Push (Bröst, Axlar, Triceps)\n  • Pass B: Pull (Rygg, Biceps)\n  • Pass C: Ben & Rumpa' : ''}
+  ${passesPerCycle >= 4 ? '  • Pass A: Överkropp Push\n  • Pass B: Överkropp Pull  \n  • Pass C: Ben & Rumpa\n  • Pass D: Specialisering/Svag punkt' : ''}
+- Varje pass MÅSTE ha ett "weekday" fält (vid behov, kan användaren anpassa)
+- Sikta på ${exerciseRange} övningar med ${setsPerExerciseRange} set vardera (totalt: ${totalSetRange} set per pass)
+- Denna volym är designad för att fylla ${sessionDuration}-minuters passlängden
+- Använd ENDAST övningar med tillgänglig utrustning: ${equipmentList || "kroppsvikt"}
+- Varje övning MÅSTE ha "equipment" array (använd exakta namn) och "muscleGroups" array
+- Inkludera 2 faser för att visa hela cykelns progression
+- **KRITISKT**: Använd ENDAST ENGELSKA namn för alla övningar
+- Svara ENDAST med giltig JSON, INGA förklaringar`;
+  } else {
+    // ENGLISH VERSION
+    return `You are an expert fitness coach specializing in time optimization and periodization. Generate a personalized workout program based on these preferences:
+
+**Training Goals:**
+- Strength: ${profile.goalStrength}/100
+- Hypertrophy: ${profile.goalVolume}/100
+- Endurance: ${profile.goalEndurance}/100
+- Cardio: ${profile.goalCardio}/100
+
+**Schedule:**
+- Sessions per week: ${profile.sessionsPerWeek}
+- Session Duration: ${sessionDuration} minutes (MUST be followed exactly ±10%)
+- Training Days: ${weekdayList}
+
+**Available Equipment:**
+${equipmentList || "Bodyweight only"}
+
+**⚠️ CRITICAL TIME CALCULATION (MUST FOLLOW EXACTLY):**
+
+EVERY session MUST have an 'estimated_duration_minutes' calculated via this formula:
+
+1. **Standard Times:**
+   - 1 set = 1.5 minutes (30s work + 60s rest)
+   - Warmup = EXACTLY 10 minutes (FIXED)
+   - Cooldown = EXACTLY 8 minutes (FIXED)
+
+2. **Main Work Math:**
+   - Available time for exercises = ${sessionDuration} - 10 (warmup) - 8 (cooldown) = ${sessionDuration - 18} minutes
+   - Sets fitting in time = ${sessionDuration - 18} min ÷ 1.5 min/set = ${Math.floor((sessionDuration - 18) / 1.5)} sets
+
+3. **Calculate estimated_duration_minutes:**
+   - Sum total sets in main_work
+   - estimated_duration_minutes = (total_sets × 1.5) + 10 + 8
+
+4. **Tolerance:**
+   - MUST be within ±10% of ${sessionDuration} min
+   - Acceptable: ${Math.floor(sessionDuration * 0.9)}-${Math.ceil(sessionDuration * 1.1)} minutes
+
+**VOLUME GOALS:**
+- Aim for ${exerciseRange} exercises per session
+- Each exercise should have ${setsPerExerciseRange} sets
+- Total sets per session: ${totalSetRange}
+
+**IMPORTANT DESIGN PRINCIPLES:**
+1. **Muscle Balance:** Train all major muscle groups evenly
+2. **48h Rule:** At least 48h recovery before training the same muscle group
+3. **Overlap:** Avoid training same muscle on adjacent days
+4. **Balance:** Cover all groups (Chest, Back, Legs, Shoulders, Arms, Core) weekly
+
+**WEEKLY STRUCTURE FOR ${sessionsCount} SESSIONS/WEEK:**
+${weekdays.map((day: string, i: number) => `- Session ${i + 1}: ${day}`).join('\n')}
+
+Generate a program with ${passesPerCycle} unique sessions (${passNames.join(', ')}). Each session runs ${Math.ceil(profile.sessionsPerWeek / passesPerCycle)} times per week.
+
+**SESSION STRUCTURE:**
+- **${passesPerCycle} SESSIONS: Session ${passNames.join(', ')}**
+- Cycle: ${passNames.join(' → ')} → ${passNames[0]} → ...
+- Each session targets different muscles for optimal recovery
+- Full cycle takes approx ${cycleDurationWeeks} weeks
+
+Return ONLY a valid JSON object with this structure:
+
+{
+  "programName": "Program Name based on goals",
+  "duration": "${cycleDurationWeeks} weeks",
+  "phases": [
+    {
+      "phaseName": "Weeks 1-2: Session ${passNames[0]}-${passNames[Math.min(1, passesPerCycle - 1)]}",
+      "weekRange": "1-2",
+      "sessions": [
+        {
+          "sessionName": "Session A - Upper Body",
+          "muscleFocus": "Upper Body - Push",
+          "sessionType": "strength",
+          "weekday": "Monday",
+          "exercises": [
+            {
+              "exerciseKey": "barbell_bench_press",
+              "exerciseTitle": "Bench Press",
+              "sets": 4,
+              "reps": "6-8",
+              "restSeconds": 180,
+              "notes": "Focus on controlled eccentric",
+              "equipment": ["Barbell", "Bench"],
+              "muscleGroups": ["Chest", "Triceps", "Shoulders"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+**CRITICAL RULES FOR ${passesPerCycle}-SESSION PROGRAM:**
+- Create EXACTLY ${passesPerCycle} UNIQUE SESSIONS (${passNames.join(', ')})
+- Each session is UNIQUE with different muscle focus
+- **MUSCLE SPLIT:**
+  ${passesPerCycle === 2 ? '  • Session A: Upper Body\n  • Session B: Lower Body' : ''}
+  ${passesPerCycle === 3 ? '  • Session A: Push\n  • Session B: Pull\n  • Session C: Legs' : ''}
+  ${passesPerCycle >= 4 ? '  • Session A: Upper Push\n  • Session B: Upper Pull\n  • Session C: Legs\n  • Session D: Weak Point/Specialization' : ''}
+- Each session MUST have a "weekday" field
+- Aim for ${exerciseRange} exercises with ${setsPerExerciseRange} sets each
+- Use ONLY exercises with available equipment: ${equipmentList || "bodyweight"}
+- Include 2 phases to show progression
+- **CRITICAL**: Use ONLY ENGLISH names for exercises
+- Respond ONLY with valid JSON`;
+  }
+}
+
+/**
+ * Build reasoner-optimized system prompt for DeepSeek Reasoner
+ * Designed for structured JSON with warmup/cooldown blocks
+ */
+export function buildReasonerSystemPromptV1(language: string = 'en'): string {
+  const systemPromptSv = `Du är en expert-tränare som genererar personliga träningsprogram.
+
+Din expertis:
+- Träningsperiodisering och progression
+- Tidsoptimerad programdesign
+- Balanserad muskelgruppsfördelning med 48h återhämtning
+- Anpassning efter utrustning och träningsmål
+
+Primära regler:
+1. Skapa säkra, effektiva träningsprogram baserade på användarens mål och tillgänglig utrustning
+2. Optimera volym och intensitet efter målprioriteringar (styrka, volym, uthållighet, kondition)
+3. Följ tidskrav exakt (±10% tolerans av målad passlängd)
+4. Använd endast ENGELSKA övningsnamn (t.ex. "Bench Press", "Squat")
+5. Svara ENDAST med giltig JSON (ingen markdown, inga förklaringar)
+
+Output-struktur: Du får specifika instruktioner om JSON-strukturen i user-meddelandet.`;
+
+const systemPromptEn = `You are an expert fitness coach generating personalized workout programs.
+
+Your expertise:
+- Training periodization and progression
+- Time-optimized program design
+- Balanced muscle group distribution with 48h recovery
+- Adaptation to equipment and goals
+
+Primary Rules:
+1. Create safe, effective workout programs based on user goals and available equipment
+2. Optimize volume and intensity based on goal priorities (strength, hypertrophy, endurance, cardio)
+3. Follow time requirements exactly (±10% tolerance of target session duration)
+4. ALWAYS use ENGLISH exercise names (e.g., "Bench Press", "Squat")
+5. Respond ONLY with valid JSON (no markdown, no explanations)
+
+Output Structure: You will receive specific instructions about the JSON structure in the user message.`;
+
+  return language === 'sv' ? systemPromptSv : systemPromptEn;
+}
+
+/**
+ * Build reasoner-optimized user prompt with warmup/cooldown structure
+ */
+export function buildReasonerUserPromptV1(
+  profile: {
+    age?: number;
+    sex?: string;
+    bodyWeight?: number;
+    height?: number;
+    trainingLevel?: string;
+    goalStrength: number;
+    goalVolume: number;
+    goalEndurance: number;
+    goalCardio: number;
+    sessionsPerWeek: number;
+  },
+  sessionDuration: number,
+  weekdayList: string,
+  equipmentList: string,
+  language: string = 'en'
+): string {
+  const passesPerCycle = calculatePassesPerCycle(profile.sessionsPerWeek);
+  const passNames = ['A', 'B', 'C', 'D'].slice(0, passesPerCycle);
+  // Calculate distribution percentages
+  const total = profile.goalStrength + profile.goalVolume + profile.goalEndurance + profile.goalCardio;
+  const distribution = {
+    strength_percent: total > 0 ? Math.round((profile.goalStrength / total) * 100) : 25,
+    hypertrophy_percent: total > 0 ? Math.round((profile.goalVolume / total) * 100) : 25,
+    endurance_percent: total > 0 ? Math.round((profile.goalEndurance / total) * 100) : 25,
+    cardio_percent: total > 0 ? Math.round((profile.goalCardio / total) * 100) : 25,
+  };
+
+  /* 
+    Updated output format for language: ${language}
+    Ensures prompt instructions match the requested language while keeping exercise names in English.
+  */
+  
+  if (language === 'sv') {
+    return `Generera ett veckoträningsprogram baserat på följande användardata:
+
+**ANVÄNDARPROFIL:**
+- Ålder: ${profile.age || 'Ej angiven'}
+- Kön: ${profile.sex || 'Ej angiven'}
+- Kroppsvikt: ${profile.bodyWeight || 'Ej angiven'} kg
+- Längd: ${profile.height || 'Ej angiven'} cm
+- Träningsnivå: ${profile.trainingLevel || 'Mellannivå'}
+
+**TRÄNINGSMÅL (DISTRIBUTION):**
+- Styrka: ${distribution.strength_percent}%
+- Hypertrofi: ${distribution.hypertrophy_percent}%
+- Uthållighet: ${distribution.endurance_percent}%
+- Kondition: ${distribution.cardio_percent}%
+
+**SCHEMA:**
+- Pass per vecka: ${profile.sessionsPerWeek}
+- Passlängd: ${sessionDuration} minuter
+- Acceptabel längd per pass: ${Math.floor(sessionDuration * 0.9)}-${Math.ceil(sessionDuration * 1.1)} minuter (±10%)
+- Träningsdagar: ${weekdayList}
+
+**TILLGÄNGLIG UTRUSTNING:**
+${equipmentList || "Endast kroppsvikt"}
+
+**OUTPUT-FORMAT (OBLIGATORISKT):**
+Svara med ett JSON-objekt enligt denna exakta struktur. 
+VIKTIGT: Alla nycklar i JSON måste vara på ENGELSKA (t.ex. "week_focus_summary", "session_name"). 
+Värdena för textfält (t.ex. "week_focus_summary", "notes") ska vara på SVENSKA.
+Övningsnamn ("exercise_name") MÅSTE vara på ENGELSKA.
+
+{
+  "user_profile": {
+    "gender": "${profile.sex || 'Annat'}",
+    "age": ${profile.age || 30},
+    "weight_kg": ${profile.bodyWeight || 70},
+    "height_cm": ${profile.height || 170},
+    "training_level": "${profile.trainingLevel || 'Mellannivå'}",
+    "main_goal": "Baserat på högsta målprocent",
+    "distribution": {
+      "strength_percent": ${distribution.strength_percent},
+      "hypertrophy_percent": ${distribution.hypertrophy_percent},
+      "endurance_percent": ${distribution.endurance_percent},
+      "cardio_percent": ${distribution.cardio_percent}
+    },
+    "sessions_per_week": ${profile.sessionsPerWeek},
+    "session_length_minutes": ${sessionDuration},
+    "available_equipment": ${JSON.stringify(equipmentList?.split(', ').filter(Boolean) || [])}
+  },
+  "program_overview": {
+    "week_focus_summary": "Kort sammanfattning av veckans fokus (på SVENSKA)",
+    "expected_difficulty": "Lättare/Medel/Svårare",
+    "notes_on_progression": "Hur användaren ska progressa (på SVENSKA)"
+  },
+  "weekly_sessions": [
+    {
+      "session_number": 1,
+      "weekday": "En dag från listan",
+      "session_name": "Namn på passet (på SVENSKA, t.ex. 'Överkropp Styrka')",
+      "muscle_focus": "Kort namn baserat på muskelgrupper (t.ex. 'Överkropp - Push')",
+      "session_type": "strength/hypertrophy/endurance/cardio",
+      "estimated_duration_minutes": ${sessionDuration},
+      "warmup": [
+        {
+          "exercise_name": "Uppvärmningsövning (SVENSKA ok här)",
+          "sets": 1,
+          "reps_or_duration": "5 min",
+          "notes": "Förklaring"
+        }
+      ],
+      "main_work": [
+        {
+          "exercise_name": "ENGELSKA namnet (t.ex. Bench Press)",
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "tempo": "2-0-1-0",
+          "suggested_weight_kg": null,
+          "suggested_weight_notes": "Förslag på intensitet (på SVENSKA)",
+          "target_muscles": ["Muskelgrupp1", "Muskelgrupp2"],
+          "required_equipment": ["Utrustning1"],
+          "technique_cues": ["Teknikinstruktion1", "Teknikinstruktion2 (på SVENSKA)"]
+        }
+      ],
+      "cooldown": [
+        {
+          "exercise_name": "Nedvarvningsövning",
+          "duration_or_reps": "5 min",
+          "notes": "Förklaring"
+        }
+      ]
+    }
+  ],
+  "recovery_tips": ["Tips 1 (på SVENSKA)", "Tips 2"]
+}
+
+**VIKTIGA KRAV:**
+1. Skapa EXAKT ${passesPerCycle} OLIKA PASS (${passNames.join(', ')}) - unika pass som cyklas
+2. Varje pass måste ha "estimated_duration_minutes" inom ±10% av ${sessionDuration} min
+3. Använd ENDAST övningar med tillgänglig utrustning
+4. Alla övningsnamn i "main_work" MÅSTE vara på ENGELSKA
+5. Fördela muskelgrupper så att samma grupp inte tränas med < 48h mellanrum
+6. Svara ENDAST med JSON (ingen markdown)`;
+  } else {
+    return `Generate a weekly workout program based on the following user data:
+
+**USER PROFILE:**
+- Age: ${profile.age || 'Not specified'}
+- Gender: ${profile.sex || 'Not specified'}
+- Weight: ${profile.bodyWeight || 'Not specified'} kg
+- Height: ${profile.height || 'Not specified'} cm
+- Level: ${profile.trainingLevel || 'Intermediate'}
+
+**GOALS (DISTRIBUTION):**
+- Strength: ${distribution.strength_percent}%
+- Hypertrophy: ${distribution.hypertrophy_percent}%
+- Endurance: ${distribution.endurance_percent}%
+- Cardio: ${distribution.cardio_percent}%
+
+**SCHEDULE:**
+- Sessions per week: ${profile.sessionsPerWeek}
+- Session length: ${sessionDuration} minutes
+- Acceptable length: ${Math.floor(sessionDuration * 0.9)}-${Math.ceil(sessionDuration * 1.1)} minutes (±10%)
+- Days: ${weekdayList}
+
+**AVAILABLE EQUIPMENT:**
+${equipmentList || "Bodyweight only"}
+
+**OUTPUT FORMAT (MANDATORY):**
+Respond with a JSON object following this EXACT structure.
+IMPORTANT: All JSON keys must be in ENGLISH.
+Text values (notes, summaries) should be in ENGLISH.
+Exercise names MUST be in ENGLISH.
+
+{
+  "user_profile": {
+    "gender": "${profile.sex || 'Other'}",
+    "age": ${profile.age || 30},
+    "weight_kg": ${profile.bodyWeight || 70},
+    "height_cm": ${profile.height || 170},
+    "training_level": "${profile.trainingLevel || 'Intermediate'}",
+    "main_goal": "Based on highest percentage",
+    "distribution": {
+      "strength_percent": ${distribution.strength_percent},
+      "hypertrophy_percent": ${distribution.hypertrophy_percent},
+      "endurance_percent": ${distribution.endurance_percent},
+      "cardio_percent": ${distribution.cardio_percent}
+    },
+    "sessions_per_week": ${profile.sessionsPerWeek},
+    "session_length_minutes": ${sessionDuration},
+    "available_equipment": ${JSON.stringify(equipmentList?.split(', ').filter(Boolean) || [])}
+  },
+  "program_overview": {
+    "week_focus_summary": "Brief summary of the week's focus",
+    "expected_difficulty": "Easy/Medium/Hard",
+    "notes_on_progression": "How to progress"
+  },
+  "weekly_sessions": [
+    {
+      "session_number": 1,
+      "weekday": "One day from the list",
+      "session_name": "Name of session (e.g. 'Upper Body Strength')",
+      "muscle_focus": "Short focus name (e.g. 'Upper Body - Push')",
+      "session_type": "strength/hypertrophy/endurance/cardio",
+      "estimated_duration_minutes": ${sessionDuration},
+      "warmup": [
+        {
+          "exercise_name": "Warmup exercise",
+          "sets": 1,
+          "reps_or_duration": "5 min",
+          "notes": "Explanation"
+        }
+      ],
+      "main_work": [
+        {
+          "exercise_name": "ENGLISH name (e.g. Bench Press)",
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "tempo": "2-0-1-0",
+          "suggested_weight_kg": null,
+          "suggested_weight_notes": "Intensity suggestion",
+          "target_muscles": ["Muscle1", "Muscle2"],
+          "required_equipment": ["Equipment1"],
+          "technique_cues": ["Cue 1", "Cue 2"]
+        }
+      ],
+      "cooldown": [
+        {
+          "exercise_name": "Cooldown exercise",
+          "duration_or_reps": "5 min",
+          "notes": "Explanation"
+        }
+      ]
+    }
+  ],
+  "recovery_tips": ["Tip 1", "Tip 2"]
+}
+
+**CRITICAL REQUIREMENTS:**
+1. Create EXACTLY ${passesPerCycle} UNIQUE SESSIONS (${passNames.join(', ')}) - cycled
+2. Each session must have "estimated_duration_minutes" within ±10% of ${sessionDuration} min
+3. Use ONLY exercises with available equipment
+4. All "main_work" exercise names MUST be in ENGLISH
+5. Distribute muscle groups to ensure 48h recovery
+6. Respond ONLY with JSON (no markdown)`;
+  }
+}
