@@ -7,7 +7,6 @@ struct LoginView: View {
     @StateObject private var authService = AuthService.shared
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
-    @State private var showEmailSignIn = false
     @State private var showEmailSignUp = false
     @State private var email = ""
     @State private var password = ""
@@ -123,15 +122,6 @@ struct LoginView: View {
                 }
             }
             .navigationBarHidden(true)
-            .sheet(isPresented: $showEmailSignIn) {
-                EmailSignInView(
-                    email: $email,
-                    password: $password,
-                    isLoading: $isLoading,
-                    errorMessage: $errorMessage,
-                    onSignIn: { signInWithEmail() }
-                )
-            }
             .sheet(isPresented: $showEmailSignUp) {
                 MagicLinkLoginView(
                     email: $email,
