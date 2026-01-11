@@ -270,12 +270,15 @@ struct MagicLinkLoginView: View {
                             
                             TextField("din@epost.se", text: $email)
                                 .textFieldStyle(PlainTextFieldStyle())
+                                .foregroundColor(Color(hex: "1A237E")) // Dark text color
+                                .accentColor(Color(hex: "43A047")) // Green cursor
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
+                                .autocorrectionDisabled()
                         }
                         
                         Text("Vi skickar en länk till din e-post som loggar in dig direkt. Inget lösenord behövs!")
