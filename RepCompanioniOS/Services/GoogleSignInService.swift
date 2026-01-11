@@ -57,10 +57,7 @@ class GoogleSignInService: ObservableObject {
             return
         }
         
-        guard let config = GIDConfiguration(clientID: clientId) else {
-            print("[GoogleSignInService] ❌ Failed to create GIDConfiguration with ID: \(clientId)")
-            return
-        }
+        let config = GIDConfiguration(clientID: clientId)
         
         GIDSignIn.sharedInstance.configuration = config
         isConfigured = true

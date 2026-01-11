@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B9168F572F13F554005D08F6 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B9168F562F13F554005D08F6 /* GoogleSignIn */; };
 		B99569CC2ED8D99800E88D56 /* Watch2 Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -80,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9168F572F13F554005D08F6 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +95,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B9168F552F13F554005D08F6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B99569A52ED8D96500E88D56 = {
 			isa = PBXGroup;
 			children = (
@@ -100,6 +109,7 @@
 				B99569E92ED8E9CC00E88D56 /* RepCompanioniOS */,
 				B99569B02ED8D96500E88D56 /* RepCompanion 2 */,
 				B99569C32ED8D99600E88D56 /* Watch2 Watch App */,
+				B9168F552F13F554005D08F6 /* Frameworks */,
 				B99569AF2ED8D96500E88D56 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -137,6 +147,7 @@
 			);
 			name = "RepCompanion 2";
 			packageProductDependencies = (
+				B9168F562F13F554005D08F6 /* GoogleSignIn */,
 			);
 			productName = "RepCompanion 2";
 			productReference = B99569AE2ED8D96500E88D56 /* RepCompanion 2.app */;
@@ -579,6 +590,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B9168F562F13F554005D08F6 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9168F522F13E80A005D08F6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B99569A62ED8D96500E88D56 /* Project object */;
 }
