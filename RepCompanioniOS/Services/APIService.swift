@@ -359,8 +359,6 @@ class APIService {
     }
     
     func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], useV3: Bool = true) async throws -> OnboardingCompleteResponse {
-        // TEMPORARY: Skip token requirement for testing
-        print("[APIService] ✅ Completing onboarding without authentication (testing mode)...")
         print("[APIService] 🚀 Using V3 AI architecture: \(useV3)")
         
         var urlComponents = URLComponents(string: "\(baseURL)/api/onboarding/complete")!
@@ -385,7 +383,14 @@ class APIService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // No Authorization header - backend will use default dev user
+        
+        // Add auth token if available
+        if let token = UserDefaults.standard.string(forKey: "authToken") {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[APIService] ✅ Using auth token for onboarding")
+        } else {
+            print("[APIService] ⚠️  No auth token found - request may fail")
+        }
         
         let body = OnboardingCompleteRequest(profile: profile, equipment: equipment)
         request.httpBody = try JSONEncoder().encode(body)
