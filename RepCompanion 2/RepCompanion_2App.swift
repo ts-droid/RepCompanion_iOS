@@ -19,6 +19,20 @@ struct RepCompanion_2App: App {
     private let connectivityManager = WatchConnectivityManager.shared
     
     init() {
+        // Clear old authentication data to force re-login with new auth methods
+        // This is a one-time migration after removing email/password auth
+        let migrationKey = "auth_migration_v2_completed"
+        if !UserDefaults.standard.bool(forKey: migrationKey) {
+            print("[App] 🔄 Clearing old authentication data...")
+            UserDefaults.standard.removeObject(forKey: "auth_user_id")
+            UserDefaults.standard.removeObject(forKey: "auth_user_email")
+            UserDefaults.standard.removeObject(forKey: "auth_user_name")
+            UserDefaults.standard.removeObject(forKey: "auth_method")
+            UserDefaults.standard.removeObject(forKey: "authToken")
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            print("[App] ✅ Old auth data cleared - user will need to login again")
+        }
+        
         // Ensure WatchConnectivity is initialized early
         _ = WatchConnectivityManager.shared
         
