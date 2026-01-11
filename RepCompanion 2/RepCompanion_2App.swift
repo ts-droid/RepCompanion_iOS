@@ -8,6 +8,9 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 @main
 struct RepCompanion_2App: App {
@@ -34,6 +37,11 @@ struct RepCompanion_2App: App {
             ContentView()
                 .environment(\.locale, Locale(identifier: languageService.currentLanguage))
                 .environmentObject(languageService)
+                .onOpenURL { url in
+                    #if canImport(GoogleSignIn)
+                    GIDSignIn.sharedInstance.handle(url)
+                    #endif
+                }
         }
         .modelContainer(persistenceController.container)
     }

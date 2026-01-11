@@ -39,9 +39,22 @@
 		B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch2 Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B9168F542F13E9B8005D08F6 /* Exceptions for "RepCompanion 2" folder in "RepCompanion 2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"RepCompanion-2-Info.plist",
+			);
+			target = B99569AD2ED8D96500E88D56 /* RepCompanion 2 */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B99569B02ED8D96500E88D56 /* RepCompanion 2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B9168F542F13E9B8005D08F6 /* Exceptions for "RepCompanion 2" folder in "RepCompanion 2" target */,
+			);
 			path = "RepCompanion 2";
 			sourceTree = "<group>";
 		};
@@ -179,6 +192,9 @@
 			);
 			mainGroup = B99569A52ED8D96500E88D56;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B9168F522F13E80A005D08F6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B99569AF2ED8D96500E88D56 /* Products */;
 			projectDirPath = "";
@@ -368,10 +384,11 @@
 				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 8MQ36FR54B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RepCompanion-2-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = RepCompanion;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
@@ -408,10 +425,11 @@
 				CODE_SIGN_ENTITLEMENTS = "RepCompanion 2/RepCompanion 2Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 8MQ36FR54B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RepCompanion-2-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = RepCompanion;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "RepCompanion behöver tillgång till kameran för att du ska kunna skanna din utrustning och automatiskt anpassa ditt träningsprogram.";
@@ -550,6 +568,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B9168F522F13E80A005D08F6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = B99569A62ED8D96500E88D56 /* Project object */;
 }

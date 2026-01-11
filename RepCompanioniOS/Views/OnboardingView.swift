@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import HealthKit
 
 struct OnboardingView: View {
     @Environment(\.modelContext) private var modelContext
@@ -2106,6 +2107,33 @@ struct OnboardingView: View {
                     }
                 } catch {
                     print("[Onboarding] No height data available in HealthKit: \(error.localizedDescription)")
+                }
+
+                // Fetch biological sex
+                do {
+                    let biologicalSex = try healthKitService.getBiologicalSex()
+                    await MainActor.run {
+                        if biologicalSex == .male {
+                            sex = "man"
+                        } else if biologicalSex == .female {
+                            sex = "kvinna"
+                        }
+                    }
+                } catch {
+                    print("[Onboarding] No sex data available in HealthKit: \(error.localizedDescription)")
+                }
+
+                // Fetch date of birth
+                do {
+                    let dob = try healthKitService.getDateOfBirthComponents()
+                    await MainActor.run {
+                        if let year = dob.year { birthYear = year }
+                        if let month = dob.month { birthMonth = month }
+                        if let day = dob.day { birthDay = day }
+                        calculateAgeFromBirthDate()
+                    }
+                } catch {
+                    print("[Onboarding] No birth date data available in HealthKit: \(error.localizedDescription)")
                 }
                 
                 // Mark as fetched even if no data was found (user can still proceed)

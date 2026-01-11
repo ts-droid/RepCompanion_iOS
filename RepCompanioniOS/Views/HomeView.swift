@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import HealthKit
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext

@@ -21,7 +21,9 @@ class HealthKitService: ObservableObject {
         HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!,
         HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
         HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
-        HKObjectType.quantityType(forIdentifier: .vo2Max)!
+        HKObjectType.quantityType(forIdentifier: .vo2Max)!,
+        HKObjectType.characteristicType(forIdentifier: .biologicalSex)!,
+        HKObjectType.characteristicType(forIdentifier: .dateOfBirth)!
     ]
     
     // Types we want to write
@@ -240,6 +242,14 @@ class HealthKitService: ObservableObject {
             
             healthStore.execute(query)
         }
+    }
+    
+    func getBiologicalSex() throws -> HKBiologicalSex {
+        return try healthStore.biologicalSex().biologicalSex
+    }
+    
+    func getDateOfBirthComponents() throws -> DateComponents {
+        return try healthStore.dateOfBirthComponents()
     }
     
     func getSleepHours(for date: Date) async throws -> Double {
