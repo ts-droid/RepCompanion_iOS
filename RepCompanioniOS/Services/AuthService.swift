@@ -107,6 +107,29 @@ class AuthService: ObservableObject {
         }
     }
     
+    // MARK: - Magic Link
+    
+    func sendMagicLink(email: String) async throws {
+        try await APIService.shared.sendMagicLink(email: email)
+    }
+    
+    func signInWithMagicLink(token: String, modelContext: ModelContext? = nil) async throws {
+        let authResponse = try await APIService.shared.verifyMagicLink(token: token)
+        
+        // Extract user info from response
+        let userIdentifier = authResponse.user.id
+        let userEmail = authResponse.user.email
+        let userName = authResponse.user.name
+        
+        // Save authentication state
+        saveAuthState(userId: userIdentifier, email: userEmail, name: userName, method: "magic_link")
+        
+        // Sync data from backend
+        if let modelContext = modelContext {
+            await syncUserData(userId: userIdentifier, modelContext: modelContext)
+        }
+    }
+    
     // MARK: - Sign In with Email
     
     func signInWithEmail(email: String, password: String, modelContext: ModelContext? = nil) async throws {

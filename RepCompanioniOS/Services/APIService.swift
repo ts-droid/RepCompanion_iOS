@@ -140,6 +140,55 @@ class APIService {
         return authResponse
     }
     
+    /// Send magic link to email
+    func sendMagicLink(email: String) async throws {
+        let url = URL(string: "\(baseURL)/api/auth/magic-link")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = ["email": email]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (_, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+    }
+    
+    /// Verify magic link token
+    func verifyMagicLink(token: String) async throws -> AuthResponse {
+        let url = URL(string: "\(baseURL)/api/auth/magic-link/verify")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = ["token": token]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
+        
+        // Store token
+        UserDefaults.standard.set(authResponse.token, forKey: "authToken")
+        
+        return authResponse
+    }
+    
     func authenticate(email: String, password: String) async throws -> AuthResponse {
         let url = URL(string: "\(baseURL)/api/auth/login")!
         var request = URLRequest(url: url)

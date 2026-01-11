@@ -24,7 +24,11 @@ struct LoginView: View {
                     Spacer()
                     
                     // Logo and Branding
-                    BrandLogo(size: 100)
+                    Image("AppLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 140, height: 140)
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     VStack(spacing: 8) {
                         Text("Välkommen!")
@@ -40,12 +44,12 @@ struct LoginView: View {
                     
                     // Authentication Options
                     VStack(spacing: 16) {
-                        // Google Button
                         Button(action: { signInWithGoogle() }) {
-                            HStack {
-                                Image(systemName: "globe") // Fallback to system icon
+                            HStack(spacing: 12) {
+                                Image("GoogleLogo")
                                     .resizable()
-                                    .frame(width: 20, height: 20)
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
                                 Text("Fortsätt med Google")
                             }
                             .font(.headline)
@@ -74,11 +78,11 @@ struct LoginView: View {
                         .clipShape(Capsule())
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                         
-                        // Email Sign Up (Primary Action)
+                        // Magic Link / Email Flow
                         Button(action: { showEmailSignUp = true }) {
                             HStack {
-                                Image(systemName: "envelope.fill")
-                                Text("Skapa konto med e-post")
+                                Image(systemName: "link")
+                                Text("Logga in med Magic Link")
                             }
                             .font(.headline)
                             .frame(maxWidth: .infinity)
@@ -95,14 +99,7 @@ struct LoginView: View {
                             .shadow(color: Color(hex: "43A047").opacity(0.3), radius: 10, x: 0, y: 5)
                         }
                         
-                        // Already have an account?
-                        Button(action: { showEmailSignIn = true }) {
-                            Text("Har du redan ett konto? Logga in")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(Color(hex: "1A237E"))
-                        }
-                        .padding(.top, 8)
+                        // Already have an account? - Removed in favor of single Magic Link flow
                     }
                     .padding(.horizontal, 32)
                     
@@ -136,13 +133,11 @@ struct LoginView: View {
                 )
             }
             .sheet(isPresented: $showEmailSignUp) {
-                EmailSignUpView(
+                MagicLinkLoginView(
                     email: $email,
-                    password: $password,
-                    name: $name,
                     isLoading: $isLoading,
                     errorMessage: $errorMessage,
-                    onSignUp: { signUpWithEmail() }
+                    onSendLink: { completion in sendMagicLink(completion: completion) }
                 )
             }
             .alert("Fel", isPresented: .constant(errorMessage != nil)) {
@@ -234,197 +229,132 @@ struct LoginView: View {
         }
     }
     
-    private func signInWithEmail() {
-        guard !email.isEmpty, !password.isEmpty else {
-            errorMessage = "Vänligen fyll i e-post och lösenord"
+    private func sendMagicLink(completion: @escaping (Bool) -> Void) {
+        guard !email.isEmpty else {
+            errorMessage = "Vänligen fyll i din e-post"
+            completion(false)
             return
         }
         
         isLoading = true
         Task {
             do {
-                try await authService.signInWithEmail(email: email, password: password, modelContext: modelContext)
+                try await authService.sendMagicLink(email: email)
                 await MainActor.run {
                     isLoading = false
-                    showEmailSignIn = false
+                    completion(true)
                 }
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = "Kunde inte logga in: \(error.localizedDescription)"
-                }
-            }
-        }
-    }
-    
-    private func signUpWithEmail() {
-        guard !email.isEmpty, !password.isEmpty, !name.isEmpty else {
-            errorMessage = "Vänligen fyll i alla fält"
-            return
-        }
-        
-        guard password.count >= 6 else {
-            errorMessage = "Lösenordet måste vara minst 6 tecken"
-            return
-        }
-        
-        isLoading = true
-        Task {
-            do {
-                try await authService.signUpWithEmail(email: email, password: password, name: name, modelContext: modelContext)
-                await MainActor.run {
-                    isLoading = false
-                    showEmailSignUp = false
-                }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = "Kunde inte skapa konto: \(error.localizedDescription)"
+                    errorMessage = "Kunde inte skicka länk: \(error.localizedDescription)"
+                    completion(false)
                 }
             }
         }
     }
 }
 
-// MARK: - Email Sign In View
+// MARK: - Magic Link Login View
 
-struct EmailSignInView: View {
+struct MagicLinkLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Binding var email: String
-    @Binding var password: String
     @Binding var isLoading: Bool
     @Binding var errorMessage: String?
-    let onSignIn: () -> Void
+    @State private var linkSent = false
+    let onSendLink: (@escaping (Bool) -> Void) -> Void
     
     var body: some View {
         NavigationView {
             ZStack {
-                Color.appBackground(for: colorScheme).ignoresSafeArea()
+                BrandBackground()
                 
                 VStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("E-post")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        TextField("din@epost.se", text: $email)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Lösenord")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        SecureField("Lösenord", text: $password)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    
-                    Button(action: onSignIn) {
-                        if isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("Logga in")
+                    if !linkSent {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Ange din e-post")
+                                .font(.headline)
+                                .foregroundColor(Color(hex: "1A237E"))
+                            
+                            TextField("din@epost.se", text: $email)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(12)
+                                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
                         }
+                        
+                        Text("Vi skickar en länk till din e-post som loggar in dig direkt. Inget lösenord behövs!")
+                            .font(.subheadline)
+                            .foregroundColor(Color(hex: "546E7A"))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Button(action: {
+                            onSendLink { success in
+                                withAnimation {
+                                    linkSent = success
+                                }
+                            }
+                        }) {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Skicka Magic Link")
+                            }
+                        }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color(hex: "1A237E"))
+                        .foregroundColor(.white)
+                        .cornerRadius(28)
+                        .disabled(isLoading || email.isEmpty)
+                    } else {
+                        VStack(spacing: 20) {
+                            Image(systemName: "envelope.badge.shield.half.filled")
+                                .font(.system(size: 80))
+                                .foregroundColor(Color(hex: "43A047"))
+                            
+                            Text("Kolla din e-post!")
+                                .font(.title2.bold())
+                                .foregroundColor(Color(hex: "1A237E"))
+                            
+                            Text("Vi har skickat en inloggningslänk till **\(email)**. Klicka på länken i mejlet för att logga in.")
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(Color(hex: "546E7A"))
+                            
+                            Button("Stäng") {
+                                dismiss()
+                            }
+                            .font(.headline)
+                            .padding()
+                        }
+                        .padding()
                     }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentBlue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .disabled(isLoading)
                     
                     Spacer()
                 }
-                .padding()
+                .padding(32)
             }
             .navigationTitle("Logga in")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Stäng") {
+                    Button("Avbryt") {
                         dismiss()
                     }
                 }
             }
-        }
-    }
-}
-
-// MARK: - Email Sign Up View
-
-struct EmailSignUpView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) private var colorScheme
-    @Binding var email: String
-    @Binding var password: String
-    @Binding var name: String
-    @Binding var isLoading: Bool
-    @Binding var errorMessage: String?
-    let onSignUp: () -> Void
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color.appBackground(for: colorScheme).ignoresSafeArea()
-                
-                VStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Namn")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        TextField("Ditt namn", text: $name)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("E-post")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        TextField("din@epost.se", text: $email)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Lösenord")
-                            .font(.subheadline)
-                            .foregroundColor(Color.textPrimary(for: colorScheme))
-                        SecureField("Minst 6 tecken", text: $password)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    
-                    Button(action: onSignUp) {
-                        if isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("Skapa konto")
-                        }
-                    }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentBlue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .disabled(isLoading)
-                    
-                    Spacer()
-                }
-                .padding()
-            }
-            .navigationTitle("Skapa konto")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Stäng") {
-                        dismiss()
-                    }
+            .onChange(of: isLoading) { _, newValue in
+                if !newValue && errorMessage == nil && !email.isEmpty {
+                    // This is a simple way to detect success if the parent doesn't handle it
+                    // Actually, it's better to stay in sync with parent
                 }
             }
         }

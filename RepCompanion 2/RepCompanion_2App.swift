@@ -41,8 +41,34 @@ struct RepCompanion_2App: App {
                     #if canImport(GoogleSignIn)
                     GIDSignIn.sharedInstance.handle(url)
                     #endif
+                    
+                    // Handle Magic Link
+                    if url.scheme == "repcompanion" && url.host == "magic-link" {
+                        handleMagicLink(url: url)
+                    }
                 }
         }
         .modelContainer(persistenceController.container)
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func handleMagicLink(url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+              let queryItems = components.queryItems,
+              let token = queryItems.first(where: { $0.name == "token" })?.value else {
+            return
+        }
+        
+        Task {
+            do {
+                try await AuthService.shared.signInWithMagicLink(
+                    token: token,
+                    modelContext: persistenceController.container.mainContext
+                )
+            } catch {
+                print("[App] ❌ Failed to sign in with magic link: \(error.localizedDescription)")
+            }
+        }
     }
 }
