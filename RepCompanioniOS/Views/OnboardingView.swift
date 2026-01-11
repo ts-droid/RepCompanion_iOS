@@ -255,9 +255,7 @@ struct OnboardingView: View {
                 }
             }
             .task {
-                if !authService.isAuthenticated {
-                    await autoLoginForAlphaTesting()
-                }
+                // Equipment catalog sync only - no auto-login
                 syncEquipmentCatalogEarly()
             }
             .onChange(of: motivationType) { _, newValue in
@@ -2673,20 +2671,6 @@ struct OnboardingView: View {
             return "xmark.circle.fill"
         default:
             return "hourglass"
-        }
-    }
-    
-    private func autoLoginForAlphaTesting() async {
-        print("[Onboarding] 🔐 Auto-login for alpha testing...")
-        do {
-            try await authService.signInWithEmail(
-                email: "dev@recompute.it",
-                password: "dev123",
-                modelContext: modelContext
-            )
-            print("[Onboarding] ✅ Auto-login successful")
-        } catch {
-            print("[Onboarding] ⚠️ Auto-login failed (non-critical): \(error.localizedDescription)")
         }
     }
     
