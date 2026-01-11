@@ -48,10 +48,10 @@ struct LoginView: View {
                                 Image("GoogleLogo")
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 24, height: 24)
+                                    .frame(width: 20, height: 20)
                                 Text("Fortsätt med Google")
+                                    .font(.system(size: 19, weight: .semibold))
                             }
-                            .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .background(Color.white)
