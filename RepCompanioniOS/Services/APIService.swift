@@ -802,40 +802,45 @@ class APIService {
     
     /// Get current program generation status (doesn't require jobId)
     func getProgramStatus() async throws -> ProgramStatusResponse {
-        let url = URL(string: "\(baseURL)/api/program/status")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        // Try plural first as it's more robust against route shadowing
+        let endpoints = ["/api/programs/status", "/api/program/status"]
         
-        // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
-        if let token = authToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
+        var lastError: Error?
         
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+        for endpoint in endpoints {
+            let url = URL(string: "\(baseURL)\(endpoint)")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("[API] ❌ Invalid response type")
-                throw APIError.invalidResponse
+            if let token = authToken {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
             
-            print("[API] Program status response: \(httpResponse.statusCode)")
-            
-            guard (200...299).contains(httpResponse.statusCode) else {
-                let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
-                print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
-                throw APIError.httpError(httpResponse.statusCode)
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    continue
+                }
+                
+                print("[API] Program status response (\(endpoint)): \(httpResponse.statusCode)")
+                
+                if (200...299).contains(httpResponse.statusCode) {
+                    return try JSONDecoder().decode(ProgramStatusResponse.self, from: data)
+                } else if httpResponse.statusCode == 404 {
+                    let errorBody = String(data: data, encoding: .utf8) ?? "No error body"
+                    print("[API] ⚠️ 404 on \(endpoint): \(errorBody)")
+                    continue
+                } else {
+                    let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                    throw APIError.httpError(httpResponse.statusCode)
+                }
+            } catch {
+                lastError = error
+                print("[API] ⚠️ Failed to fetch \(endpoint): \(error.localizedDescription)")
             }
-            
-            return try JSONDecoder().decode(ProgramStatusResponse.self, from: data)
-        } catch let error as URLError {
-            print("[API] ❌ Network error: \(error.localizedDescription)")
-            print("[API] ❌ Failed to connect to \(baseURL)")
-            throw APIError.networkError(error.localizedDescription)
-        } catch {
-            print("[API] ❌ Unknown error: \(error.localizedDescription)")
-            throw error
         }
+        
+        throw lastError ?? APIError.unknown(message: "Failed to get program status from any endpoint")
     }
     
     struct ProgramStatusResponse: Codable {
