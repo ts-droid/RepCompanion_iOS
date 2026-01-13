@@ -840,7 +840,7 @@ class APIService {
             }
         }
         
-        throw lastError ?? APIError.unknown(message: "Failed to get program status from any endpoint")
+        throw lastError ?? APIError.networkError("Failed to get program status from any endpoint")
     }
     
     struct ProgramStatusResponse: Codable {
@@ -2402,6 +2402,7 @@ enum APIError: LocalizedError {
     case rateLimited(String)
     case decodingError
     case networkError(String)
+    case unknown(String)
     
     var errorDescription: String? {
         switch self {
@@ -2417,6 +2418,8 @@ enum APIError: LocalizedError {
             return "Kunde inte tolka svaret från servern"
         case .networkError(let message):
             return "Nätverksfel: \(message). Kontrollera din internetanslutning och att servern körs."
+        case .unknown(let message):
+            return message
         }
     }
 }
