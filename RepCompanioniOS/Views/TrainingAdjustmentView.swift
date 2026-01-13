@@ -314,7 +314,7 @@ struct TrainingAdjustmentView: View {
                 _ = try await APIService.shared.completeOnboarding(
                     profile: profileData,
                     equipment: [], // Empty for profile update, we handle gym-specifics below
-                    useV3: true
+                    useV4: true
                 )
                 
                 // 2. Generate Program for EACH Gym
