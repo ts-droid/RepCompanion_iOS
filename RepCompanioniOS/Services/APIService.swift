@@ -358,12 +358,12 @@ class APIService {
         let oneRmLatpull: Int
     }
     
-    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], useV3: Bool = true) async throws -> OnboardingCompleteResponse {
-        print("[APIService] 🚀 Using V3 AI architecture: \(useV3)")
+    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], useV4: Bool = true) async throws -> OnboardingCompleteResponse {
+        print("[APIService] 🚀 Using V4 AI architecture: \(useV4)")
         
         var urlComponents = URLComponents(string: "\(baseURL)/api/onboarding/complete")!
-        if useV3 {
-            urlComponents.queryItems = [URLQueryItem(name: "useV3", value: "true")]
+        if useV4 {
+            urlComponents.queryItems = [URLQueryItem(name: "useV4", value: "true")]
         }
         
         guard let url = urlComponents.url else {
