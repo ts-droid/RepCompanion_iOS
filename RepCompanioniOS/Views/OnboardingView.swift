@@ -1548,7 +1548,7 @@ struct OnboardingView: View {
                 let response = try await APIService.shared.completeOnboarding(
                     profile: profileData,
                     equipment: selectedEquipment,
-                    useV3: true
+                    useV4: true
                 )
                 
                 print("[Onboarding] ✅ Program generation started, response received")
@@ -2122,7 +2122,7 @@ struct OnboardingView: View {
                     let response = try await APIService.shared.completeOnboarding(
                         profile: profileData,
                         equipment: selectedEquipment,
-                        useV3: true // Use V3 AI architecture for program generation
+                        useV4: true // Use V4 AI architecture for program generation
                     )
                     
                     print("[Onboarding] ✅ Received response from completeOnboarding")
