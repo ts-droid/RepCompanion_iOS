@@ -150,26 +150,28 @@ final class UserProfile {
     
     // MARK: - Computed Properties
     
-    /// Derives the training focus label from goal percentages
+    /// Returns a user-friendly Swedish label for the motivation type
     var derivedTrainingFocus: String {
-        let goals = [
-            ("Styrka", goalStrength),
-            ("Volym", goalVolume),
-            ("Uthållighet", goalEndurance),
-            ("Cardio", goalCardio)
-        ]
-        
-        // Find the highest goal
-        let maxGoal = goals.max(by: { $0.1 < $1.1 })
-        
-        // Check if it's balanced (all within 15% of each other)
-        let maxValue = goals.map { $0.1 }.max() ?? 0
-        let minValue = goals.map { $0.1 }.min() ?? 0
-        
-        if maxValue - minValue <= 15 {
+        guard let motivation = motivationType else {
             return "Allround"
         }
         
-        return maxGoal?.0 ?? "Allround"
+        switch motivation.lowercased() {
+        case "bättre_hälsa":
+            return "Bättre hälsa"
+        case "bygga_muskler":
+            return "Bygga muskler"
+        case "sport":
+            if let sport = specificSport, !sport.isEmpty {
+                return "Specifik idrott: \(sport.capitalized)"
+            }
+            return "Specifik idrott"
+        case "bli_rörligare":
+            return "Bli rörligare"
+        case "rehabilitering":
+            return "Rehabilitering"
+        default:
+            return motivation.capitalized
+        }
     }
 }
