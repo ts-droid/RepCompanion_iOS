@@ -120,26 +120,19 @@ class SyncService: ObservableObject {
             return
         }
         
-        // Get existing templates
+        // NUCLEAR OPTION: Delete existing templates for the CURRENT gym to ensure fresh sync
+        // We fetch the current gym ID from the profile
+        let profileDescriptor = FetchDescriptor<UserProfile>(predicate: #Predicate { $0.userId == userId })
+        let profile = try? modelContext.fetch(profileDescriptor).first
+        let activeGymId = profile?.selectedGymId
+        
+        print("[SYNC] 🗑️ Deleting existing templates for gym \(activeGymId ?? "None") to ensure fresh sync...")
         let descriptor = FetchDescriptor<ProgramTemplate>(
-            predicate: #Predicate { $0.userId == userId }
+            predicate: #Predicate { $0.userId == userId && $0.gymId == activeGymId }
         )
         let existingTemplates = try modelContext.fetch(descriptor)
-        print("[SYNC] 📊 Found \(existingTemplates.count) existing templates in local database")
         
-        // NUCLEAR OPTION: Delete ALL existing templates and exercises first
-        // This ensures no stale data or ID mismatches after server regeneration
-        print("[SYNC] 🗑️ Deleting all existing templates to ensure fresh sync...")
         for template in existingTemplates {
-            // Also delete associated exercises
-            let templateIdToDelete = template.id
-            let exerciseDescriptor = FetchDescriptor<ProgramTemplateExercise>(
-                predicate: #Predicate<ProgramTemplateExercise> { $0.templateId == templateIdToDelete }
-            )
-            let exercises = (try? modelContext.fetch(exerciseDescriptor)) ?? []
-            for exercise in exercises {
-                modelContext.delete(exercise)
-            }
             modelContext.delete(template)
         }
         try modelContext.save()
@@ -149,6 +142,7 @@ class SyncService: ObservableObject {
             
             // Create new template
             let template = createTemplate(from: templateData, userId: userId)
+            template.gymId = activeGymId
             modelContext.insert(template)
             
             // Add exercises with STRICT deduplication
@@ -159,7 +153,8 @@ class SyncService: ObservableObject {
                 let uniqueKey = "\(exerciseData.exerciseName.lowercased())-\(exerciseData.orderIndex)"
                 
                 if !insertedDescriptions.contains(uniqueKey) {
-                    let exercise = createTemplateExercise(from: exerciseData, templateId: template.id)
+                    let exercise = createTemplateExercise(from: exerciseData, template: template)
+                    exercise.gymId = activeGymId
                     modelContext.insert(exercise)
                     templateExercises.append(exercise)
                     insertedDescriptions.insert(uniqueKey)
@@ -290,6 +285,24 @@ class SyncService: ObservableObject {
         }
         
         try modelContext.save()
+        
+        // RECONCILE: Update Gym.equipmentIds from UserEquipment
+        print("[SYNC] 🔄 Reconciling Gym equipment collections...")
+        let allGyms = (try? modelContext.fetch(FetchDescriptor<Gym>(predicate: #Predicate { $0.userId == userId }))) ?? []
+        let allEquipment = (try? modelContext.fetch(FetchDescriptor<UserEquipment>(predicate: #Predicate { $0.userId == userId }))) ?? []
+        
+        for gym in allGyms {
+            let gymEquipIds = allEquipment
+                .filter { $0.gymId == gym.id && $0.available }
+                .map { $0.equipmentType }
+            
+            if !gymEquipIds.isEmpty {
+                gym.equipmentIds = gymEquipIds
+                print("[SYNC] ✅ Updated gym '\(gym.name)' with \(gymEquipIds.count) units of equipment")
+            }
+        }
+        
+        try modelContext.save()
     }
     
     private func syncTrainingTips(modelContext: ModelContext) async throws {
@@ -391,11 +404,11 @@ class SyncService: ObservableObject {
         exercise.notes = data.notes
     }
     
-    private func createTemplateExercise(from data: ProgramTemplateExerciseResponse, templateId: UUID) -> ProgramTemplateExercise {
+    private func createTemplateExercise(from data: ProgramTemplateExerciseResponse, template: ProgramTemplate) -> ProgramTemplateExercise {
         let exerciseId = UUID(uuidString: data.id) ?? UUID()
-        return ProgramTemplateExercise(
+        let exercise = ProgramTemplateExercise(
             id: exerciseId,
-            templateId: templateId,
+            gymId: template.gymId,
             exerciseKey: data.exerciseKey,
             exerciseName: data.exerciseName,
             orderIndex: data.orderIndex,
@@ -406,6 +419,8 @@ class SyncService: ObservableObject {
             muscles: data.muscles,
             notes: data.notes
         )
+        exercise.template = template
+        return exercise
     }
     
     private func createSession(from data: WorkoutSessionResponse, userId: String) -> WorkoutSession {

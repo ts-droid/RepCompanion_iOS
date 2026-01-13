@@ -14,13 +14,13 @@ class APIService {
     
     #if targetEnvironment(simulator)
     // Simulator: Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 issues
-    private lazy var baseURL: String = {
+    lazy var baseURL: String = {
         return "http://127.0.0.1:5002"
     }()
     #else
     // Physical device needs Mac's IP address or Cloud URL
     // Current Mac IP: 192.168.68.82 (auto-detected)
-    private lazy var baseURL: String = {
+    lazy var baseURL: String = {
         return useCloud ? productionURL : "http://192.168.68.82:5002"
     }()
     #endif
@@ -38,7 +38,7 @@ class APIService {
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     }
     
-    private var authToken: String? {
+    var authToken: String? {
         // Get from keychain or user defaults
         UserDefaults.standard.string(forKey: "authToken")
     }
@@ -1355,7 +1355,7 @@ class APIService {
         return try decoder.decode([UserEquipmentResponse].self, from: data)
     }
     
-    func createGym(name: String, location: String?) async throws -> GymResponse {
+    func createGym(name: String, location: String?, latitude: String? = nil, longitude: String? = nil, equipmentIds: [String]? = nil, isPublic: Bool = false) async throws -> GymResponse {
         guard let token = authToken else {
             throw APIError.unauthorized
         }
@@ -1366,10 +1366,54 @@ class APIService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        let body = [
+        var body: [String: Any] = [
             "name": name,
-            "location": location as Any
+            "location": location as Any,
+            "isPublic": isPublic
         ]
+        
+        if let lat = latitude { body["latitude"] = lat }
+        if let lon = longitude { body["longitude"] = lon }
+        if let eqs = equipmentIds { body["equipmentIds"] = eqs }
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(GymResponse.self, from: data)
+    }
+    
+    func updateGym(id: String, name: String, location: String?, latitude: String? = nil, longitude: String? = nil, equipmentIds: [String]? = nil, isPublic: Bool = false) async throws -> GymResponse {
+        guard let token = authToken else {
+            throw APIError.unauthorized
+        }
+        
+        let url = URL(string: "\(baseURL)/api/gyms/\(id)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        var body: [String: Any] = [
+            "name": name,
+            "location": location as Any,
+            "isPublic": isPublic
+        ]
+        
+        if let lat = latitude { body["latitude"] = lat }
+        if let lon = longitude { body["longitude"] = lon }
+        if let eqs = equipmentIds { body["equipmentIds"] = eqs }
+        
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -1933,6 +1977,83 @@ class APIService {
             throw APIError.httpError(httpResponse.statusCode)
         }
     }
+    
+    // MARK: - V4 Workout Generation (Robust)
+    
+    /// Generate a V4 workout program with robust decoding
+    func generateProgramV4() async throws -> V4ProgramResponse {
+        let url = URL(string: "\(baseURL)/api/program/generate-v4")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let (data, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        do {
+            return try JSONDecoder().decode(V4ProgramResponse.self, from: data)
+        } catch {
+            print("[APIService] ❌ DECODING ERROR (V4): \(error)")
+            throw APIError.decodingError
+        }
+    }
+    
+    /// Fetch the user's time model for V4 generation
+    func fetchUserTimeModel() async throws -> UserTimeModel {
+        let url = URL(string: "\(baseURL)/api/user/time-model")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let (data, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        return try JSONDecoder().decode(UserTimeModel.self, from: data)
+    }
+    
+    /// Update the user's time model
+    func updateUserTimeModel(_ model: UserTimeModel) async throws -> UserTimeModel {
+        let url = URL(string: "\(baseURL)/api/user/time-model")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.httpBody = try JSONEncoder().encode(model)
+        
+        let (data, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        return try JSONDecoder().decode(UserTimeModel.self, from: data)
+    }
 }
 
 // MARK: - Additional Response Models
@@ -2020,6 +2141,9 @@ struct GymResponse: Codable {
     let userId: String
     let name: String
     let location: String?
+    let latitude: String?
+    let longitude: String?
+    let isPublic: Bool?
     let createdAt: Date
 }
 

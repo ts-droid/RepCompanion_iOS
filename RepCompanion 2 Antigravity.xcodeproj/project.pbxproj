@@ -40,22 +40,9 @@
 		B99569C22ED8D99600E88D56 /* Watch2 Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch2 Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B9168F542F13E9B8005D08F6 /* Exceptions for "RepCompanion 2" folder in "RepCompanion 2" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"RepCompanion-2-Info.plist",
-			);
-			target = B99569AD2ED8D96500E88D56 /* RepCompanion 2 */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B99569B02ED8D96500E88D56 /* RepCompanion 2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B9168F542F13E9B8005D08F6 /* Exceptions for "RepCompanion 2" folder in "RepCompanion 2" target */,
-			);
 			path = "RepCompanion 2";
 			sourceTree = "<group>";
 		};

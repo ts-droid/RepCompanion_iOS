@@ -8,14 +8,12 @@ struct EditProgramTemplateView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
     
-    @Query private var allExercises: [ProgramTemplateExercise]
     @State private var exercises: [ProgramTemplateExercise] = []
     @State private var hasChanges = false
     @State private var showAddExercise = false
     
     private var templateExercises: [ProgramTemplateExercise] {
-        allExercises.filter { $0.templateId == template.id }
-            .sorted { $0.orderIndex < $1.orderIndex }
+        template.exercises.sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var body: some View {
@@ -173,7 +171,7 @@ struct EditProgramTemplateView: View {
             }
             .sheet(isPresented: $showAddExercise) {
                 AddExerciseView(
-                    templateId: template.id,
+                    template: template,
                     onExerciseAdded: { newExercise in
                         exercises.append(newExercise)
                         updateOrderIndices()
@@ -225,6 +223,7 @@ struct EditProgramTemplateView: View {
                 existing.orderIndex = exercise.orderIndex
             } else {
                 // Insert new
+                exercise.template = template
                 modelContext.insert(exercise)
             }
         }
@@ -382,7 +381,7 @@ struct EditableExerciseCard: View {
 }
 
 struct AddExerciseView: View {
-    let templateId: UUID
+    let template: ProgramTemplate
     let onExerciseAdded: (ProgramTemplateExercise) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -451,7 +450,7 @@ struct AddExerciseView: View {
                             let exerciseKey = selectedExercise!.id
                             let allMuscles = selectedExercise!.primaryMuscles + selectedExercise!.secondaryMuscles
                             let newExercise = ProgramTemplateExercise(
-                                templateId: templateId,
+                                gymId: template.gymId,
                                 exerciseKey: exerciseKey,
                                 exerciseName: selectedExercise!.name,
                                 orderIndex: 0, // Will be updated
@@ -461,6 +460,7 @@ struct AddExerciseView: View {
                                 requiredEquipment: selectedExercise!.requiredEquipment,
                                 muscles: allMuscles
                             )
+                            newExercise.template = template
                             onExerciseAdded(newExercise)
                         }
                         .buttonStyle(.borderedProminent)

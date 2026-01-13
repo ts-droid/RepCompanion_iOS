@@ -7,7 +7,6 @@ struct WorkoutListView: View {
     @StateObject private var authService = AuthService.shared
     
     @Query private var programTemplates: [ProgramTemplate]
-    @Query private var templateExercises: [ProgramTemplateExercise]
     @Query private var userProfiles: [UserProfile]
     
     @State private var activeSession: WorkoutSession?
@@ -26,14 +25,17 @@ struct WorkoutListView: View {
     }
     
     private var sortedTemplates: [ProgramTemplate] {
-        programTemplates.sorted { template1, template2 in
-            let day1 = template1.dayOfWeek ?? 0
-            let day2 = template2.dayOfWeek ?? 0
-            if day1 != day2 {
-                return day1 < day2
+        let activeGymId = currentProfile?.selectedGymId
+        return programTemplates
+            .filter { $0.gymId == activeGymId } // Filter by gym
+            .sorted { template1, template2 in
+                let day1 = template1.dayOfWeek ?? 0
+                let day2 = template2.dayOfWeek ?? 0
+                if day1 != day2 {
+                    return day1 < day2
+                }
+                return template1.templateName < template2.templateName
             }
-            return template1.templateName < template2.templateName
-        }
     }
     
     private var currentPassNumber: Int {
@@ -41,7 +43,7 @@ struct WorkoutListView: View {
     }
     
     private func getExerciseCount(for template: ProgramTemplate) -> Int {
-        templateExercises.filter { $0.templateId == template.id }.count
+        template.exercises.count
     }
     
     private func getDayName(_ dayOfWeek: Int?) -> String {
@@ -199,6 +201,7 @@ struct WorkoutListView: View {
                         print("[WorkoutListView] 🔄 Pull-to-refresh triggered")
                         if let userId = authService.currentUserId {
                             do {
+                                // Sync specifically for the user (SyncService might need updates to handle per-gym sync if server supports it, otherwise generic sync)
                                 try await SyncService.shared.syncProgramTemplates(userId: userId, modelContext: modelContext)
                                 print("[WorkoutListView] ✅ Templates synced successfully")
                             } catch {

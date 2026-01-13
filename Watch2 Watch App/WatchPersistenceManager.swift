@@ -444,7 +444,6 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
                 if existingExercise == nil {
                      let newExercise = ProgramTemplateExercise(
                          id: id,
-                         templateId: templateId ?? UUID(),
                          exerciseKey: name.lowercased().replacingOccurrences(of: " ", with: "-"),
                          exerciseName: name,
                          orderIndex: data["orderIndex"] as? Int ?? 0,
@@ -454,6 +453,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
                          requiredEquipment: [],
                          muscles: []
                      )
+                     if let tid = templateId, let template = (try? context.fetch(FetchDescriptor<ProgramTemplate>(predicate: #Predicate { $0.id == tid })))?.first {
+                         newExercise.template = template
+                     }
                      context.insert(newExercise)
                 }
             }
@@ -562,7 +564,6 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
                     } else {
                         let newEx = ProgramTemplateExercise(
                             id: exId,
-                            templateId: id,
                             exerciseKey: exData["exerciseKey"] as? String ?? exName.lowercased(),
                             exerciseName: exName,
                             orderIndex: exData["orderIndex"] as? Int ?? 0,
@@ -570,15 +571,8 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
                             targetReps: exData["targetReps"] as? String ?? "8-10",
                             targetWeight: exData["targetWeight"] as? Double
                         )
+                        newEx.template = template
                         context.insert(newEx)
-                        // Note: Relationships might need manual setting if not auto-inferred, 
-                        // but since we passed templateId to init, SwiftData often handles it or we set it explicitly.
-                        // Ideally: template.exercises?.append(newEx) if not auto-linked.
-                        newEx.templateId = id // Redundant but safe
-                        
-                        // If strict relationship needed:
-                        if template.exercises == nil { template.exercises = [] }
-                        template.exercises?.append(newEx)
                     }
                 }
             }

@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var showNotificationAlert = false
     @State private var isSyncing = false
     @State private var showResetOnboardingAlert = false
+    @State private var showResetPassAlert = false
     
     @Query private var userProfiles: [UserProfile]
     @Query private var programTemplates: [ProgramTemplate]
@@ -194,6 +195,39 @@ struct SettingsView: View {
                     }
                 }
                 
+                // Program Management
+                Section("Programhantering") {
+                    Button(role: .none) {
+                        showResetPassAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                                .foregroundColor(.blue)
+                            VStack(alignment: .leading) {
+                                Text("Börja om på Pass 1")
+                                Text("Nollställ räknaren för ditt nuvarande program.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    
+                    Button(role: .destructive) {
+                        showResetOnboardingAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle")
+                                .foregroundColor(.red)
+                            VStack(alignment: .leading) {
+                                Text("Återställ allt")
+                                Text("Ta bort alla program och gym för att börja om helt.")
+                                    .font(.caption)
+                                    .foregroundColor(.red.opacity(0.8))
+                            }
+                        }
+                    }
+                }
+                
                 // Admin Section (Dev Only)
                 let isDevUser = AuthService.shared.currentUserEmail == "dev@recompute.it" || 
                                 AuthService.shared.currentUserEmail == "dev@test.com"
@@ -209,26 +243,15 @@ struct SettingsView: View {
                     }
                 }
                 
-                // Debug Section (Always visible in DEBUG builds)
                 #if DEBUG
                 Section("Debug") {
-                    Button(role: .destructive) {
-                        showResetOnboardingAlert = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                                .foregroundColor(.red)
-                            Text("Återställ onboarding")
-                        }
-                    }
-                    
                     Button(role: .destructive) {
                         deleteAllTemplates()
                     } label: {
                         HStack {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
-                            Text("Radera alla program templates")
+                            Text("Manuell templates-rensning")
                         }
                     }
                 }
@@ -243,7 +266,15 @@ struct SettingsView: View {
                     }
                 }
             }
-            .alert("Återställ onboarding", isPresented: $showResetOnboardingAlert) {
+            .alert("Börja om på Pass 1?", isPresented: $showResetPassAlert) {
+                Button("Avbryt", role: .cancel) { }
+                Button("Nollställ", role: .destructive) {
+                    resetCurrentPass()
+                }
+            } message: {
+                Text("Detta kommer att sätta din räknare till Pass 1. Dina befintliga träningsprogram raderas inte.")
+            }
+            .alert("Radera allt och börja om?", isPresented: $showResetOnboardingAlert) {
                 Button("Avbryt", role: .cancel) { }
                 Button("Återställ", role: .destructive) {
                     resetOnboarding()
@@ -261,6 +292,16 @@ struct SettingsView: View {
             } message: {
                 Text("Kunde inte aktivera notifikationer. Kontrollera att appen har behörighet i Inställningar.")
             }
+        }
+    }
+    
+    // MARK: - Program Functions
+    
+    private func resetCurrentPass() {
+        if let profile = currentProfile {
+            profile.currentPassNumber = 1
+            try? modelContext.save()
+            print("[SettingsView] ✅ Reset currentPassNumber to 1")
         }
     }
     

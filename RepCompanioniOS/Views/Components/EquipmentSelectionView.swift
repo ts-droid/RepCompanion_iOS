@@ -3,14 +3,16 @@ import SwiftData
 
 struct EquipmentSelectionView: View {
     @Binding var selectedEquipmentIds: [String]
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     let colorScheme: ColorScheme
     let selectedTheme: String
+    var onFinish: (() -> Void)? = nil // Optional callback for onboarding
     
-    @State private var availableEquipment: [EquipmentCatalog] = []
+    @Query(sort: \EquipmentCatalog.name) private var availableEquipment: [EquipmentCatalog]
     @State private var isLoading = false
     @State private var showCamera = false
     
-    // Grouping equipment
     private var groupedEquipment: [String: [EquipmentCatalog]] {
         Dictionary(grouping: availableEquipment, by: { $0.category })
     }
@@ -20,40 +22,63 @@ struct EquipmentSelectionView: View {
     }
     
     var body: some View {
-        VStack(spacing: 24) {
-            Button(action: { showCamera = true }) {
-                HStack {
-                    Image(systemName: "camera.fill")
-                    Text("Skanna utrustning")
+        VStack(spacing: 0) {
+            // Header for Scanning
+            VStack(spacing: 16) {
+                Button(action: { showCamera = true }) {
+                    HStack {
+                        Image(systemName: "camera.fill")
+                        Text("Skanna utrustning")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme))
+                    .cornerRadius(12)
+                    .shadow(color: Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.3), radius: 8, x: 0, y: 4)
                 }
-                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme))
-                .cornerRadius(12)
+                .padding(.horizontal)
+                .padding(.top, 16)
+                
+                Text("Eller välj manuellt nedan")
+                    .font(.caption)
+                    .foregroundColor(Color.textSecondary(for: colorScheme))
             }
+            .padding(.bottom, 16)
+            .background(Color.appBackground(for: colorScheme))
             
             if isLoading {
-                ProgressView()
+                Spacer()
+                ProgressView("Hämtar utrustning...")
                     .padding()
+                Spacer()
             } else if availableEquipment.isEmpty {
-                Text("Ingen utrustning hittades. Kontrollera din anslutning.")
-                    .foregroundColor(Color.textSecondary(for: colorScheme))
-                    .padding()
+                Spacer()
+                VStack(spacing: 12) {
+                    Image(systemName: "wifi.exclamationmark")
+                        .font(.largeTitle)
+                    Text("Ingen utrustning hittades.")
+                    Button("Försök igen") { loadEquipment() }
+                        .buttonStyle(.bordered)
+                }
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+                Spacer()
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 32) {
                         ForEach(categories, id: \.self) { category in
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Text(category)
-                                    .font(.headline)
+                                    .font(.title3)
+                                    .fontWeight(.bold)
                                     .foregroundColor(Color.textPrimary(for: colorScheme))
-                                    .padding(.leading, 4)
+                                    .padding(.horizontal, 4)
                                 
                                 LazyVGrid(columns: [
-                                    GridItem(.flexible()),
-                                    GridItem(.flexible())
-                                ], spacing: 12) {
+                                    GridItem(.flexible(), spacing: 16),
+                                    GridItem(.flexible(), spacing: 16)
+                                ], spacing: 16) {
                                     ForEach(groupedEquipment[category] ?? [], id: \.id) { equipment in
                                         EquipmentCard(
                                             equipment: equipment,
@@ -68,7 +93,41 @@ struct EquipmentSelectionView: View {
                             }
                         }
                     }
-                    .padding(.bottom, 20)
+                    .padding(.horizontal)
+                    .padding(.bottom, 100)
+                }
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if onFinish != nil {
+                Button(action: { onFinish?() }) {
+                    Text("Fortsätt")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme))
+                        .cornerRadius(12)
+                        .padding()
+                }
+                .background(
+                    LinearGradient(
+                        colors: [Color.appBackground(for: colorScheme).opacity(0), Color.appBackground(for: colorScheme)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea()
+                )
+            }
+        }
+        .navigationTitle("Välj utrustning")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if onFinish == nil {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Klar") {
+                        dismiss()
+                    }
                 }
             }
         }
@@ -93,41 +152,15 @@ struct EquipmentSelectionView: View {
         isLoading = true
         Task {
             do {
-                // Fetch from server via APIService (assuming EquipmentCatalog is cached or fetched fresh)
-                // Actually, ExerciseCatalogService syncs to SwiftData, we should query from there?
-                // But this view might be used where we want direct access or via service.
-                // Let's us APIService directly or modelContext if we want persistence.
-                // For simplicity/robustness, let's fetch fresh list or use what's in DB.
-                // Reusing APIService fetchEquipmentCatalog directly to avoid context threading issues for now, 
-                // OR better: use ModelContext if passed in, but we didn't pass it.
-                // Let's use APIService.shared.fetchEquipmentCatalog() -> [EquipmentCatalog]
-                // Oh wait, APIService returns [EquipmentCatalogResponse], not Model objects.
-                // OnboardingView used `loadEquipmentCatalog` which populated `availableEquipment`.
-                // Let's look at how OnboardingView did it.
-                // It seems it used `availableEquipment` state.
-                
-                // Let's replicate `APIService.shared.fetchEquipmentCatalog` and map manualy if needed, 
-                // OR query from DB if we trust sync.
-                // Let's try fetching from API to ensure fresh data for selection.
-                
-                let response = try await APIService.shared.fetchEquipmentCatalog()
-                
-                // Convert Response to Model for display (temporary usage)
-                self.availableEquipment = response.map { item in
-                     EquipmentCatalog(
-                        id: item.id,
-                        name: item.name,
-                        nameEn: item.nameEn,
-                        category: item.category,
-                        type: item.type,
-                        equipmentDescription: item.description,
-                        createdAt: item.createdAt
-                    )
+                try await ExerciseCatalogService.shared.syncEquipmentCatalog(modelContext: modelContext)
+                await MainActor.run {
+                    isLoading = false
                 }
-                isLoading = false
             } catch {
-                print("Failed to load equipment: \(error)")
-                isLoading = false
+                await MainActor.run {
+                    print("Failed to load equipment: \(error)")
+                    isLoading = false
+                }
             }
         }
     }
@@ -150,42 +183,50 @@ struct EquipmentCard: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(equipment.name)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Color.textPrimary(for: colorScheme))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .frame(height: 40, alignment: .topLeading)
-                
-                Spacer()
-                
-                if isSelected {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Spacer()
+                    ZStack {
+                        Circle()
+                            .fill(isSelected ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : Color.textSecondary(for: colorScheme).opacity(0.1))
+                            .frame(width: 24, height: 24)
+                        
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        }
                     }
                 }
+                
+                Text(equipment.name)
+                    .font(.body)
+                    .fontWeight(.semibold)
+                    .foregroundColor(isSelected ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : Color.textPrimary(for: colorScheme))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .frame(height: 48, alignment: .topLeading)
+                
+                Spacer(minLength: 0)
             }
-            .padding(12)
-            .frame(height: 100)
+            .padding(16)
+            .frame(maxWidth: .infinity)
             .background(
-                isSelected
-                    ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.15)
-                    : Color.cardBackground(for: colorScheme)
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.cardBackground(for: colorScheme))
+                    .shadow(color: isSelected ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.1) : Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
             )
-            .cornerRadius(12)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 16)
                     .stroke(
                         isSelected
                             ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
-                            : Color.clear,
-                        lineWidth: 2
+                            : Color.textSecondary(for: colorScheme).opacity(0.1),
+                        lineWidth: isSelected ? 2 : 1
                     )
             )
         }
+        .scaleEffect(isSelected ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSelected)
     }
 }

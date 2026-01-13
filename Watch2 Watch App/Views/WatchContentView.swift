@@ -239,7 +239,7 @@ struct WatchProgramListView: View {
                                         Text(getDayShortName(dayOfWeek))
                                     }
                                     Text("•")
-                                    Text("\(template.exercises?.count ?? 0) övningar")
+                                    Text("\(template.exercises.count) övningar")
                                 }
                                 .font(.footnote)
                                 .foregroundColor(.secondary)

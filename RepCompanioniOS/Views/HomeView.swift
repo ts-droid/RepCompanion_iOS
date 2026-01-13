@@ -10,6 +10,9 @@ struct HomeView: View {
     @State private var isGeneratingProgram = false
     @State private var showActiveWorkout = false
     @State private var activeSession: WorkoutSession?
+    @State private var showGenerationProgress = false
+    @State private var generationProgress: Int = 0
+    @State private var generationStatus: String = "generating"
     
     // Logic for refined workout initiation
     @State private var showStartConfirmation = false
@@ -18,7 +21,6 @@ struct HomeView: View {
     @Query private var userProfiles: [UserProfile]
     @Query private var programTemplates: [ProgramTemplate]
     @Query private var workoutSessions: [WorkoutSession]
-    @Query private var templateExercises: [ProgramTemplateExercise]
     @Query private var exerciseLogs: [ExerciseLog]
     
     @StateObject private var healthKitService = HealthKitService.shared
@@ -53,12 +55,16 @@ struct HomeView: View {
             dayOfWeek = weekday - 1
         }
         
-        // Only return template if it matches today's weekday
-        return programTemplates.first(where: { $0.dayOfWeek == dayOfWeek })
+        
+        // Only return template if it matches today's weekday AND current gym
+        let activeGymId = currentProfile?.selectedGymId
+        return programTemplates.first(where: { 
+            $0.dayOfWeek == dayOfWeek && $0.gymId == activeGymId
+        })
     }
     
     private func getExerciseCount(for template: ProgramTemplate) -> Int {
-        templateExercises.filter { $0.templateId == template.id }.count
+        template.exercises.count
     }
     
     // Get next upcoming template (for bottom button when no workout today)
@@ -76,12 +82,15 @@ struct HomeView: View {
         }
         
         // If there's a template for today, return it
-        if let todayTemplate = programTemplates.first(where: { $0.dayOfWeek == dayOfWeek }) {
+        let activeGymId = currentProfile?.selectedGymId
+        if let todayTemplate = programTemplates.first(where: { 
+            $0.dayOfWeek == dayOfWeek && $0.gymId == activeGymId
+        }) {
             return todayTemplate
         }
         
-        // If no template for today, find the next upcoming template
-        let sortedTemplates = programTemplates.filter { $0.dayOfWeek != nil }
+        // If no template for today, find the next upcoming template for THIS gym
+        let sortedTemplates = programTemplates.filter { $0.dayOfWeek != nil && $0.gymId == activeGymId }
             .sorted { ($0.dayOfWeek ?? 0) < ($1.dayOfWeek ?? 0) }
         
         // Find next template after today
@@ -280,6 +289,18 @@ struct HomeView: View {
             .onChange(of: healthKitService.authorizationStatus) { _, _ in
                 updateActivityAndRecovery()
                 updateSleepScore()
+            }
+            
+            // Generation progress overlay
+            if showGenerationProgress {
+                GenerationProgressView(
+                    progress: generationProgress,
+                    status: generationStatus,
+                    iconName: "",
+                    onDismiss: {
+                        showGenerationProgress = false
+                    }
+                )
             }
         }
         .sheet(item: $activeSession) { session in
@@ -483,24 +504,78 @@ struct HomeView: View {
     }
     
     private func generateProgram() {
-        guard let profile = currentProfile else { return }
+        guard let profile = currentProfile else {
+            print("[HomeView] ❌ Cannot generate program: No profile found")
+            return
+        }
         
+        print("[HomeView] 🚀 Starting program generation for user: \(profile.userId)")
         isGeneratingProgram = true
+        showGenerationProgress = true
+        generationProgress = 0
+        generationStatus = "generating"
         
         Task {
             do {
-                let service = WorkoutGenerationService(modelContext: modelContext)
-                if let input = service.getUserWorkoutData(userId: profile.userId) {
-                    _ = try await service.generateProgram(for: input)
+                let service = WorkoutGenerationService.shared
+                if let input = service.getUserWorkoutData(userId: profile.userId, modelContext: modelContext) {
+                    print("[HomeView] 📥 Workout data gathered for gym: \(input.gymId ?? "none")")
+                    
+                    // Update progress during generation
+                    await MainActor.run {
+                        generationProgress = 30
+                        print("[HomeView] 📊 Progress: 30% - Requesting generation...")
+                    }
+                    
+                    // The service already calls saveProgramTemplates internally
+                    _ = try await service.generateProgram(for: input, userId: profile.userId, modelContext: modelContext)
+                    
+                    await MainActor.run {
+                        generationProgress = 70
+                        print("[HomeView] 📊 Progress: 70% - Program generated and saved. Adapting to other gyms...")
+                    }
+                    
+                    // Adapt to all OTHER gyms automatically
+                    let targetUserId = profile.userId
+                    let sourceGymId = input.gymId ?? ""
+                    let otherGymsDescriptor = FetchDescriptor<Gym>(
+                        predicate: #Predicate { $0.userId == targetUserId && $0.id != sourceGymId }
+                    )
+                    let otherGyms = try? modelContext.fetch(otherGymsDescriptor)
+                    print("[HomeView] 🔍 Found \(otherGyms?.count ?? 0) other gyms for adaptation")
+                    
+                    for gym in otherGyms ?? [] {
+                        print("[HomeView] 🔄 Auto-adapting new program to gym: \(gym.name)")
+                        try? await ProgramAdaptationService.shared.adaptProgram(
+                            userId: profile.userId,
+                            sourceGymId: input.gymId,
+                            targetGymId: gym.id,
+                            modelContext: modelContext
+                        )
+                    }
+                    
+                    await MainActor.run {
+                        generationProgress = 100
+                        generationStatus = "completed"
+                        print("[HomeView] ✅ Generation and adaptation complete!")
+                    }
+                    
+                    // Wait a moment to show completion
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } else {
+                    print("[HomeView] ❌ Failed to get user workout data")
                 }
                 
                 await MainActor.run {
                     isGeneratingProgram = false
+                    showGenerationProgress = false
+                    print("[HomeView] 🏁 Cleanup: showGenerationProgress = false")
                 }
             } catch {
                 await MainActor.run {
                     isGeneratingProgram = false
-                    print("Error generating program: \(error)")
+                    showGenerationProgress = false
+                    print("[HomeView] ❌ Error generating program: \(error)")
                 }
             }
         }
@@ -562,7 +637,7 @@ struct HomeView: View {
     private func calculateWorkoutProgress() -> Double? {
         guard let template = todayTemplate else { return nil }
         
-        let plannedExercises = templateExercises.filter { $0.templateId == template.id }
+        let plannedExercises = template.exercises
         
         var totalPlannedReps = 0
         for exercise in plannedExercises {

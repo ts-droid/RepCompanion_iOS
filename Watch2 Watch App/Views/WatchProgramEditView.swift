@@ -7,7 +7,7 @@ struct WatchProgramEditView: View {
     @Environment(\.modelContext) private var modelContext
     
     private var sortedExercises: [ProgramTemplateExercise] {
-        template.exercises?.sorted { $0.orderIndex < $1.orderIndex } ?? []
+        template.exercises.sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var body: some View {

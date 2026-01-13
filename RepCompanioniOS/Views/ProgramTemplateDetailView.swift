@@ -19,11 +19,8 @@ struct ProgramTemplateDetailView: View {
     @State private var showStartConfirmation = false
     
     // Query to fetch exercises for this template
-    @Query private var allExercises: [ProgramTemplateExercise]
-    
     private var exercises: [ProgramTemplateExercise] {
-        allExercises.filter { $0.templateId == template.id }
-            .sorted { $0.orderIndex < $1.orderIndex }
+        template.exercises.sorted { $0.orderIndex < $1.orderIndex }
     }
     
     private func startWorkout() {

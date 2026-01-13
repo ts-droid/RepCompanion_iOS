@@ -128,19 +128,18 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                             "createdAt": template.createdAt.timeIntervalSince1970
                         ]
                         
-                        if let exercises = template.exercises {
-                            dict["exercises"] = exercises.map { exercise -> [String: Any] in
-                                return [
-                                    "id": exercise.id.uuidString,
-                                    "templateId": exercise.templateId.uuidString,
-                                    "exerciseName": exercise.exerciseName,
-                                    "exerciseKey": exercise.exerciseKey,
-                                    "orderIndex": exercise.orderIndex,
-                                    "targetSets": exercise.targetSets,
-                                    "targetReps": exercise.targetReps,
-                                    "targetWeight": exercise.targetWeight ?? 0.0
-                                ]
-                            }
+                        let exercises = template.exercises
+                        dict["exercises"] = exercises.map { exercise -> [String: Any] in
+                            return [
+                                "id": exercise.id.uuidString,
+                                "templateId": exercise.template?.id.uuidString ?? "",
+                                "exerciseName": exercise.exerciseName,
+                                "exerciseKey": exercise.exerciseKey,
+                                "orderIndex": exercise.orderIndex,
+                                "targetSets": exercise.targetSets,
+                                "targetReps": exercise.targetReps,
+                                "targetWeight": exercise.targetWeight ?? 0.0
+                            ]
                         }
                         return dict
                     }
@@ -212,22 +211,21 @@ extension WatchConnectivityManager {
                 "createdAt": template.createdAt.timeIntervalSince1970
             ]
             
-            if let exercises = template.exercises {
-                dict["exercises"] = exercises.map { exercise -> [String: Any] in
-                    return [
-                        "id": exercise.id.uuidString,
-                        "templateId": exercise.templateId.uuidString,
-                        "exerciseName": exercise.exerciseName,
-                        "exerciseKey": exercise.exerciseKey, // Ensure this exists in updated model
-                        "orderIndex": exercise.orderIndex,
-                        "targetSets": exercise.targetSets,
-                        "targetReps": exercise.targetReps,
-                        "targetWeight": exercise.targetWeight ?? 0.0,
-                        "requiredEquipment": exercise.requiredEquipment,
-                        "muscles": exercise.muscles,
-                        "notes": exercise.notes ?? ""
-                    ]
-                }
+            let exercises = template.exercises
+            dict["exercises"] = exercises.map { exercise -> [String: Any] in
+                return [
+                    "id": exercise.id.uuidString,
+                    "templateId": exercise.template?.id.uuidString ?? "",
+                    "exerciseName": exercise.exerciseName,
+                    "exerciseKey": exercise.exerciseKey, // Ensure this exists in updated model
+                    "orderIndex": exercise.orderIndex,
+                    "targetSets": exercise.targetSets,
+                    "targetReps": exercise.targetReps,
+                    "targetWeight": exercise.targetWeight ?? 0.0,
+                    "requiredEquipment": exercise.requiredEquipment,
+                    "muscles": exercise.muscles,
+                    "notes": exercise.notes ?? ""
+                ]
             }
             return dict
         }

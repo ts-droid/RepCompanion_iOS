@@ -27,7 +27,7 @@ struct GymListView: View {
                 )
             } else {
                 ForEach(gyms) { gym in
-                    NavigationLink(destination: GymDetailView(gym: gym)) {
+                    NavigationLink(destination: EditGymView(gymToEdit: gym)) {
                         GymRowContent(
                             gym: gym,
                             isSelected: gym.isSelected,
@@ -61,10 +61,30 @@ struct GymListView: View {
             }
         }
         .sheet(isPresented: $showingAddGym) {
-            EditGymView()
+            NavigationView {
+                EditGymView()
+            }
         }
         .sheet(item: $gymToEdit) { gym in
-            EditGymView(gymToEdit: gym)
+            NavigationView {
+                EditGymView(gymToEdit: gym)
+            }
+        }
+        .onAppear {
+            autoSelectFirstGymIfNeeded()
+        }
+    }
+    
+    private func autoSelectFirstGymIfNeeded() {
+        // If there's exactly one gym and none are selected in the profile, select it
+        guard gyms.count == 1, let firstGym = gyms.first else { return }
+        
+        let currentUserId = firstGym.userId
+        let profile = profiles.first { $0.userId == currentUserId }
+        
+        if profile?.selectedGymId == nil {
+            print("[GymListView] 🔄 Auto-selecting first gym: \(firstGym.name)")
+            gymService.selectGym(gym: firstGym, modelContext: modelContext)
         }
     }
     

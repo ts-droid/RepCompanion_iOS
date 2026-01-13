@@ -81,9 +81,12 @@ struct StatisticsView: View {
                         }
                         
                         // Muscle Distribution Chart
-                        ChartCard(title: "Muskelfördelning", subtitle: "Fördelning av set per muskelgrupp", colorScheme: colorScheme) {
-                            ExerciseDistributionChart(data: StatsCalculator.shared.getMuscleDistribution(modelContext: modelContext))
+                        NavigationLink(destination: MuscleBalanceView()) {
+                            ChartCard(title: "Muskelfördelning", subtitle: "Fördelning av set per muskelgrupp", colorScheme: colorScheme) {
+                                ExerciseDistributionChart(data: StatsCalculator.shared.getMuscleDistribution(modelContext: modelContext))
+                            }
                         }
+                        .buttonStyle(.plain)
                         
                         // Strength Development Charts
                         VStack(alignment: .leading, spacing: 16) {

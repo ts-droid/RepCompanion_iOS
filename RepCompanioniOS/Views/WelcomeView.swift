@@ -14,7 +14,11 @@ struct WelcomeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                         // Header
-                        BrandLogo(size: 80)
+                        Image("AppLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 140, height: 140)
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                             .padding(.top, 40)
                         
                         VStack(spacing: 12) {

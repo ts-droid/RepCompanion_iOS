@@ -5,18 +5,21 @@ import SwiftData
 final class ProgramTemplate {
     @Attribute(.unique) var id: UUID
     var userId: String
+    var gymId: String? // Linked to a specific gym
     var templateName: String
     var muscleFocus: String?
     var dayOfWeek: Int? // 1=Monday, 7=Sunday
     var estimatedDurationMinutes: Int?
     var warmupDescription: String? // New field for warm-up suggestions
-    @Relationship(deleteRule: .cascade) var exercises: [ProgramTemplateExercise]?
+    @Relationship(deleteRule: .cascade, inverse: \ProgramTemplateExercise.template) 
+    var exercises: [ProgramTemplateExercise] = []
     var createdAt: Date
     var updatedAt: Date
     
     init(
         id: UUID = UUID(),
         userId: String,
+        gymId: String? = nil,
         templateName: String,
         muscleFocus: String? = nil,
         dayOfWeek: Int? = nil,
@@ -26,6 +29,7 @@ final class ProgramTemplate {
     ) {
         self.id = id
         self.userId = userId
+        self.gymId = gymId
         self.templateName = templateName
         self.muscleFocus = muscleFocus
         self.dayOfWeek = dayOfWeek
@@ -40,7 +44,8 @@ final class ProgramTemplate {
 @Model
 final class ProgramTemplateExercise {
     @Attribute(.unique) var id: UUID
-    var templateId: UUID
+    var template: ProgramTemplate?
+    var gymId: String? // Cached gymId for easier filtering
     var exerciseKey: String
     var exerciseName: String
     var orderIndex: Int
@@ -53,7 +58,7 @@ final class ProgramTemplateExercise {
     
     init(
         id: UUID = UUID(),
-        templateId: UUID,
+        gymId: String? = nil,
         exerciseKey: String,
         exerciseName: String,
         orderIndex: Int,
@@ -65,7 +70,7 @@ final class ProgramTemplateExercise {
         notes: String? = nil
     ) {
         self.id = id
-        self.templateId = templateId
+        self.gymId = gymId
         self.exerciseKey = exerciseKey
         self.exerciseName = exerciseName
         self.orderIndex = orderIndex

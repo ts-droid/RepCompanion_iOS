@@ -25,15 +25,46 @@ class GymService: ObservableObject {
     func createGym(
         name: String,
         location: String?,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
         equipmentIds: [String],
+        isPublic: Bool = false,
         userId: String,
         modelContext: ModelContext
-    ) -> Gym {
+    ) async throws -> Gym {
+        // Build coordinate strings if present
+        let latStr = latitude != nil ? String(format: "%.6f", latitude!) : nil
+        let lonStr = longitude != nil ? String(format: "%.6f", longitude!) : nil
+        
+        var serverId: String?
+        
+        // Sync to server if public
+        if isPublic {
+            do {
+                let response = try await APIService.shared.createGym(
+                    name: name,
+                    location: location,
+                    latitude: latStr,
+                    longitude: lonStr,
+                    equipmentIds: equipmentIds,
+                    isPublic: true
+                )
+                serverId = response.id
+            } catch {
+                print("Failed to sync public gym to server: \(error)")
+                // we still save locally
+            }
+        }
+        
         // Create new gym
         let gym = Gym(
+            id: serverId ?? UUID().uuidString,
             name: name,
             location: location,
+            latitude: latitude,
+            longitude: longitude,
             equipmentIds: equipmentIds,
+            isPublic: isPublic,
             userId: userId
         )
         
@@ -61,12 +92,38 @@ class GymService: ObservableObject {
         gym: Gym,
         name: String,
         location: String?,
+        latitude: Double?,
+        longitude: Double?,
         equipmentIds: [String],
+        isPublic: Bool,
         modelContext: ModelContext
-    ) {
+    ) async throws {
+        // Sync to server if public (or becoming public)
+        if isPublic {
+            let latStr = latitude != nil ? String(format: "%.6f", latitude!) : nil
+            let lonStr = longitude != nil ? String(format: "%.6f", longitude!) : nil
+            
+            do {
+                _ = try await APIService.shared.updateGym(
+                    id: gym.id,
+                    name: name,
+                    location: location,
+                    latitude: latStr,
+                    longitude: lonStr,
+                    equipmentIds: equipmentIds,
+                    isPublic: true
+                )
+            } catch {
+                print("Failed to sync gym update to server: \(error)")
+            }
+        }
+        
         gym.name = name
         gym.location = location
+        gym.latitude = latitude
+        gym.longitude = longitude
         gym.equipmentIds = equipmentIds
+        gym.isPublic = isPublic
         gym.updatedAt = Date()
         
         try? modelContext.save()

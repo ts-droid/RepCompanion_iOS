@@ -18,7 +18,6 @@ struct ActiveWorkoutView: View {
     let template: ProgramTemplate?
     
     @Query private var exerciseLogs: [ExerciseLog]
-    @Query private var allTemplateExercises: [ProgramTemplateExercise]
     @Query private var gyms: [Gym]
     @Query private var equipmentCatalog: [EquipmentCatalog]
     @Query private var profiles: [UserProfile]
@@ -223,9 +222,6 @@ struct ActiveWorkoutView: View {
             print("[DEBUG ActiveWorkoutView] onDisappear")
             timer?.invalidate()
         }
-        .onChange(of: allTemplateExercises) { _, _ in
-            initializeSessionExercises()
-        }
         .onChange(of: isResting) { _, newValue in
             if newValue {
                 startTimer()
@@ -286,9 +282,18 @@ struct ActiveWorkoutView: View {
     private func initializeSessionExercises() {
         guard sessionExercises.isEmpty else { return }
         
-        let targetTemplateId = template?.id ?? session.templateId
-        sessionExercises = allTemplateExercises.filter { $0.templateId == targetTemplateId }
-            .sorted { $0.orderIndex < $1.orderIndex }
+        if let templateExercises = template?.exercises {
+            sessionExercises = templateExercises.sorted { $0.orderIndex < $1.orderIndex }
+        } else {
+            // Fallback if template is nil (should not happen with regular flow)
+            let targetTemplateId = session.templateId
+            let descriptor = FetchDescriptor<ProgramTemplateExercise>(
+                predicate: #Predicate { $0.template?.id == targetTemplateId }
+            )
+            if let fetched = try? modelContext.fetch(descriptor) {
+                sessionExercises = fetched.sorted { $0.orderIndex < $1.orderIndex }
+            }
+        }
     }
     
     private func restoreStateFromLogs() {

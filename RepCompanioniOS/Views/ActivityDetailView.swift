@@ -10,7 +10,6 @@ struct ActivityDetailView: View {
     
     @Query private var workoutSessions: [WorkoutSession]
     @Query private var programTemplates: [ProgramTemplate]
-    @Query private var templateExercises: [ProgramTemplateExercise]
     @Query private var exerciseLogs: [ExerciseLog]
     
     @State private var stepsToday: Int = 0
@@ -61,7 +60,7 @@ struct ActivityDetailView: View {
         guard let template = todayTemplate else { return nil }
         
         // Get planned exercises for today's template
-        let plannedExercises = templateExercises.filter { $0.templateId == template.id }
+        let plannedExercises = template.exercises
         
         // Calculate total planned reps
         var totalPlannedReps = 0

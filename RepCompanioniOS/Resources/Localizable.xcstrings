@@ -107,6 +107,9 @@
     "Admin" : {
 
     },
+    "Adress (Valfritt)" : {
+
+    },
     "Advanced" : {
       "localizations" : {
         "sv" : {
@@ -174,6 +177,9 @@
     "Aktivt" : {
 
     },
+    "Aktivt gym" : {
+
+    },
     "Aktivt Gym" : {
 
     },
@@ -181,6 +187,12 @@
 
     },
     "Alla övningar har granskats." : {
+
+    },
+    "Analys" : {
+
+    },
+    "Analyserar ditt program..." : {
 
     },
     "Analyzing your goals..." : {
@@ -192,6 +204,9 @@
           }
         }
       }
+    },
+    "Ange din e-post" : {
+
     },
     "Anledning (valfritt)" : {
 
@@ -220,7 +235,7 @@
     "Återställ" : {
 
     },
-    "Återställ onboarding" : {
+    "Återställ allt" : {
 
     },
     "Åtkomst nekad" : {
@@ -230,6 +245,7 @@
 
     },
     "Available Equipment" : {
+      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -347,6 +363,12 @@
           }
         }
       }
+    },
+    "Börja om på Pass 1" : {
+
+    },
+    "Börja om på Pass 1?" : {
+
     },
     "Börja träna" : {
 
@@ -547,6 +569,9 @@
     "Detta kommer att återställa onboarding och du kommer att behöva gå igenom onboarding igen." : {
 
     },
+    "Detta kommer att sätta din räknare till Pass 1. Dina befintliga träningsprogram raderas inte." : {
+
+    },
     "Detta pass har inga övningar ännu" : {
 
     },
@@ -578,16 +603,13 @@
         }
       }
     },
-    "Ditt namn" : {
+    "Ditt program har lägst fokus på **%@**. Överväg att lägga till en övning för denna muskelgrupp för en mer balanserad fysik." : {
 
     },
     "Du ansvarar själv för att:" : {
 
     },
     "Du har genomfört hela ditt träningspass!" : {
-
-    },
-    "E-post" : {
 
     },
     "Ej synkad" : {
@@ -605,6 +627,9 @@
           }
         }
       }
+    },
+    "Eller välj manuellt nedan" : {
+
     },
     "Endast utvecklare har tillgång till denna vy." : {
 
@@ -681,6 +706,9 @@
       }
     },
     "Fördela 100% mellan dina träningsmål" : {
+
+    },
+    "Fördelning av set baserat på dina programmallar." : {
 
     },
     "Försök igen" : {
@@ -822,6 +850,9 @@
     "Genomsnittlig puls" : {
 
     },
+    "Gick inte att hämta analys" : {
+
+    },
     "Godkänn" : {
 
     },
@@ -831,7 +862,7 @@
     "Gym Information" : {
 
     },
-    "Gym Name (e.g., Home Gym)" : {
+    "Gym Namn (t.ex. Mitt Gym)" : {
 
     },
     "Hälsodata" : {
@@ -846,13 +877,13 @@
     "Hälsotrender" : {
 
     },
+    "Hämtar utrustning..." : {
+
+    },
     "Hantera träningspass" : {
 
     },
     "Här är en sammanfattning av det du hann med." : {
-
-    },
-    "Har du redan ett konto? Logga in" : {
 
     },
     "Health data imported" : {
@@ -942,6 +973,9 @@
     "Historik" : {
 
     },
+    "Hitta i närheten" : {
+
+    },
     "Hoppa över" : {
 
     },
@@ -991,6 +1025,9 @@
     "Inaktiverad" : {
 
     },
+    "Inblick" : {
+
+    },
     "Increase mobility, reduce stiffness and prevent injury." : {
       "localizations" : {
         "sv" : {
@@ -1031,10 +1068,10 @@
     "Ingen träningshistorik än" : {
 
     },
-    "Ingen utrustning hittades. Kontrollera din anslutning." : {
+    "Ingen utrustning hittades." : {
 
     },
-    "Ingen utrustning vald" : {
+    "Ingen utrustning vald. Detta gym kommer endast att stödja kroppsviktsövningar." : {
 
     },
     "Ingen väntande utrustning" : {
@@ -1059,6 +1096,9 @@
         }
       }
     },
+    "Ja, baserat på mitt program" : {
+
+    },
     "Ja, kör!" : {
 
     },
@@ -1081,6 +1121,9 @@
 
     },
     "Klar" : {
+
+    },
+    "Kolla din e-post!" : {
 
     },
     "Kontrollera värde" : {
@@ -1142,6 +1185,7 @@
       }
     },
     "Loading equipment list..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1151,13 +1195,13 @@
         }
       }
     },
-    "Location (Optional)" : {
-
-    },
     "Logga" : {
 
     },
     "Logga in" : {
+
+    },
+    "Logga in med Magic Link" : {
 
     },
     "Logga övningar för att se dina PBs här" : {
@@ -1188,9 +1232,6 @@
           }
         }
       }
-    },
-    "Lösenord" : {
-
     },
     "Mål" : {
 
@@ -1223,9 +1264,6 @@
     "Mina Gym" : {
 
     },
-    "Minst 6 tecken" : {
-
-    },
     "Mobility" : {
       "localizations" : {
         "sv" : {
@@ -1236,6 +1274,9 @@
         }
       }
     },
+    "Muskelbalans" : {
+
+    },
     "Muskelgrupper" : {
 
     },
@@ -1245,13 +1286,13 @@
     "Name" : {
 
     },
-    "Namn" : {
-
-    },
     "Nästa" : {
 
     },
     "Nej, bara detta set" : {
+
+    },
+    "Nej, hoppa över" : {
 
     },
     "New to training or returning after a long break" : {
@@ -1274,6 +1315,12 @@
         }
       }
     },
+    "Nollställ" : {
+
+    },
+    "Nollställ räknaren för ditt nuvarande program." : {
+
+    },
     "Normal weight" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1292,9 +1339,6 @@
 
     },
     "Nuvarande" : {
-
-    },
-    "Nytt gym" : {
 
     },
     "Oavsett om du vill gå ner i vikt, rehabilitera en skada eller träna för ishockey, hjälper vi dig med rätt fokus." : {
@@ -1362,6 +1406,7 @@
       }
     },
     "Or select manually" : {
+      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1465,9 +1510,6 @@
     "Personliga tips" : {
 
     },
-    "Plats" : {
-
-    },
     "Preparing your workout program..." : {
 
     },
@@ -1489,6 +1531,9 @@
       }
     },
     "Primära" : {
+
+    },
+    "Privata gym sparas endast för dig." : {
 
     },
     "Professional or competitive athlete" : {
@@ -1530,7 +1575,16 @@
         }
       }
     },
+    "Programhantering" : {
+
+    },
+    "Publikt gym" : {
+
+    },
     "Push-notifikationer" : {
+
+    },
+    "Radera allt och börja om?" : {
 
     },
     "Recover from injury or illness." : {
@@ -1544,9 +1598,6 @@
       }
     },
     "Redigera" : {
-
-    },
-    "Redigera gym" : {
 
     },
     "Redigera pass" : {
@@ -1610,6 +1661,7 @@
 
     },
     "Scan Equipment" : {
+      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1683,10 +1735,10 @@
     "Skanna utrustning" : {
 
     },
-    "Skapa konto" : {
+    "Skapa program för gymmet?" : {
 
     },
-    "Skapa konto med e-post" : {
+    "Skicka Magic Link" : {
 
     },
     "Slutför" : {
@@ -1716,6 +1768,9 @@
 
     },
     "Social" : {
+
+    },
+    "Sök gym i närheten" : {
 
     },
     "Sök övning" : {
@@ -1840,6 +1895,9 @@
 
     },
     "Ta bort" : {
+
+    },
+    "Ta bort alla program och gym för att börja om helt." : {
 
     },
     "Ta om" : {
@@ -2071,6 +2129,9 @@
     "Välj mätvärde" : {
 
     },
+    "Välj som aktivt gym" : {
+
+    },
     "Välj språk" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2112,6 +2173,12 @@
     "Vi behöver lite information om dig för att anpassa din träning" : {
 
     },
+    "Vi har skickat en inloggningslänk till **%@**. Klicka på länken i mejlet för att logga in." : {
+
+    },
+    "Vi skickar en länk till din e-post som loggar in dig direkt. Inget lösenord behövs!" : {
+
+    },
     "Videoinstruktion" : {
 
     },
@@ -2137,6 +2204,9 @@
 
     },
     "Vill du pausa passet för att fortsätta senare, eller avsluta det helt?" : {
+
+    },
+    "Vill du skapa ett träningsupplägg för detta gym baserat på ditt nuvarande program? Övningarna anpassas efter tillgänglig utrustning." : {
 
     },
     "Vill du starta %@s pass idag?" : {

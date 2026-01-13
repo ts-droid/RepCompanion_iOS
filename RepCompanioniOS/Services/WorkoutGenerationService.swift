@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import Combine
 
 struct WorkoutGenerationInput {
     let gender: String
@@ -14,6 +15,7 @@ struct WorkoutGenerationInput {
     let sessionsPerWeek: Int
     let sessionLengthMinutes: Int
     let availableEquipment: [String]
+    let gymId: String?
     let oneRMValues: OneRMValues?
     
     struct GoalDistribution {
@@ -104,20 +106,25 @@ struct WorkoutProgram: Codable {
 }
 
 @MainActor
-class WorkoutGenerationService {
-    private let modelContext: ModelContext
+class WorkoutGenerationService: ObservableObject {
+    static let shared = WorkoutGenerationService()
     
-    init(modelContext: ModelContext) {
+    private let modelContext: ModelContext?
+    
+    init(modelContext: ModelContext? = nil) {
         self.modelContext = modelContext
     }
     
-    func getUserWorkoutData(userId: String) -> WorkoutGenerationInput? {
+    func getUserWorkoutData(userId: String, modelContext: ModelContext) -> WorkoutGenerationInput? {
+        // Use the passed-in context
+        let context = modelContext
+        
         // Fetch user profile
         let profileDescriptor = FetchDescriptor<UserProfile>(
             predicate: #Predicate { $0.userId == userId }
         )
         
-        guard let profile = try? modelContext.fetch(profileDescriptor).first else {
+        guard let profile = try? context.fetch(profileDescriptor).first else {
             return nil
         }
         
@@ -158,6 +165,12 @@ class WorkoutGenerationService {
         ]
         let trainingLevel = levelMap[profile.trainingLevel?.lowercased() ?? ""] ?? "Van"
         
+        // Fetch selected gym
+        let gymDescriptor = FetchDescriptor<Gym>(
+            predicate: #Predicate { $0.userId == userId && $0.isSelected }
+        )
+        let selectedGym = try? context.fetch(gymDescriptor).first
+        
         return WorkoutGenerationInput(
             gender: gender,
             age: profile.age ?? 30,
@@ -175,7 +188,8 @@ class WorkoutGenerationService {
             ),
             sessionsPerWeek: profile.sessionsPerWeek,
             sessionLengthMinutes: profile.sessionDuration,
-            availableEquipment: ["Dumbbells", "Barbell", "Bench", "Pull-up Bar"], // Mock data
+            availableEquipment: selectedGym?.equipmentIds ?? [],
+            gymId: selectedGym?.id,
             oneRMValues: WorkoutGenerationInput.OneRMValues(
                 bench: profile.oneRmBench.map { Double($0) },
                 ohp: profile.oneRmOhp.map { Double($0) },
@@ -186,7 +200,7 @@ class WorkoutGenerationService {
         )
     }
     
-    func generateProgram(for input: WorkoutGenerationInput) async throws -> WorkoutProgram {
+    func generateProgram(for input: WorkoutGenerationInput, userId: String, modelContext: ModelContext) async throws -> WorkoutProgram {
         // HYBRID APPROACH: Try Apple Intelligence first (on-device), then fall back to server-side
         
         // Step 1: Try Apple Intelligence if available (iOS 18+)
@@ -198,7 +212,7 @@ class WorkoutGenerationService {
                     let program = try await appleIntelligence.generateWorkoutProgram(for: input)
                     
                     // Save program templates to SwiftData
-                    try await saveProgramTemplates(from: program, userId: "current-user")
+                    try await saveProgramTemplates(from: program, userId: userId, gymId: input.gymId, modelContext: modelContext)
                     
                     print("[WorkoutGeneration] ✅ Successfully generated program using Apple Intelligence")
                     return program
@@ -215,26 +229,134 @@ class WorkoutGenerationService {
         }
         
         // Step 2: Fall back to server-side generation via API
-        print("[WorkoutGeneration] 🌐 Using server-side generation...")
+        print("[WorkoutGeneration] 🌐 Using server-side V4 generation...")
         do {
-            let response = try await APIService.shared.generateWorkoutProgram(force: false)
-            let program = response.program
+            let v4Response = try await APIService.shared.generateProgramV4()
+            let program = convertV4ToLegacyFormat(v4Response.program, input: input)
             
             // Save program templates to SwiftData
-            try await saveProgramTemplates(from: program, userId: "current-user")
+            try await saveProgramTemplates(from: program, userId: userId, gymId: input.gymId, modelContext: modelContext)
             
-            print("[WorkoutGeneration] ✅ Successfully generated program using server-side API")
+            print("[WorkoutGeneration] ✅ Successfully generated program using V4 API")
             return program
         } catch {
             // Final fallback to mock if API fails (for development/testing)
-            print("[WorkoutGeneration] ⚠️ Server-side generation failed, using mock: \(error)")
+            print("[WorkoutGeneration] ⚠️ V4 generation failed, using mock: \(error)")
             let mockProgram = createMockProgram(for: input)
             
             // Save program templates to SwiftData
-            try await saveProgramTemplates(from: mockProgram, userId: "current-user")
+            try await saveProgramTemplates(from: mockProgram, userId: userId, gymId: input.gymId, modelContext: modelContext)
             
             return mockProgram
         }
+    }
+    
+    // Convert V4 program structure to legacy WorkoutProgram format
+    private func convertV4ToLegacyFormat(_ v4Program: V4Program, input: WorkoutGenerationInput) -> WorkoutProgram {
+        let sessions = v4Program.sessions.enumerated().map { (index, v4Session) -> WorkoutProgram.WeeklySession in
+            // Extract all exercises from all blocks
+            var allExercises: [V4Exercise] = []
+            for block in v4Session.blocks {
+                allExercises.append(contentsOf: block.exercises)
+            }
+            
+            // Convert V4 exercises to legacy MainExercise format
+            let mainWork = allExercises.map { v4Ex -> WorkoutProgram.WeeklySession.MainExercise in
+                // Calculate suggested weight based on load type
+                let suggestedWeight: Double
+                let weightNotes: String
+                
+                switch v4Ex.loadType {
+                case .percentage1RM:
+                    suggestedWeight = v4Ex.loadValue // Already in kg from backend
+                    weightNotes = "\(Int(v4Ex.loadValue))% av 1RM"
+                case .rpe:
+                    suggestedWeight = 0
+                    weightNotes = "RPE \(Int(v4Ex.loadValue))"
+                case .bodyweight:
+                    suggestedWeight = 0
+                    weightNotes = "Kroppsvikt"
+                case .fixed:
+                    suggestedWeight = v4Ex.loadValue
+                    weightNotes = "\(Int(v4Ex.loadValue)) kg"
+                case .unknown(let type):
+                    suggestedWeight = v4Ex.loadValue
+                    weightNotes = type
+                }
+                
+                return WorkoutProgram.WeeklySession.MainExercise(
+                    exerciseName: v4Ex.exerciseID, // Will be resolved by backend
+                    sets: v4Ex.sets,
+                    reps: v4Ex.reps,
+                    restSeconds: v4Ex.restSeconds ?? 90,
+                    tempo: "2-1-2-1", // Default tempo
+                    suggestedWeightKg: suggestedWeight,
+                    suggestedWeightNotes: weightNotes,
+                    targetMuscles: [], // Not provided by V4
+                    requiredEquipment: [], // Not provided by V4
+                    techniqueCues: v4Ex.notes.map { [$0] } ?? []
+                )
+            }
+            
+            // Use session name from V4, fallback to "Pass X"
+            let sessionName = v4Session.name ?? "Pass \(index + 1)"
+            
+            return WorkoutProgram.WeeklySession(
+                sessionNumber: v4Session.sessionIndex,
+                weekday: v4Session.weekday,
+                sessionName: sessionName,
+                sessionType: "strength",
+                estimatedDurationMinutes: v4Session.estimatedMinutes ?? input.sessionLengthMinutes,
+                muscleFocus: v4Session.name ?? "Full Body",
+                warmup: [
+                    WorkoutProgram.WeeklySession.WarmupExercise(
+                        exerciseName: "Dynamic Warm-up",
+                        sets: 1,
+                        repsOrDuration: "5-10 min",
+                        notes: "Förbered kroppen för träning"
+                    )
+                ],
+                mainWork: mainWork,
+                cooldown: [
+                    WorkoutProgram.WeeklySession.CooldownExercise(
+                        exerciseName: "Static Stretching",
+                        durationOrReps: "5 min",
+                        notes: "Stretcha tränade muskelgrupper"
+                    )
+                ]
+            )
+        }
+        
+        return WorkoutProgram(
+            userProfile: WorkoutProgram.UserProfileData(
+                gender: input.gender,
+                age: input.age,
+                weightKg: input.weightKg,
+                heightCm: input.heightCm,
+                trainingLevel: input.trainingLevel,
+                mainGoal: input.mainGoal,
+                distribution: WorkoutProgram.UserProfileData.GoalDistribution(
+                    strengthPercent: input.distribution.strengthPercent,
+                    hypertrophyPercent: input.distribution.hypertrophyPercent,
+                    endurancePercent: input.distribution.endurancePercent,
+                    cardioPercent: input.distribution.cardioPercent
+                ),
+                sessionsPerWeek: input.sessionsPerWeek,
+                sessionLengthMinutes: input.sessionLengthMinutes,
+                availableEquipment: input.availableEquipment
+            ),
+            programOverview: WorkoutProgram.ProgramOverview(
+                weekFocusSummary: v4Program.programName ?? "Personligt träningsprogram",
+                expectedDifficulty: "Medel",
+                notesOnProgression: "Öka vikten gradvis varje vecka"
+            ),
+            weeklySessions: sessions,
+            recoveryTips: [
+                "Sov 7-9 timmar per natt för optimal återhämtning",
+                "Ät protein inom 2 timmar efter träning",
+                "Vila minst en dag mellan intensiva pass"
+            ]
+        )
     }
     
     private func createMockProgram(for input: WorkoutGenerationInput) -> WorkoutProgram {
@@ -392,17 +514,32 @@ class WorkoutGenerationService {
         return baseWeight * 0.7
     }
     
-    private func saveProgramTemplates(from program: WorkoutProgram, userId: String) async throws {
-        // Clear existing templates
-        let existingTemplates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
-        for template in existingTemplates {
-            modelContext.delete(template)
+    func saveProgramTemplates(from program: WorkoutProgram, userId: String, gymId: String?, modelContext: ModelContext) async throws {
+        print("[WorkoutGenerationService] 🧹 Starting cleanup for user: \(userId), gym: \(gymId ?? "none")")
+        
+        // Clear existing templates for THIS gym specifically
+        // Also clear legacy "current-user" templates to avoid duplicates
+        let descriptor = FetchDescriptor<ProgramTemplate>(
+            predicate: #Predicate { ($0.userId == userId || $0.userId == "current-user") && $0.gymId == gymId }
+        )
+        
+        do {
+            let existingTemplates = try modelContext.fetch(descriptor)
+            print("[WorkoutGenerationService] 🗑️ Found \(existingTemplates.count) existing templates to delete")
+            for template in existingTemplates {
+                modelContext.delete(template)
+            }
+        } catch {
+            print("[WorkoutGenerationService] ⚠️ Cleanup fetch failed: \(error)")
         }
         
         // Create new templates from generated program
+        print("[WorkoutGenerationService] 📝 Saving \(program.weeklySessions.count) new sessions")
+        
         for session in program.weeklySessions {
             let template = ProgramTemplate(
                 userId: userId,
+                gymId: gymId,
                 templateName: session.sessionName,
                 muscleFocus: session.muscleFocus,
                 dayOfWeek: getDayOfWeek(from: session.weekday),
@@ -410,9 +547,11 @@ class WorkoutGenerationService {
             )
             
             // Add exercises to template
+            print("[WorkoutGenerationService]   - Session: \(session.sessionName), Exercises: \(session.mainWork.count)")
+            
             for (exerciseIndex, exercise) in session.mainWork.enumerated() {
                 let templateExercise = ProgramTemplateExercise(
-                    templateId: template.id,
+                    gymId: gymId,
                     exerciseKey: exercise.exerciseName.lowercased().replacingOccurrences(of: " ", with: "-"),
                     exerciseName: exercise.exerciseName,
                     orderIndex: exerciseIndex,
@@ -422,20 +561,67 @@ class WorkoutGenerationService {
                     requiredEquipment: exercise.requiredEquipment,
                     muscles: exercise.targetMuscles
                 )
-                if template.exercises == nil {
-                    template.exercises = []
-                }
-                template.exercises?.append(templateExercise)
+                
+                // Establish the relationship
+                templateExercise.template = template
+                template.exercises.append(templateExercise)
+                
+                // Explicitly insert the exercise if needed, though SwiftData usually handles through relationship
+                modelContext.insert(templateExercise)
             }
             
             modelContext.insert(template)
         }
         
-        try modelContext.save()
+        do {
+            try modelContext.save()
+            print("[WorkoutGenerationService] ✅ Successfully saved all templates and exercises")
+        } catch {
+            print("[WorkoutGenerationService] ❌ Failed to save context: \(error)")
+            throw error
+        }
     }
     
     private func getDayOfWeek(from weekday: String) -> Int {
         let weekdays = ["Måndag": 1, "Tisdag": 2, "Onsdag": 3, "Torsdag": 4, "Fredag": 5, "Lördag": 6, "Söndag": 7]
         return weekdays[weekday] ?? 1
     }
+    
+    // MARK: - Muscle Balance Analysis
+    
+    func fetchMuscleBalanceAnalysis() async throws -> MuscleBalanceAnalysis {
+        guard let token = APIService.shared.authToken else {
+            throw APIError.unauthorized
+        }
+        
+        var request = URLRequest(url: URL(string: "\(APIService.shared.baseURL)/api/profile/muscle-balance")!)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        
+        let decoder = JSONDecoder()
+        return try decoder.decode(MuscleBalanceAnalysis.self, from: data)
+    }
+}
+
+// MARK: - Models
+
+struct MuscleBalanceAnalysis: Codable {
+    let stats: [MuscleGroupStats]
+    let totalExercises: Int
+    let totalSets: Int
+    let avgExercisesPerMuscle: Double
+}
+
+struct MuscleGroupStats: Codable, Identifiable {
+    var id: String { muscleGroup }
+    let muscleGroup: String
+    let exerciseCount: Double
+    let totalSets: Int
+    let percentage: Int
 }

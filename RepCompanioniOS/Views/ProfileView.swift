@@ -302,7 +302,7 @@ struct ProfileView: View {
                             .padding(.horizontal)
                             
                             if let gym = selectedGym {
-                                NavigationLink(destination: GymDetailView(gym: gym)) {
+                                NavigationLink(destination: EditGymView(gymToEdit: gym)) {
                                     HStack {
                                         VStack(alignment: .leading) {
                                             Text(gym.name)

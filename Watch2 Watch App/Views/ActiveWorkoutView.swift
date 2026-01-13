@@ -188,12 +188,17 @@ struct ActiveWorkoutView: View {
     }
     
     private func initializeSessionExercises() {
-        guard let session = activeSession else { return }
-        let templateId = session.templateId
+        guard let session = activeSession, let templateId = session.templateId else { return }
         
-        sessionExercises = allTemplateExercises
-            .filter { $0.templateId == templateId }
-            .sorted { $0.orderIndex < $1.orderIndex }
+        // Find the template and its exercises
+        if let template = allTemplates.first(where: { $0.id == templateId }) {
+            sessionExercises = template.exercises.sorted { $0.orderIndex < $1.orderIndex }
+        } else {
+            // Fallback for cases where template might not be found in memory or for quick workouts
+            sessionExercises = allTemplateExercises
+                .filter { $0.template?.id == templateId }
+                .sorted { $0.orderIndex < $1.orderIndex }
+        }
         
         // Find first incomplete set
         updateCurrentProgressFromLogs()
