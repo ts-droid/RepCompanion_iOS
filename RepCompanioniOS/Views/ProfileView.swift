@@ -127,7 +127,7 @@ struct ProfileView: View {
                             HStack(spacing: 40) {
                                 InfoItem(label: "Kön", value: currentProfile?.sex ?? "Ej angivet", colorScheme: effectiveColorScheme)
                                 InfoItem(label: "Träningsnivå", value: currentProfile?.trainingLevel ?? "Nybörjare", colorScheme: effectiveColorScheme)
-                                InfoItem(label: "Fokus", value: currentProfile?.trainingGoals ?? "Allround", colorScheme: effectiveColorScheme)
+                                InfoItem(label: "Fokus", value: currentProfile?.derivedTrainingFocus ?? "Allround", colorScheme: effectiveColorScheme)
                             }
                             .padding(.top, 8)
                             

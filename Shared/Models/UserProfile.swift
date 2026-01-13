@@ -147,4 +147,29 @@ final class UserProfile {
         self.createdAt = Date()
         self.updatedAt = Date()
     }
+    
+    // MARK: - Computed Properties
+    
+    /// Derives the training focus label from goal percentages
+    var derivedTrainingFocus: String {
+        let goals = [
+            ("Styrka", goalStrength),
+            ("Volym", goalVolume),
+            ("Uthållighet", goalEndurance),
+            ("Cardio", goalCardio)
+        ]
+        
+        // Find the highest goal
+        let maxGoal = goals.max(by: { $0.1 < $1.1 })
+        
+        // Check if it's balanced (all within 15% of each other)
+        let maxValue = goals.map { $0.1 }.max() ?? 0
+        let minValue = goals.map { $0.1 }.min() ?? 0
+        
+        if maxValue - minValue <= 15 {
+            return "Allround"
+        }
+        
+        return maxGoal?.0 ?? "Allround"
+    }
 }
