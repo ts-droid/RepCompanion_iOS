@@ -1565,11 +1565,12 @@ struct OnboardingView: View {
                 // User can proceed to Step Goal step while it generates
             } catch {
                 print("[Onboarding] ❌ Error starting program generation: \(error.localizedDescription)")
+                print("[Onboarding] ℹ️ User can continue onboarding - error will be shown if they wait for program")
                 await MainActor.run {
                     isGeneratingProgram = false
                     programGenerationStartedEarly = false
-                    generationError = error.localizedDescription
-                    showGenerationErrorAlert = true
+                    // Don't show alert immediately - let user continue to next steps
+                    // Error will be shown later if user tries to wait for program completion
                 }
             }
         }
