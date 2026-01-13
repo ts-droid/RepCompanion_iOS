@@ -52,6 +52,12 @@ struct OnboardingView: View {
     @State private var oneRmLatpull: Int?
     @State private var oneRmCalculated = false // Track if 1RM values have been auto-calculated
     @State private var selectedEquipment: [String] = []
+    
+    // Gym details
+    @State private var gymName: String = "Mitt Gym"
+    @State private var gymAddress: String = ""
+    @State private var gymIsPublic: Bool = false
+    
     @State private var selectedTheme = "Main" // Default theme
     @State private var selectedColorScheme: String = "auto"
     @State private var dailyStepGoal: Int = 10000 // Default step goal
