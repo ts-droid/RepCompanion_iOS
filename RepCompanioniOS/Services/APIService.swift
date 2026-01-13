@@ -832,6 +832,7 @@ class APIService {
                     continue
                 } else {
                     let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                    print("[API] ⚠️ HTTP error \(httpResponse.statusCode) on \(endpoint): \(errorBody)")
                     throw APIError.httpError(httpResponse.statusCode)
                 }
             } catch {
