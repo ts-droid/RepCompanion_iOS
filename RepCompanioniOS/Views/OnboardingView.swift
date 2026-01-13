@@ -232,17 +232,17 @@ struct OnboardingView: View {
                     // Retry program generation
                     completeOnboarding()
                 }
-                Button(String(localized: "Gå vidare"), role: .cancel) {
+                Button(String(localized: "Fortsätt utan program"), role: .cancel) {
                     generationError = nil
                     showGenerationErrorAlert = false
-                    // Complete onboarding without program
-                    completeOnboardingWithoutProgram()
+                    // Continue to next step (Step Goal) instead of skipping to home
+                    goToNextStep()
                 }
             } message: {
                 if let error = generationError {
-                    Text(String(localized: "Programgenerering lyckades inte just nu. \(error)\n\nVill du försöka igen eller gå vidare till din startsida?"))
+                    Text(String(localized: "Programgenerering lyckades inte just nu. \(error)\n\nVill du försöka igen eller fortsätta utan program?"))
                 } else {
-                    Text(String(localized: "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller gå vidare till din startsida?"))
+                    Text(String(localized: "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller fortsätta utan program?"))
                 }
             }
             .alert("Kontrollera värde", isPresented: $showValueValidationAlert) {
