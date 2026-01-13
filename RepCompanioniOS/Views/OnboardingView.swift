@@ -348,28 +348,28 @@ struct OnboardingView: View {
                 MotivationOption(
                     title: LocalizedStringKey("Rehabilitation"),
                     description: LocalizedStringKey("Recover from injury or illness."),
-                    isSelected: motivationType == "rehabilitering",
+                    isSelected: motivationType == "rehabilitation",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "rehabilitering" }
+                    action: { motivationType = "rehabilitation" }
                 )
                 
                 MotivationOption(
                     title: LocalizedStringKey("Better health"),
                     description: LocalizedStringKey("Improve stamina, fitness and energy."),
-                    isSelected: motivationType == "bättre_hälsa",
+                    isSelected: motivationType == "better_health",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "bättre_hälsa" }
+                    action: { motivationType = "better_health" }
                 )
                 
                 MotivationOption(
                     title: LocalizedStringKey("Build muscle"),
                     description: LocalizedStringKey("Build muscle mass and get stronger."),
-                    isSelected: motivationType == "bygga_muskler",
+                    isSelected: motivationType == "build_muscle",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "bygga_muskler" }
+                    action: { motivationType = "build_muscle" }
                 )
                 
                 MotivationOption(
@@ -384,10 +384,10 @@ struct OnboardingView: View {
                 MotivationOption(
                     title: LocalizedStringKey("Mobility"),
                     description: LocalizedStringKey("Increase mobility, reduce stiffness and prevent injury."),
-                    isSelected: motivationType == "bli_rörligare",
+                    isSelected: motivationType == "mobility",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "bli_rörligare" }
+                    action: { motivationType = "mobility" }
                 )
             }
         }
@@ -1761,13 +1761,13 @@ struct OnboardingView: View {
             endurance = 30
             volume = 20
             cardio = 15
-        case "bygga_muskler", "hypertrofi", "fitness":
+        case "build_muscle", "bygga_muskler", "hypertrofi", "fitness":
             // Focus on strength and volume for muscle building
             strength = 30
             volume = 30
             endurance = 25
             cardio = 15
-        case "bli_rörligare":
+        case "mobility", "bli_rörligare":
             // Focus on mobility, flexibility, and injury prevention
             strength = 25
             volume = 20
@@ -1785,7 +1785,7 @@ struct OnboardingView: View {
         switch trainingLevel.lowercased() {
         case "nybörjare":
             // For "bygga_muskler", keep higher strength/volume even for beginners
-            if motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
+            if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
                 // Smaller adjustment for muscle building - still prioritize strength/volume
                 strength = max(25, strength - 5)
                 volume = max(25, volume - 5)

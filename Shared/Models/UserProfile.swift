@@ -156,22 +156,14 @@ final class UserProfile {
             return "Allround"
         }
         
-        switch motivation.lowercased() {
-        case "bättre_hälsa":
-            return "Bättre hälsa"
-        case "bygga_muskler":
-            return "Bygga muskler"
-        case "sport":
-            if let sport = specificSport, !sport.isEmpty {
-                return "Specifik idrott: \(sport.capitalized)"
-            }
-            return "Specifik idrott"
-        case "bli_rörligare":
-            return "Bli rörligare"
-        case "rehabilitering":
-            return "Rehabilitering"
-        default:
-            return motivation.capitalized
+        // Use LocalizationService for consistent localization
+        let localizedMotivation = LocalizationService.localizeMotivationType(motivation)
+        
+        // Add sport name if applicable
+        if motivation.lowercased() == "sport", let sport = specificSport, !sport.isEmpty {
+            return "\(localizedMotivation): \(sport.capitalized)"
         }
+        
+        return localizedMotivation
     }
 }
