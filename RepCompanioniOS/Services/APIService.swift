@@ -2221,7 +2221,7 @@ struct ProgramTemplateResponse: Codable {
     let muscleFocus: String?
     let dayOfWeek: Int?
     let estimatedDurationMinutes: Int?
-    let exercises: [ProgramTemplateExerciseResponse]
+    let exercises: [ProgramTemplateExerciseResponse]?
 }
 
 struct ProgramTemplateExerciseResponse: Codable {
