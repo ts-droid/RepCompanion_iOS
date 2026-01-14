@@ -138,7 +138,7 @@ class SyncService: ObservableObject {
         try modelContext.save()
         // Create fresh templates from server data
         for templateData in templatesData {
-            print("[SYNC] 📝 Creating template: \(templateData.templateName) with \(templateData.exercises.count) exercises")
+            print("[SYNC] 📝 Creating template: \(templateData.templateName) with \((templateData.exercises ?? []).count) exercises")
             
             // Create new template
             let template = createTemplate(from: templateData, userId: userId)
@@ -149,7 +149,7 @@ class SyncService: ObservableObject {
             var templateExercises: [ProgramTemplateExercise] = []
             var insertedDescriptions = Set<String>()
             
-            for exerciseData in templateData.exercises {
+            for exerciseData in templateData.exercises ?? [] {
                 let uniqueKey = "\(exerciseData.exerciseName.lowercased())-\(exerciseData.orderIndex)"
                 
                 if !insertedDescriptions.contains(uniqueKey) {
