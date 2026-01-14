@@ -68,32 +68,72 @@ struct EquipmentSelectionView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         ForEach(categories, id: \.self) { category in
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text(category)
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(localizeCategory(category))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundColor(Color.textPrimary(for: colorScheme))
-                                    .padding(.horizontal, 4)
+                                    .padding(.horizontal)
                                 
-                                LazyVGrid(columns: [
-                                    GridItem(.flexible(), spacing: 16),
-                                    GridItem(.flexible(), spacing: 16)
-                                ], spacing: 16) {
+                                VStack(spacing: 12) {
                                     ForEach(groupedEquipment[category] ?? [], id: \.id) { equipment in
-                                        EquipmentCard(
-                                            equipment: equipment,
-                                            isSelected: selectedEquipmentIds.contains(equipment.id),
-                                            colorScheme: colorScheme,
-                                            selectedTheme: selectedTheme
-                                        ) {
-                                            toggleSelection(equipment.id)
+                                        Button(action: { toggleSelection(equipment.id) }) {
+                                            HStack(spacing: 16) {
+                                                // Checkbox
+                                                ZStack {
+                                                    Circle()
+                                                        .stroke(
+                                                            selectedEquipmentIds.contains(equipment.id) 
+                                                                ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
+                                                                : Color.gray.opacity(0.5),
+                                                            lineWidth: 2
+                                                        )
+                                                        .frame(width: 24, height: 24)
+                                                    
+                                                    if selectedEquipmentIds.contains(equipment.id) {
+                                                        Circle()
+                                                            .fill(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                                                            .frame(width: 14, height: 14)
+                                                    }
+                                                }
+                                                
+                                                // Text Content
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(equipment.name)
+                                                        .font(.body)
+                                                        .fontWeight(.medium)
+                                                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                                                    
+                                                    if let nameEn = equipment.nameEn {
+                                                        Text(nameEn)
+                                                            .font(.caption)
+                                                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                                                    }
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                // Optional info icon or similar could go here
+                                            }
+                                            .padding()
+                                            .background(Color.cardBackground(for: colorScheme))
+                                            .cornerRadius(12)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(
+                                                        selectedEquipmentIds.contains(equipment.id) 
+                                                            ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
+                                                            : Color.clear,
+                                                        lineWidth: 1
+                                                    )
+                                            )
                                         }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
                         }
                     }
-                    .padding(.horizontal)
                     .padding(.bottom, 100)
                 }
             }
@@ -170,6 +210,18 @@ struct EquipmentSelectionView: View {
             selectedEquipmentIds.remove(at: index)
         } else {
             selectedEquipmentIds.append(id)
+        }
+    }
+
+    
+    private func localizeCategory(_ key: String) -> String {
+        switch key.lowercased() {
+        case "free_weights", "freeweights": return "Frivikter"
+        case "machine", "machines": return "Maskiner"
+        case "cardio": return "Cardio"
+        case "accessory", "accessories": return "Tillbehör"
+        case "bodyweight": return "Kroppsvikt"
+        default: return key.capitalized
         }
     }
 }

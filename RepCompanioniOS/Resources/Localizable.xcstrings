@@ -34,6 +34,9 @@
     "%lld kcal" : {
 
     },
+    "%lld m" : {
+
+    },
     "%lld min" : {
 
     },
@@ -102,6 +105,9 @@
 
     },
     "90 dagar" : {
+
+    },
+    "Address (Optional)" : {
 
     },
     "Admin" : {
@@ -662,6 +668,12 @@
         }
       }
     },
+    "Enter address" : {
+
+    },
+    "Enter gym name" : {
+
+    },
     "Färgschema" : {
 
     },
@@ -749,6 +761,9 @@
       }
     },
     "Fortsätt med Google" : {
+
+    },
+    "Fortsätt utan program" : {
 
     },
     "Gå ner i vikt" : {
@@ -859,7 +874,16 @@
     "Godkänn övningar & utrustning" : {
 
     },
+    "Gym Details" : {
+
+    },
+    "Gym i närheten" : {
+
+    },
     "Gym Information" : {
+
+    },
+    "Gym Name" : {
 
     },
     "Gym Namn (t.ex. Mitt Gym)" : {
@@ -1552,10 +1576,10 @@
     "Program" : {
 
     },
-    "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller gå vidare till din startsida?" : {
+    "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller fortsätta utan program?" : {
 
     },
-    "Programgenerering lyckades inte just nu. %@\n\nVill du försöka igen eller gå vidare till din startsida?" : {
+    "Programgenerering lyckades inte just nu. %@\n\nVill du försöka igen eller fortsätta utan program?" : {
 
     },
     "Programgenerering misslyckades" : {
@@ -1576,6 +1600,9 @@
       }
     },
     "Programhantering" : {
+
+    },
+    "Public Gym" : {
 
     },
     "Publikt gym" : {
@@ -2314,6 +2341,9 @@
           }
         }
       }
+    },
+    "Where will you be training?" : {
+
     },
     "Which sport are you training for?" : {
       "localizations" : {

@@ -214,7 +214,7 @@ class SyncService: ObservableObject {
         try modelContext.save()
     }
     
-    private func syncGymsAndEquipment(userId: String, modelContext: ModelContext) async throws {
+    func syncGymsAndEquipment(userId: String, modelContext: ModelContext) async throws {
         // Fetch gyms from API
         let gymsData = try await apiService.fetchUserGyms()
         

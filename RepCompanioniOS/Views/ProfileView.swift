@@ -15,7 +15,10 @@ struct ProfileView: View {
     @Query private var gyms: [Gym]
     
     private var currentProfile: UserProfile? {
-        profiles.first
+        if let userId = authService.currentUserId {
+            return profiles.first(where: { $0.userId == userId })
+        }
+        return profiles.first
     }
     
     private var selectedGym: Gym? {

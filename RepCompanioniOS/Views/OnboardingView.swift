@@ -25,6 +25,7 @@ struct OnboardingView: View {
     @State private var showGenerationProgress = false
     @State private var showTimeoutMessage = false
     @State private var programGenerationStartedEarly = false // Track if generation started from Equipment step
+    @State private var programGenerationComplete = false // Track if generation finished while user was in flow
     
     // Onboarding data
     @State private var motivationType = ""
@@ -55,6 +56,10 @@ struct OnboardingView: View {
     
     // Gym details
     @State private var gymName: String = "Mitt Gym"
+    
+    @StateObject private var locationService = LocationService.shared
+    @State private var showNearbyGyms = false
+
     @State private var gymAddress: String = ""
     @State private var gymIsPublic: Bool = false
     
@@ -77,6 +82,8 @@ struct OnboardingView: View {
         case age
         case weight
         case height
+        case gymName
+        case gymAddress
     }
     
     // Equipment catalog
@@ -85,8 +92,8 @@ struct OnboardingView: View {
     @State private var showCamera = false
     
     private var totalSteps: Int {
-        // New order: Motivation → Training Level → Health Data → Personal Info → Goals → 1RM → Frequency → Equipment → Step Goal → Theme
-        motivationType == "sport" ? 9 : 10
+        // New order: Motivation → Training Level → Health Data → Personal Info → Goals → 1RM → Frequency → Equipment → Gym Details → Step Goal → Theme
+        motivationType == "sport" ? 10 : 11
     }
     
     private var progressPercentage: Double {
@@ -116,8 +123,10 @@ struct OnboardingView: View {
         case 8:
             return !selectedEquipment.isEmpty
         case 9:
-            return true // Step Goal (shown while Program AI works)
+            return !gymName.isEmpty // Gym details - name is required
         case 10:
+            return true // Step Goal (shown while Program AI works)
+        case 11:
             return true // Theme selection (only if not sport)
         default:
             return false
@@ -241,8 +250,12 @@ struct OnboardingView: View {
                 Button(String(localized: "Fortsätt utan program"), role: .cancel) {
                     generationError = nil
                     showGenerationErrorAlert = false
-                    // Continue to next step (Step Goal) instead of skipping to home
-                    goToNextStep()
+                    // Continue to next step or finish if at end
+                    if currentStep >= totalSteps {
+                        finalizeOnboarding()
+                    } else {
+                        goToNextStep()
+                    }
                 }
             } message: {
                 if let error = generationError {
@@ -270,9 +283,19 @@ struct OnboardingView: View {
             }
             .onChange(of: motivationType) { _, newValue in
                 // Recalculate preset goals when motivation type changes
-                if !newValue.isEmpty && !trainingLevel.isEmpty {
-                    goalsCalculated = false // Reset to allow recalculation
-                    calculatePresetGoals()
+                 if !newValue.isEmpty {
+                     // Recalculate based on new level
+                     goalsCalculated = false
+                     calculatePresetGoals()
+                }
+            }
+            .onChange(of: programGenerationComplete) { _, newValue in
+                if newValue && showGenerationProgress {
+                    print("[Onboarding] ✅ Background generation completed while waiting, finalizing...")
+                    // Add a small delay for smoother UX
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        finalizeOnboarding()
+                    }
                 }
             }
             .onChange(of: trainingLevel) { _, newValue in
@@ -317,9 +340,12 @@ struct OnboardingView: View {
             // Equipment → Starts Program AI query when user clicks "Continue", saves gym as "Mitt Gym"
             equipmentStep
         case 9:
+            // Gym Details → User enters gym name, address, and type
+            gymDetailsStep
+        case 10:
             // Step Goal (shown while Program AI works)
             stepGoalStep
-        case 10:
+        case 11:
             // Theme (if not sport)
             if motivationType == "sport" {
                 EmptyView() // No theme step for sport
@@ -1214,6 +1240,172 @@ struct OnboardingView: View {
         )
     }
     
+    // MARK: - Step 9: Gym Details
+    
+    private var gymDetailsStep: some View {
+        VStack(spacing: 24) {
+            Text(String(localized: "Gym Details"))
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+            
+            Text(String(localized: "Where will you be training?"))
+                .font(.subheadline)
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+            
+            VStack(spacing: 20) {
+                // Manual Entry Section
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(localized: "Gym Name"))
+                            .font(.caption)
+                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                        TextField("Enter gym name", text: $gymName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .focused($focusedField, equals: .gymName)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(localized: "Address (Optional)"))
+                            .font(.caption)
+                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                        
+                        HStack {
+                            TextField("Enter address", text: $gymAddress)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .focused($focusedField, equals: .gymAddress)
+                                .onChange(of: gymAddress) { _, newValue in
+                                    locationService.searchQuery = newValue
+                                }
+                            
+                            if !gymAddress.isEmpty {
+                                Button(action: { gymAddress = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        }
+                        
+                        // Address Autocomplete Suggestions
+                        if !locationService.suggestions.isEmpty && focusedField == .gymAddress {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Divider()
+                                ForEach(locationService.suggestions.prefix(3)) { suggestion in
+                                    Button(action: {
+                                        self.gymAddress = suggestion.title
+                                        locationService.searchQuery = ""
+                                        focusedField = nil
+                                    }) {
+                                        VStack(alignment: .leading) {
+                                            Text(suggestion.title)
+                                                .font(.subheadline)
+                                                .foregroundColor(Color.textPrimary(for: colorScheme))
+                                            Text(suggestion.subtitle)
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.vertical, 4)
+                                    }
+                                    Divider()
+                                }
+                            }
+                            .padding(.vertical, 8)
+                            .background(Color.cardBackground(for: colorScheme))
+                            .cornerRadius(8)
+                        }
+                    }
+                    
+                    Toggle("Public Gym", isOn: $gymIsPublic)
+                        .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.cardBackground(for: colorScheme))
+                )
+                
+                // Find Nearby Section
+                Button(action: {
+                    locationService.requestPermission()
+                    locationService.searchNearbyGyms()
+                    showNearbyGyms = true
+                }) {
+                    HStack {
+                        Image(systemName: "location.fill")
+                        if locationService.isSearching {
+                            ProgressView()
+                                .padding(.leading, 8)
+                        } else {
+                            Text("Sök gym i närheten")
+                        }
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.cardBackground(for: colorScheme))
+                    .cornerRadius(12)
+                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                }
+                
+                // Nearby Gyms List
+                if showNearbyGyms && !locationService.nearbyGyms.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Gym i närheten")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                        
+                        ScrollView {
+                            VStack(spacing: 8) {
+                                ForEach(locationService.nearbyGyms.prefix(5)) { nearby in
+                                    Button(action: {
+                                        self.gymName = nearby.name
+                                        self.gymAddress = nearby.address ?? ""
+                                        // We don't have separate lat/long state in OnboardingView yet, 
+                                        // but getting name/address is the main goal.
+                                        self.showNearbyGyms = false
+                                    }) {
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text(nearby.name)
+                                                    .foregroundColor(Color.textPrimary(for: colorScheme))
+                                                if let addr = nearby.address {
+                                                    Text(addr)
+                                                        .font(.caption)
+                                                        .foregroundColor(.gray)
+                                                        .lineLimit(1)
+                                                }
+                                            }
+                                            Spacer()
+                                            if nearby.distance < 1000 {
+                                                Text("\(Int(nearby.distance)) m")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            } else {
+                                                Text(String(format: "%.1f km", nearby.distance / 1000.0))
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        .padding()
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(Color.cardBackground(for: colorScheme).opacity(0.8))
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 200)
+                    }
+                }
+            }
+        }
+        .onAppear {
+             locationService.requestPermission()
+        }
+    }
+    
     // MARK: - Step 9: Step Goal
     
     private var stepGoalStep: some View {
@@ -1473,16 +1665,15 @@ struct OnboardingView: View {
                 }
             }
             
-            // Start Program AI query when user clicks "Continue" on Equipment step (step 8)
-            // Save gym as "Mitt Gym" and start program generation in background
-            if currentStep == 8 {
-                print("[Onboarding] 🚀 Starting program generation from Equipment step...")
+            // Start Program AI query when user clicks "Continue" on Gym Details step (step 9)
+            // Save gym and start program generation in background
+            if currentStep == 9 {
+                print("[Onboarding] 🚀 Starting program generation from Gym Details step...")
                 startProgramGeneration()
             }
             
-            // Handle Step Goal step (step 9) - if user clicks "Continue", go to Theme
-            // If user clicks "Finish" (which happens when currentStep == totalSteps), complete onboarding
-            if currentStep == 9 && currentStep < totalSteps {
+            // Handle Step Goal step (step 10) - just proceed to Theme
+            if currentStep == 10 && currentStep < totalSteps {
                 // Just proceed to next step (Theme)
                 currentStep += 1
                 updateStepIcon()
@@ -1507,12 +1698,13 @@ struct OnboardingView: View {
         Task {
             let userId = authService.currentUserId ?? "dev-user-123"
             
-            // Save gym as "Mitt Gym" with selected equipment
-            print("[Onboarding] 🏋️ Creating gym 'Mitt Gym' with \(selectedEquipment.count) equipment items")
+            // Save gym with user details
+            print("[Onboarding] 🏋️ Creating gym '\(gymName)' with \(selectedEquipment.count) equipment items")
             _ = try await GymService.shared.createGym(
-                name: "Mitt Gym",
-                location: "Standard plats",
+                name: gymName,
+                location: gymAddress.isEmpty ? nil : gymAddress,
                 equipmentIds: selectedEquipment,
+                isPublic: gymIsPublic,
                 userId: userId,
                 modelContext: modelContext
             )
@@ -1569,6 +1761,13 @@ struct OnboardingView: View {
                 
                 // Program generation is now running in background
                 // User can proceed to Step Goal step while it generates
+                
+                if response.success && (response.hasProgram == true || (response.templatesCreated ?? 0) > 0) {
+                    await MainActor.run {
+                        programGenerationComplete = true
+                        print("[Onboarding] ✅ Background program generation complete!")
+                    }
+                }
             } catch {
                 print("[Onboarding] ❌ Error starting program generation: \(error.localizedDescription)")
                 print("[Onboarding] ℹ️ User can continue onboarding - error will be shown if they wait for program")
@@ -2087,258 +2286,134 @@ struct OnboardingView: View {
         Task {
             await MainActor.run {
                 isGeneratingProgram = true
-                showGenerationProgress = true
-                generationError = nil
-                showGenerationErrorAlert = false
             }
             
-            do {
-                let userId = authService.currentUserId ?? "dev-user-123"
-                
-                // Check if program generation was already started from Equipment step
-                if programGenerationStartedEarly {
-                    print("[Onboarding] ✅ Program generation already started from Equipment step, waiting for completion...")
-                    // Just wait for generation to complete and sync templates
-                    // Skip the API call since it was already made
+            // capture state safely
+            let startedEarly = await MainActor.run { programGenerationStartedEarly }
+            let complete = await MainActor.run { programGenerationComplete }
+            
+            if startedEarly {
+                if complete {
+                    print("[Onboarding] ✅ Generation already complete, showing completion animation...")
+                    await MainActor.run {
+                        showGenerationProgress = true
+                        generationStatus = "Slutför..."
+                    }
+                    
+                    // Show "fake" completion animation for 10s as requested to allow full sync/population
+                    try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+                    
+                    finalizeOnboarding()
                 } else {
-                    // Start program generation now (original flow)
-                    let profileData = APIService.OnboardingCompleteRequest.ProfileData(
-                        motivationType: motivationType,
-                        trainingLevel: trainingLevel,
-                        specificSport: motivationType == "sport" ? specificSport : nil,
-                        age: age,
-                        sex: sex.isEmpty ? nil : sex,
-                        bodyWeight: bodyWeight,
-                        height: height,
-                        goalStrength: goalStrength,
-                        goalVolume: goalVolume,
-                        goalEndurance: goalEndurance,
-                        goalCardio: goalCardio,
-                        sessionsPerWeek: sessionsPerWeek,
-                        sessionDuration: sessionDuration,
-                        oneRmBench: oneRmBench,
-                        oneRmOhp: oneRmOhp,
-                        oneRmDeadlift: oneRmDeadlift,
-                        oneRmSquat: oneRmSquat,
-                        oneRmLatpull: oneRmLatpull,
-                        theme: selectedTheme
-                    )
-                    
-                    print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
-                    let response = try await APIService.shared.completeOnboarding(
-                        profile: profileData,
-                        equipment: selectedEquipment,
-                        useV4: true // Use V4 AI architecture for program generation
-                    )
-                    
-                    print("[Onboarding] ✅ Received response from completeOnboarding")
-                    print("[Onboarding] 📋 Response structure:")
-                    print("[Onboarding]   • success: \(response.success)")
-                    print("[Onboarding]   • hasProgram: \(response.program != nil)")
-                    if let program = response.program {
-                        print("[Onboarding]   • program.cached: \(program.cached ?? false)")
-                        print("[Onboarding]   • program.jobId: \(program.jobId ?? "nil")")
+                    print("[Onboarding] ⏳ Generation still in progress, waiting for completion...")
+                    await MainActor.run {
+                        showGenerationProgress = true
                     }
-                    
-                    // Check if program generation failed (no program in response and hasProgram is false)
-                    if response.hasProgram == false && response.templatesCreated == 0 {
-                        print("[Onboarding] ⚠️ Program generation appears to have failed - no templates created")
-                        await MainActor.run {
-                            self.generationError = "Programgenerering misslyckades. Inga pass kunde skapas."
-                            self.showGenerationErrorAlert = true
-                            self.isGeneratingProgram = false
-                            self.showGenerationProgress = false
-                        }
-                        return
-                    }
-                    
-                    // Store jobId if available
-                    if let jobId = response.program?.jobId {
-                        await MainActor.run {
-                            generationJobId = jobId
-                        }
-                    }
-                    
-                    // Check if program generation failed (no program in response and hasProgram is false)
-                    if response.hasProgram == false && response.templatesCreated == 0 {
-                        print("[Onboarding] ⚠️ Program generation appears to have failed - no templates created")
-                        await MainActor.run {
-                            self.generationError = "Programgenerering misslyckades. Inga pass kunde skapas."
-                            self.showGenerationErrorAlert = true
-                            self.isGeneratingProgram = false
-                            self.showGenerationProgress = false
-                        }
-                        return
-                    }
+                    waitForGenerationCompletion()
+                }
+                return
+            }
+        
+        Task {
+            isGeneratingProgram = true
+            showGenerationProgress = true
+            generationStatus = "Genererar ditt program..."
+            
+            do {
+
+                
+                // Start program generation now (original flow)
+                let profileData = APIService.OnboardingCompleteRequest.ProfileData(
+                    motivationType: motivationType,
+                    trainingLevel: trainingLevel,
+                    specificSport: motivationType == "sport" ? specificSport : nil,
+                    age: age,
+                    sex: sex.isEmpty ? nil : sex,
+                    bodyWeight: bodyWeight,
+                    height: height,
+                    goalStrength: goalStrength,
+                    goalVolume: goalVolume,
+                    goalEndurance: goalEndurance,
+                    goalCardio: goalCardio,
+                    sessionsPerWeek: sessionsPerWeek,
+                    sessionDuration: sessionDuration,
+                    oneRmBench: oneRmBench,
+                    oneRmOhp: oneRmOhp,
+                    oneRmDeadlift: oneRmDeadlift,
+                    oneRmSquat: oneRmSquat,
+                    oneRmLatpull: oneRmLatpull,
+                    theme: selectedTheme
+                )
+                
+                // Minimum animation duration of 10s
+                let minDuration = TimeInterval(10)
+                let startTime = Date()
+                
+                print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
+                async let responseTask = APIService.shared.completeOnboarding(
+                    profile: profileData,
+                    equipment: selectedEquipment,
+                    useV4: true // Use V4 AI architecture for program generation
+                )
+                
+                // Wait for both the API call and the minimum duration
+                let response = try await responseTask
+                let elapsed = Date().timeIntervalSince(startTime)
+                let remaining = minDuration - elapsed
+                
+                if remaining > 0 {
+                    print("[Onboarding] ⏳ Waiting \(remaining)s to meet minimum animation time...")
+                    try await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
                 }
                 
-                // Now wait for program generation to complete and sync templates
-                // This applies to both early-start and normal-start cases
-                print("[Onboarding] ⏳ Waiting for program generation to complete...")
-                
-                // Poll for program templates - check status and sync
-                let syncService = SyncService.shared
-                
-                // Poll for program templates if not immediately available (race condition fix)
-                // First check program status to see if generation is complete
-                var pollAttempts = 0
-                let maxPollAttempts = 45 // Allow up to 90 seconds for AI generation (45 attempts x 2 seconds)
-                var templatesFound = false
-                
-                while pollAttempts < maxPollAttempts {
-                    do {
-                        // Check program status first
-                        let programStatus = try await APIService.shared.getProgramStatus()
-                        print("[Onboarding] Program status: \(programStatus.status), hasTemplates: \(programStatus.hasTemplates), templatesCount: \(programStatus.templatesCount)")
-                        
-                        if programStatus.status == "ready" && programStatus.hasTemplates {
-                            // Program is ready, sync templates and profile
-                            try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
-                            try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
-                            let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
-                            if !templates.isEmpty {
-                                print("[Onboarding] ✅ Program templates and profile synced and found after cache hit.")
-                                templatesFound = true
-                                break
-                            } else {
-                                print("[Onboarding] ⚠️ Status says ready but no templates found locally, retrying...")
-                            }
-                        } else if programStatus.status == "generating" || programStatus.status == "queued" || programStatus.status == "no_program" || (programStatus.status == "completed" && !programStatus.hasTemplates) {
-                            // Still generating/waiting - server returns 'no_program' until templates are saved
-                            print("[Onboarding] ⏳ Program still generating (status: \(programStatus.status), hasTemplates: \(programStatus.hasTemplates), progress: \(programStatus.progress ?? 0)%), waiting...")
-                            await MainActor.run {
-                                generationStatus = programStatus.status == "no_program" ? "generating" : programStatus.status
-                                generationProgress = programStatus.progress ?? pollAttempts * 10  // Estimate progress from poll attempts
-                                showGenerationProgress = true
-                            }
-                        } else if programStatus.status == "failed" {
-                            // Generation failed
-                            print("[Onboarding] ❌ Program generation failed: \(programStatus.error ?? "Unknown error")")
-                            await MainActor.run {
-                                generationError = programStatus.error ?? "Programgenerering misslyckades. Försök igen senare."
-                                showGenerationErrorAlert = true
-                                isGeneratingProgram = false
-                                showGenerationProgress = false
-                            }
-                            return
-                        } else {
-                            // Unknown status, try syncing anyway
-                            try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
-                            try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
-                            let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
-                            if !templates.isEmpty {
-                                print("[Onboarding] ✅ Program templates and profile synced despite unknown status.")
-                                templatesFound = true
-                                break
-                            }
-                        }
-                        
-                        pollAttempts += 1
-                        try await Task.sleep(nanoseconds: 2_000_000_000) // Wait 2 seconds between attempts
-                    } catch {
-                        print("[Onboarding] ❌ Error checking program status/syncing templates: \(error.localizedDescription)")
-                        print("[Onboarding] ❌ Error type: \(type(of: error))")
-                        if let apiError = error as? APIError {
-                            print("[Onboarding] ❌ API Error: \(apiError.localizedDescription)")
-                        }
-                        pollAttempts += 1
-                        
-                        // If it's a network error, show more helpful message
-                        if let apiError = error as? APIError,
-                           case .networkError = apiError {
-                            await MainActor.run {
-                                generationError = "Kunde inte ansluta till servern. Kontrollera att backend-servern körs på port 5001."
-                                showGenerationErrorAlert = true
-                            }
-                        }
-                        
-                        try await Task.sleep(nanoseconds: 2_000_000_000)
+                if response.success {
+                    print("[Onboarding] ✅ Success! Passing response to finalize...")
+                    finalizeOnboarding(response: response)
+                } else {
+                    await MainActor.run {
+                        generationError = "Programgenerering misslyckades."
+                        showGenerationErrorAlert = true
+                        isGeneratingProgram = false
+                        showGenerationProgress = false
                     }
                 }
-                        
-                        if !templatesFound {
-                            // Final check: try one more time to sync and verify
-                            do {
-                                let finalStatus = try await APIService.shared.getProgramStatus()
-                                if finalStatus.status == "ready" && finalStatus.hasTemplates {
-                                    try await syncService.syncProgramTemplates(userId: userId, modelContext: modelContext)
-                                    let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
-                                    if templates.isEmpty {
-                                        print("[Onboarding] ❌ Final check: Status says ready but templates still empty after sync.")
-                                        await MainActor.run {
-                                            generationError = "Programmet är klart men kunde inte laddas. Försök öppna appen igen."
-                                            showGenerationErrorAlert = true
-                                            isGeneratingProgram = false
-                                            showGenerationProgress = false
-                                        }
-                                        return
-                                    } else {
-                                        templatesFound = true
-                                    }
-                                } else if finalStatus.status == "generating" || finalStatus.status == "queued" {
-                                    // Still generating - start polling with jobId if available
-                                    if let jobId = finalStatus.jobId {
-                                        print("[Onboarding] ⏳ Program still generating, starting polling with jobId: \(jobId)")
-                                        await MainActor.run {
-                                            generationJobId = jobId
-                                            generationStatus = finalStatus.status
-                                            generationProgress = finalStatus.progress ?? 0
-                                            showGenerationProgress = true
-                                        }
-                                        await pollGenerationStatus(jobId: jobId, userId: userId)
-                                        return
-                                    } else {
-                                        await MainActor.run {
-                                            generationError = "Programgenerering pågår fortfarande. Vänta lite och försök igen."
-                                            showGenerationErrorAlert = true
-                                            isGeneratingProgram = false
-                                            showGenerationProgress = false
-                                        }
-                                        return
-                                    }
-                                } else {
-                                    await MainActor.run {
-                                        generationError = finalStatus.error ?? "Kunde inte ladda ditt program. Försök igen senare."
-                                        showGenerationErrorAlert = true
-                                        isGeneratingProgram = false
-                                        showGenerationProgress = false
-                                    }
-                                    return
-                                }
-                            } catch {
-                                print("[Onboarding] ❌ Final check failed: \(error.localizedDescription)")
-                                await MainActor.run {
-                                    generationError = "Kunde inte ladda ditt program. Kontrollera din internetanslutning och försök igen."
-                                    showGenerationErrorAlert = true
-                                    isGeneratingProgram = false
-                                    showGenerationProgress = false
-                                }
-                                return
-                            }
-                        }
-                        
-                        // Update profile
-                        let profileDescriptor = FetchDescriptor<UserProfile>(
-                            predicate: #Predicate { $0.userId == userId }
-                        )
-                        if let profile = try? modelContext.fetch(profileDescriptor).first {
-                            profile.onboardingCompleted = true
-                            profile.theme = selectedTheme
-                            try? modelContext.save()
-                        }
-                        
-                        // Save step goal to UserDefaults
-                        UserDefaults.standard.set(dailyStepGoal, forKey: "dailyStepGoal")
-                        print("[Onboarding] ✅ Step goal saved: \(dailyStepGoal) steps")
-                        
-                        // Dismiss onboarding and go to home
-                        await MainActor.run {
-                            dismiss()
-                        }
             } catch {
                 print("[Onboarding] ❌ Error completing onboarding: \(error.localizedDescription)")
                 await MainActor.run {
-                    generationError = "Kunde inte slutföra onboarding: \(error.localizedDescription)"
+                    generationError = "Ett oväntat fel uppstod: \(error.localizedDescription)"
+                    showGenerationErrorAlert = true
+                    isGeneratingProgram = false
+                    showGenerationProgress = false
+                }
+            }
+            }
+        }
+    }
+    
+    private func waitForGenerationCompletion() {
+        Task {
+            print("[Onboarding] 🕒 Waiting for background generation to complete...")
+            var attempts = 0
+            // Wait up to 5 minutes (300 attempts * 1s) to match API timeout
+            while !programGenerationComplete && attempts < 300 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                attempts += 1
+                
+                if attempts % 5 == 0 {
+                    print("[Onboarding] ⏳ Still waiting for generation... (\(attempts)s)")
+                }
+            }
+            
+            await MainActor.run {
+                if programGenerationComplete {
+                    print("[Onboarding] ✅ Detected generation completion!")
+                    finalizeOnboarding()
+                } else {
+                    print("[Onboarding] ❌ Generation wait timed out after 300s (5 minutes)")
+                    // If we timed out waiting, but the task is technically still running in background,
+                    // we might want to check status explicitly or just show error.
+                    // For now, assume it failed or got stuck.
+                    generationError = "Programgenerering tog för lång tid. Vänligen försök igen."
                     showGenerationErrorAlert = true
                     isGeneratingProgram = false
                     showGenerationProgress = false
@@ -2346,6 +2421,58 @@ struct OnboardingView: View {
             }
         }
     }
+    
+    private func finalizeOnboarding(response: APIService.OnboardingCompleteResponse? = nil) {
+        print("[Onboarding] 🏁 Finalizing onboarding...")
+        
+        Task {
+            // Update profile
+            if let userId = authService.currentUserId {
+                let descriptor = FetchDescriptor<UserProfile>(
+                    predicate: #Predicate { $0.userId == userId }
+                )
+                if let profile = try? modelContext.fetch(descriptor).first {
+                    profile.onboardingCompleted = true
+                    profile.theme = selectedTheme
+                    
+                    // Sync profile data from API response if available
+                    if let apiProfile = response?.profile {
+                        print("[Onboarding] 📥 Syncing profile data from API response...")
+                        profile.age = apiProfile.age
+                        profile.sex = apiProfile.sex
+                        profile.bodyWeight = apiProfile.bodyWeight
+                        profile.height = apiProfile.height
+                        // Use coalescing for non-optional model properties
+                        profile.trainingLevel = apiProfile.trainingLevel ?? "intermediate"
+                        profile.motivationType = apiProfile.motivationType ?? "general_fitness"
+                        profile.goalStrength = apiProfile.goalStrength ?? 25
+                        profile.goalVolume = apiProfile.goalVolume ?? 25
+                        profile.goalEndurance = apiProfile.goalEndurance ?? 25
+                        profile.goalCardio = apiProfile.goalCardio ?? 25
+                        profile.sessionsPerWeek = apiProfile.sessionsPerWeek ?? 3
+                        profile.sessionDuration = apiProfile.sessionDuration ?? 60
+                    }
+                    
+                    try? modelContext.save()
+                    print("[Onboarding] ✅ Profile marked as onboarding completed and synced")
+                    
+                    // Fetch the generated program templates immediately so they appear on HomeView
+                    print("[Onboarding] 🔄 Fetching generated program templates...")
+                    try? await SyncService.shared.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                    try? await SyncService.shared.syncGymsAndEquipment(userId: userId, modelContext: modelContext)
+                    print("[Onboarding] ✅ Program templates synced")
+                }
+            }
+            
+            await MainActor.run {
+                isGeneratingProgram = false
+                showGenerationProgress = false
+                dismiss()
+            }
+        }
+    }
+
+
     
     private func pollGenerationStatus(jobId: String, userId: String) async {
         var pollCount = 0
@@ -2466,12 +2593,16 @@ struct OnboardingView: View {
             }
         }
         
-        // Timeout after max polls
+        // Timeout after max polls - JUST PROCEED
+        print("[Onboarding] ⚠️ Polling timed out. Proceeding to home screen anyway.")
         await MainActor.run {
-            generationError = "Programgenerering tog för lång tid. Försök igen senare."
-            showGenerationErrorAlert = true
+            // Instead of showing an error, we let the user into the app
+            // The program might appear later if it finishes in background
             isGeneratingProgram = false
             showGenerationProgress = false
+            
+            // We finalize onboarding so they get to HomeView
+            finalizeOnboarding()
         }
     }
     
