@@ -1790,7 +1790,14 @@
       }
     },
     "No gyms found nearby. Try increasing search distance." : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga gym hittades i närheten. Prova att öka sökavståndet."
+          }
+        }
+      }
     },
     "No health data found. You can manually fill in the values in the next step" : {
       "localizations" : {
@@ -1928,7 +1935,14 @@
       }
     },
     "Or enter manually" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eller ange manuellt"
+          }
+        }
+      }
     },
     "Or select manually" : {
       "extractionState" : "stale",
@@ -2281,7 +2295,14 @@
 
     },
     "Search Distance" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sökavstånd"
+          }
+        }
+      }
     },
     "Search for nearby gyms" : {
       "localizations" : {
