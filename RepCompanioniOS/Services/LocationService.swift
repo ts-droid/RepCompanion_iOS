@@ -10,6 +10,8 @@ struct NearbyGym: Identifiable {
     let latitude: Double
     let longitude: Double
     let distance: Double // in meters
+    let apiGymId: String? // If from our backend
+    let isRepCompanionGym: Bool
 }
 
 struct AddressSuggestion: Identifiable {
@@ -58,40 +60,97 @@ class LocationService: NSObject, ObservableObject {
         locationManager.stopUpdatingLocation()
     }
     
-    func searchNearbyGyms() {
+    func searchNearbyGyms(radiusKm: Double = 50.0) {
         guard let location = userLocation else { 
             requestPermission()
             return 
         }
         
         isSearching = true
+        self.nearbyGyms = [] // Clear previous results
         
+        let dispatchGroup = DispatchGroup()
+        var apiGyms: [NearbyGym] = []
+        var appleGyms: [NearbyGym] = []
+        
+        // 1. Fetch from RepCompanion API
+        dispatchGroup.enter()
+        Task {
+            do {
+                print("[LocationService] 🌍 Fetching nearby gyms from API with radius \(radiusKm)km...")
+                let apiResponse = try await APIService.shared.fetchNearbyGyms(
+                    lat: location.coordinate.latitude,
+                    lng: location.coordinate.longitude,
+                    radiusKm: radiusKm
+                )
+                
+                apiGyms = apiResponse.map { gym in
+                    let lat = Double(gym.latitude ?? "0") ?? 0
+                    let lng = Double(gym.longitude ?? "0") ?? 0
+                    
+                    return NearbyGym(
+                        name: gym.name,
+                        address: gym.location,
+                        latitude: lat,
+                        longitude: lng,
+                        distance: gym.distance * 1000, // API returns km, we want meters for consistency
+                        apiGymId: gym.id,
+                        isRepCompanionGym: true
+                    )
+                }
+                print("[LocationService] ✅ API found \(apiGyms.count) gyms")
+            } catch {
+                print("[LocationService] ❌ API fetch failed: \(error)")
+            }
+            dispatchGroup.leave()
+        }
+        
+        // 2. Fetch from Apple Maps (Generic)
+        dispatchGroup.enter()
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = "gym"
-        request.region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 5000, longitudinalMeters: 5000)
+        // Convert km to meters for Apple Maps region
+        let searchRegionMeters = radiusKm * 1000.0
+        request.region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: searchRegionMeters, longitudinalMeters: searchRegionMeters)
         
         let search = MKLocalSearch(request: request)
-        search.start { [weak self] response, error in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.isSearching = false
-                
-                if let mapItems = response?.mapItems {
-                    self.nearbyGyms = mapItems.map { item in
-                        // Use non-deprecated property (iOS 18+)
-                        let gymLocation = item.location
-                        let distance = location.distance(from: gymLocation)
-                        
-                        return NearbyGym(
-                            name: item.name ?? "Okänt gym",
-                            address: item.name, // Using name as a safe alternative to deprecated placemark.title if better property is not found
-                            latitude: gymLocation.coordinate.latitude,
-                            longitude: gymLocation.coordinate.longitude,
-                            distance: distance
-                        )
-                    }.sorted(by: { $0.distance < $1.distance })
+        search.start { response, error in
+            if let mapItems = response?.mapItems {
+                appleGyms = mapItems.map { item in
+                    // Use modern location property (non-optional CLLocation in newer SDKs)
+                    let gymLocation = item.location // inferred as CLLocation
+                    let distance = location.distance(from: gymLocation)
+                    
+                    return NearbyGym(
+                        name: item.name ?? "Okänt gym",
+                        address: item.placemark.title, 
+                        latitude: gymLocation.coordinate.latitude,
+                        longitude: gymLocation.coordinate.longitude,
+                        distance: distance,
+                        apiGymId: nil,
+                        isRepCompanionGym: false
+                    )
                 }
+                print("[LocationService] 🗺️ Apple Maps found \(appleGyms.count) gyms")
             }
+            dispatchGroup.leave()
+        }
+        
+        // 3. Merge and Update UI
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            self.isSearching = false
+            
+            // Combine: RepCompanion gyms first, then Apple gyms (Deduplication via distance/name could be added here)
+            // For now, simple concatenation
+            
+            // Sort Apple gyms by distance
+            let sortedAppleGyms = appleGyms.sorted(by: { $0.distance < $1.distance })
+            
+            // Filter out Apple gyms that might be duplicates of API gyms (very rough check by name distance)
+            // This is complex, so we'll just stack them for now, API first.
+            
+            self.nearbyGyms = apiGyms + sortedAppleGyms
         }
     }
 }

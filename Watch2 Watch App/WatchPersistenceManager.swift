@@ -332,6 +332,31 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         }
     }
     
+    public func sendWorkoutComplete(sessionId: UUID) {
+        guard let session = watchSession else { return }
+        
+        let message: [String: Any] = [
+            "type": "workout_complete",
+            "sessionId": sessionId.uuidString,
+            "timestamp": Date().timeIntervalSince1970
+        ]
+        
+        if session.isReachable {
+            session.sendMessage(message, replyHandler: nil, errorHandler: { [weak self] error in
+                print("[Watch] Error syncing completion: \(error.localizedDescription)")
+                self?.queueMessageForSync(message)
+            })
+        } else {
+            queueMessageForSync(message)
+        }
+    }
+    
+    private func queueMessageForSync(_ message: [String: Any]) {
+        var queue = getOfflineQueue()
+        queue.append(message)
+        saveOfflineQueue(queue)
+    }
+    
     private func queueForSync(
         sessionId: UUID,
         exerciseName: String,

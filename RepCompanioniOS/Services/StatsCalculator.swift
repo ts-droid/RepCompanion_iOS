@@ -61,6 +61,29 @@ class StatsCalculator {
         return uniqueKeys.count
     }
     
+    /// Helper to get real session duration in seconds
+    private func getSessionDuration(_ session: WorkoutSession) -> TimeInterval {
+        // If we have accumulated time (new pause/resume logic), use it
+        var duration = session.accumulatedTime
+        
+        // If session is currently active, add time since last start
+        if session.status == "active" || session.status == "pending" {
+            if let lastStart = session.lastStartTime {
+                duration += Date().timeIntervalSince(lastStart)
+            } else if duration == 0 {
+                // Initial start, no lastStartTime set yet or old logic
+                duration = Date().timeIntervalSince(session.startedAt)
+            }
+        } else if duration == 0 {
+            // Completed session with old logic (no accumulatedTime)
+            if let completed = session.completedAt {
+                duration = completed.timeIntervalSince(session.startedAt)
+            }
+        }
+        
+        return duration
+    }
+    
     /// Average session duration in minutes
     func averageDuration(modelContext: ModelContext) -> Int {
         let descriptor = FetchDescriptor<WorkoutSession>(
@@ -68,30 +91,31 @@ class StatsCalculator {
         )
         guard let sessions = try? modelContext.fetch(descriptor), !sessions.isEmpty else { return 0 }
         
-        let totalMinutes = sessions.reduce(0) { total, session in
-            // startedAt is non-optional, completedAt is optional
-            guard let completed = session.completedAt else { return total }
-            let duration = completed.timeIntervalSince(session.startedAt)
-            return total + Int(duration / 60)
+        let totalMinutes = sessions.reduce(0.0) { total, session in
+            let duration = getSessionDuration(session)
+            return total + (duration / 60.0)
         }
         
-        return totalMinutes / sessions.count
+        return Int(totalMinutes / Double(sessions.count))
     }
     
     // MARK: - Formatted Stats
     
     func formattedTotalVolume(modelContext: ModelContext) -> String {
         let volume = totalVolume(modelContext: modelContext)
-        if volume >= 1000 {
-            return String(format: "%.1fk kg", volume / 1000)
-        } else {
-            return String(format: "%.0f kg", volume)
-        }
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = " " // Swedish style or use locale
+        
+        let volumeNumber = NSNumber(value: volume)
+        let formattedStr = formatter.string(from: volumeNumber) ?? String(format: "%.0f", volume)
+        return "\(formattedStr) kg"
     }
     
     func formattedAverageDuration(modelContext: ModelContext) -> String {
         let minutes = averageDuration(modelContext: modelContext)
-        return "\(minutes)m"
+        return "\(minutes) min"
     }
     
     // MARK: - Dynamic Chart Data
@@ -195,12 +219,8 @@ class StatsCalculator {
         guard let sessions = try? modelContext.fetch(sessionDescriptor) else { return [] }
         
         return sessions.map { session in
-            // startedAt is non-optional, completedAt is optional
-            let startDate = session.startedAt
-            
             // Calculate duration
-            let endDate = session.completedAt ?? Date()
-            let duration = Int(endDate.timeIntervalSince(startDate) / 60)
+            let duration = Int(getSessionDuration(session) / 60)
             
             // Fetch logs for this session
             let sessionId = session.id
@@ -215,7 +235,7 @@ class StatsCalculator {
             return WorkoutHistoryItem(
                 id: session.id,
                 name: session.sessionName ?? "Träningspass",
-                date: startDate,
+                date: session.startedAt,
                 duration: duration,
                 totalReps: totalReps,
                 totalWeight: totalWeight,

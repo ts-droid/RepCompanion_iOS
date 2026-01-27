@@ -31,14 +31,14 @@ struct PersonalTipsSection: View {
             HStack {
                 Image(systemName: "lightbulb")
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
-                Text("Personliga tips")
+                Text(String(localized: "Personal tips"))
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundStyle(Color.textPrimary(for: colorScheme))
             }
             .padding(.horizontal)
             
-            Text("Anpassade råd för din träning")
+            Text(String(localized: "Personalized advice for your training"))
                 .font(.subheadline)
                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                 .padding(.horizontal)
@@ -60,31 +60,31 @@ struct PersonalTipsSection: View {
     
     private func getIcon(for category: String) -> String {
         switch category.lowercased() {
-        case "kost", "nutrition": return "apple.logo"
-        case "återhämtning", "recovery": return "moon.fill"
-        case "kondition", "cardio": return "figure.run"
-        case "periodisering": return "calendar"
-        case "blandad träning": return "figure.strengthtraining.traditional"
-        case "styrka", "bygga_muskler": return "figure.strengthtraining.traditional"
-        case "volym": return "scalemass.fill"
-        case "viktminskning": return "percent"
-        case "rehab", "rehabilitering": return "bandage.fill"
-        case "mobilitet", "bli_rörligare": return "figure.flexibility"
+        case "nutrition", "kost": return "apple.logo"
+        case "recovery", "återhämtning": return "moon.fill"
+        case "cardio", "kondition": return "figure.run"
+        case "periodization", "periodisering": return "calendar"
+        case "mixed_training", "blandad träning": return "figure.strengthtraining.traditional"
+        case "strength", "styrka", "build_muscle", "bygga_muskler": return "figure.strengthtraining.traditional"
+        case "volume", "volym": return "scalemass.fill"
+        case "lose_weight", "weight_loss", "viktminskning": return "percent"
+        case "rehabilitation", "rehab", "rehabilitering": return "bandage.fill"
+        case "mobility", "mobilitet", "bli_rörligare": return "figure.flexibility"
         default: return "lightbulb.fill"
         }
     }
     
     private func getColor(for category: String) -> Color {
         switch category.lowercased() {
-        case "kost", "nutrition": return .nutritionGreen
-        case "återhämtning", "recovery": return .recoveryPurple
-        case "kondition", "cardio": return .red
-        case "periodisering": return .blue
-        case "blandad träning": return .accentBlue
-        case "styrka", "bygga_muskler", "volym": return .orange
-        case "viktminskning": return .green
-        case "rehab", "rehabilitering": return .teal
-        case "mobilitet", "bli_rörligare": return .purple
+        case "nutrition", "kost": return .nutritionGreen
+        case "recovery", "återhämtning": return .recoveryPurple
+        case "cardio", "kondition": return .red
+        case "periodization", "periodisering": return .blue
+        case "mixed_training", "blandad träning": return .accentBlue
+        case "strength", "styrka", "build_muscle", "bygga_muskler", "volume", "volym": return .orange
+        case "lose_weight", "weight_loss", "viktminskning": return .green
+        case "rehabilitation", "rehab", "rehabilitering": return .teal
+        case "mobility", "mobilitet", "bli_rörligare": return .purple
         default: return .accentBlue
         }
     }
@@ -97,8 +97,8 @@ struct DefaultTipView: View {
         TipCard(
             icon: "apple.logo",
             iconColor: .nutritionGreen,
-            title: "Näring",
-            content: "Kaloriintag spelar roll för progressionen. Om du strävar efter muskelökning, behövs ett litet kaloriöverskott (200-300 kcal/dag).",
+            title: String(localized: "Nutrition"),
+            content: String(localized: "Calorie intake matters for progression. If you strive for muscle building, a small calorie surplus is needed (200-300 kcal/day)."),
             colorScheme: colorScheme
         )
     }

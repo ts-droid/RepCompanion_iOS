@@ -96,7 +96,7 @@ class TrainingTipService: ObservableObject {
         let gender = mapGender(sex: profile.sex)
         let trainingLevel = mapTrainingLevel(level: profile.trainingLevel)
         let motivation = profile.motivationType?.lowercased()
-        let genderBoth = "både"
+        let genderBoth = "both"
         
         // Strategy:
         // Use a simple predicate for the most restrictive fields (ageGroup, trainingLevel)
@@ -147,21 +147,21 @@ class TrainingTipService: ObservableObject {
     }
     
     private func mapMotivationToCategories(_ motivation: String) -> [String] {
-        switch motivation {
-        case "bygga_muskler", "hypertrofi", "fitness":
-            return ["kost", "återhämtning", "periodisering", "styrka", "volym"]
-        case "viktminskning":
-            return ["kost", "kondition", "nutrition"]
-        case "bättre_hälsa":
-            return ["kondition", "återhämtning", "kost"]
-        case "rehabilitering":
-            return ["återhämtning", "rehab", "mobilitet"]
+        switch motivation.lowercased() {
+        case "build_muscle", "bygga_muskler", "hypertrophy", "hypertrofi", "fitness":
+            return ["nutrition", "recovery", "periodization", "strength", "volume"]
+        case "lose_weight", "weight_loss", "viktminskning":
+            return ["nutrition", "cardio"]
+        case "better_health", "bättre_hälsa":
+            return ["cardio", "recovery", "nutrition"]
+        case "rehabilitation", "rehabilitering":
+            return ["recovery", "rehabilitation", "mobility"]
         case "sport":
-            return ["kondition", "periodisering", "atletism"]
-        case "bli_rörligare":
-            return ["mobilitet", "återhämtning", "stretching"]
+            return ["cardio", "periodization", "athleticism"]
+        case "mobility", "bli_rörligare":
+            return ["mobility", "recovery", "stretching"]
         default:
-            return ["blandad träning"]
+            return ["mixed_training"]
         }
     }
     
@@ -220,24 +220,24 @@ class TrainingTipService: ObservableObject {
     }
     
     private func mapGender(sex: String?) -> String {
-        guard let sex = sex?.lowercased() else { return "både" }
+        guard let sex = sex?.lowercased() else { return "both" }
         
         switch sex {
-        case "man", "male": return "man"
-        case "kvinna", "female": return "kvinna"
-        default: return "både"
+        case "male", "man": return "male"
+        case "female", "kvinna": return "female"
+        default: return "both"
         }
     }
     
     private func mapTrainingLevel(level: String?) -> String {
-        guard let level = level?.lowercased() else { return "medel" }
+        guard let level = level?.lowercased() else { return "intermediate" }
         
         switch level {
-        case "nybörjare", "beginner": return "nybörjare"
-        case "van", "intermediate": return "medel"
-        case "mycket_van", "avancerad", "advanced": return "van"
-        case "elit", "elite": return "elit"
-        default: return "medel"
+        case "beginner", "nybörjare": return "beginner"
+        case "intermediate", "van": return "intermediate"
+        case "advanced", "mycket_van", "avancerad": return "advanced"
+        case "elite", "elit": return "elite"
+        default: return "intermediate"
         }
     }
 }

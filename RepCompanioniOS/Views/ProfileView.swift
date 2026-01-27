@@ -120,29 +120,29 @@ struct ProfileView: View {
                             
                             // Stats Row
                             HStack(spacing: 40) {
-                                StatItem(icon: "calendar", label: "Pass/vecka", value: "\(currentProfile?.sessionsPerWeek ?? 3)", colorScheme: effectiveColorScheme)
-                                StatItem(icon: "clock", label: "Min/pass", value: "\(currentProfile?.sessionDuration ?? 60)", colorScheme: effectiveColorScheme)
-                                StatItem(icon: "flame", label: "Ålder", value: "\(currentProfile?.age ?? 0)", colorScheme: effectiveColorScheme)
+                                StatItem(icon: "calendar", label: String(localized: "Sessions/week"), value: "\(currentProfile?.sessionsPerWeek ?? 3)", colorScheme: effectiveColorScheme)
+                                StatItem(icon: "clock", label: String(localized: "Min/session"), value: "\(currentProfile?.sessionDuration ?? 60)", colorScheme: effectiveColorScheme)
+                                StatItem(icon: "flame", label: String(localized: "Age"), value: "\(currentProfile?.age ?? 0)", colorScheme: effectiveColorScheme)
                             }
                             .padding(.top, 8)
                             
                             // User Info Row
                             HStack(spacing: 40) {
-                                InfoItem(label: "Kön", value: currentProfile?.sex ?? "Ej angivet", colorScheme: effectiveColorScheme)
-                                InfoItem(label: "Träningsnivå", value: currentProfile?.trainingLevel ?? "Nybörjare", colorScheme: effectiveColorScheme)
-                                InfoItem(label: "Fokus", value: currentProfile?.derivedTrainingFocus ?? "Allround", colorScheme: effectiveColorScheme)
+                                InfoItem(label: String(localized: "Sex"), value: LocalizationService.localizeSex(currentProfile?.sex), colorScheme: effectiveColorScheme)
+                                InfoItem(label: String(localized: "Level"), value: LocalizationService.localizeTrainingLevel(currentProfile?.trainingLevel), colorScheme: effectiveColorScheme)
+                                InfoItem(label: String(localized: "Focus"), value: currentProfile?.derivedTrainingFocus ?? String(localized: "All-round"), colorScheme: effectiveColorScheme)
                             }
                             .padding(.top, 8)
                             
                             // Rest Time Settings
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Vila")
+                                Text(String(localized: "Rest"))
                                     .font(.caption.bold())
                                     .foregroundColor(Color.textSecondary(for: effectiveColorScheme))
                                 
                                 HStack(spacing: 20) {
                                     VStack(alignment: .leading) {
-                                        Text("Mellan set")
+                                        Text(String(localized: "Between sets"))
                                             .font(.caption2)
                                             .foregroundColor(Color.textSecondary(for: effectiveColorScheme))
                                         HStack {
@@ -154,7 +154,7 @@ struct ProfileView: View {
                                     }
                                     
                                     VStack(alignment: .leading) {
-                                        Text("Mellan övningar")
+                                        Text(String(localized: "Between exercises"))
                                             .font(.caption2)
                                             .foregroundColor(Color.textSecondary(for: effectiveColorScheme))
                                         HStack {
@@ -188,10 +188,10 @@ struct ProfileView: View {
                             .padding(.horizontal)
                             
                             VStack(spacing: 12) {
-                                GoalRow(title: "Styrka", percentage: currentProfile?.goalStrength ?? 25, colorScheme: effectiveColorScheme)
-                                GoalRow(title: "Volym", percentage: currentProfile?.goalVolume ?? 25, colorScheme: effectiveColorScheme)
-                                GoalRow(title: "Uthållighet", percentage: currentProfile?.goalEndurance ?? 25, colorScheme: effectiveColorScheme)
-                                GoalRow(title: "Cardio", percentage: currentProfile?.goalCardio ?? 25, colorScheme: effectiveColorScheme)
+                                GoalRow(title: String(localized: "Strength"), percentage: currentProfile?.goalStrength ?? 25, colorScheme: effectiveColorScheme)
+                                GoalRow(title: String(localized: "Volume"), percentage: currentProfile?.goalVolume ?? 25, colorScheme: effectiveColorScheme)
+                                GoalRow(title: String(localized: "Endurance"), percentage: currentProfile?.goalEndurance ?? 25, colorScheme: effectiveColorScheme)
+                                GoalRow(title: String(localized: "Cardio"), percentage: currentProfile?.goalCardio ?? 25, colorScheme: effectiveColorScheme)
                             }
                             .padding()
                             .background(Color.cardBackground(for: effectiveColorScheme))
@@ -212,13 +212,13 @@ struct ProfileView: View {
                             .padding(.horizontal)
                             
                             HStack(spacing: 12) {
-                                ColorSchemeButton(title: "Ljust", icon: "sun.max.fill", isSelected: colorScheme == "Light", colorScheme: effectiveColorScheme) {
+                                ColorSchemeButton(title: String(localized: "Light"), icon: "sun.max.fill", isSelected: colorScheme == "Light", colorScheme: effectiveColorScheme) {
                                     colorScheme = "Light"
                                 }
-                                ColorSchemeButton(title: "Mörkt", icon: "moon.fill", isSelected: colorScheme == "Dark", colorScheme: effectiveColorScheme) {
+                                ColorSchemeButton(title: String(localized: "Dark"), icon: "moon.fill", isSelected: colorScheme == "Dark", colorScheme: effectiveColorScheme) {
                                     colorScheme = "Dark"
                                 }
-                                ColorSchemeButton(title: "System", icon: "gear", isSelected: colorScheme == "System", colorScheme: effectiveColorScheme) {
+                                ColorSchemeButton(title: String(localized: "System"), icon: "gear", isSelected: colorScheme == "System", colorScheme: effectiveColorScheme) {
                                     colorScheme = "System"
                                 }
                             }
@@ -367,11 +367,11 @@ struct ProfileView: View {
                                 .cornerRadius(12)
                             }
                             
-                            ActionButton(icon: "gearshape.fill", title: "Justera Träning", colorScheme: effectiveColorScheme, action: {
+                            ActionButton(icon: "gearshape.fill", title: String(localized: "Adjust Training"), colorScheme: effectiveColorScheme, action: {
                                 showTrainingAdjustment = true
                             })
-                            ActionButton(icon: "square.and.arrow.down", title: "Exportera Övningar", colorScheme: effectiveColorScheme, action: {})
-                            ActionButton(icon: "rectangle.portrait.and.arrow.right", title: "Logga ut", isDestructive: true, colorScheme: effectiveColorScheme, action: {
+                            ActionButton(icon: "square.and.arrow.down", title: String(localized: "Export Exercises"), colorScheme: effectiveColorScheme, action: {})
+                            ActionButton(icon: "rectangle.portrait.and.arrow.right", title: String(localized: "Log Out"), isDestructive: true, colorScheme: effectiveColorScheme, action: {
                                 authService.signOut()
                             })
                         }

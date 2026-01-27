@@ -15,6 +15,10 @@ final class WorkoutSession {
     var movergyScore: Int?
     var snapshotData: Data? // Store JSON as Data for SwiftData compatibility
     
+    // Timer persistence fields
+    var accumulatedTime: TimeInterval = 0
+    var lastStartTime: Date? = nil
+    
     init(
         id: UUID = UUID(),
         userId: String,

@@ -189,6 +189,43 @@ class APIService {
         return authResponse
     }
     
+    // MARK: - Gym Geosearch
+    
+    func fetchNearbyGyms(lat: Double, lng: Double, radiusKm: Double = 50.0) async throws -> [NearbyGymResponse] {
+        guard let token = authToken else {
+            throw APIError.unauthorized
+        }
+        
+        var components = URLComponents(string: "\(baseURL)/api/gyms/nearby")!
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: String(lat)),
+            URLQueryItem(name: "lng", value: String(lng)),
+            URLQueryItem(name: "radius", value: String(radiusKm))
+        ]
+        
+        guard let url = components.url else {
+            throw APIError.invalidResponse
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await performRequest(request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([NearbyGymResponse].self, from: data)
+    }
+    
     func authenticate(email: String, password: String) async throws -> AuthResponse {
         let url = URL(string: "\(baseURL)/api/auth/login")!
         var request = URLRequest(url: url)
@@ -293,6 +330,8 @@ class APIService {
             let motivationType: String
             let trainingLevel: String
             let specificSport: String?
+            let focusTags: [String]?
+            let selectedIntent: String?
             let age: Int?
             let sex: String?
             let bodyWeight: Int?
@@ -345,9 +384,20 @@ class APIService {
     
     struct SuggestedGoalsResponse: Codable {
         let goalStrength: Int
-        let goalVolume: Int
+        let goalHypertrophy: Int // Mapped from backend 'goalVolume'
         let goalEndurance: Int
         let goalCardio: Int
+        let focusTags: [String]?
+        let selectedIntent: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case goalStrength
+            case goalHypertrophy = "goalVolume" // Map backend 'goalVolume' to 'goalHypertrophy'
+            case goalEndurance
+            case goalCardio
+            case focusTags
+            case selectedIntent
+        }
     }
     
     struct SuggestedOneRmResponse: Codable {
@@ -507,6 +557,7 @@ class APIService {
     func suggestTrainingGoals(
         motivationType: String,
         trainingLevel: String,
+        specificSport: String? = nil,
         age: Int?,
         sex: String?,
         bodyWeight: Int?,
@@ -548,6 +599,10 @@ class APIService {
             "oneRmSquat": oneRmSquat as Any,
             "oneRmLatpull": oneRmLatpull as Any
         ]
+        
+        if let specificSport = specificSport {
+            body["specificSport"] = specificSport
+        }
         
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
@@ -894,14 +949,28 @@ class APIService {
         decoder.dateDecodingStrategy = .iso8601
         
         // Response is an array of objects with template and exerciseCount
-        struct TemplateWithMetadata: Codable {
+        struct TemplateWithMetadata: Decodable {
             let template: ProgramTemplateResponse
             let exerciseCount: Int
             let isNext: Bool
+            let exercises: [ProgramTemplateExerciseResponse]?
         }
         
             let templatesWithMetadata = try decoder.decode([TemplateWithMetadata].self, from: data)
-            let templates = templatesWithMetadata.map { $0.template }
+            let templates = templatesWithMetadata.map { meta -> ProgramTemplateResponse in
+                // Start with the basic template data
+                let base = meta.template
+                
+                // Return a new copy with the exercises from the metadata wrapper
+                return ProgramTemplateResponse(
+                    id: base.id,
+                    templateName: base.templateName,
+                    muscleFocus: base.muscleFocus,
+                    dayOfWeek: base.dayOfWeek,
+                    estimatedDurationMinutes: base.estimatedDurationMinutes,
+                    exercises: meta.exercises // Inject the exercises from the wrapper!
+                )
+            }
             print("[API] ✅ Decoded \(templates.count) templates from response")
             return templates
         } catch let error as URLError {
@@ -2153,6 +2222,18 @@ struct GymResponse: Codable {
     let createdAt: Date
 }
 
+struct NearbyGymResponse: Codable {
+    let id: String
+    let userId: String
+    let name: String
+    let location: String?
+    let latitude: String?
+    let longitude: String?
+    let isPublic: Bool?
+    let distance: Double
+    let createdAt: Date
+}
+
 struct UserEquipmentResponse: Codable {
     let id: String
     let userId: String
@@ -2215,13 +2296,70 @@ struct UserProfileResponse: Codable {
     let updatedAt: Date?
 }
 
-struct ProgramTemplateResponse: Codable {
+struct ProgramTemplateResponse: Decodable {
     let id: String
     let templateName: String
     let muscleFocus: String?
     let dayOfWeek: Int?
     let estimatedDurationMinutes: Int?
+    
+    // Exercises can be at root or wrapped in 'exercises' property of top-level object
+    // while template fields are in 'template' property
     let exercises: [ProgramTemplateExerciseResponse]?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case templateName
+        case muscleFocus
+        case dayOfWeek
+        case estimatedDurationMinutes
+        case exercises
+        case template // New format wrapper
+    }
+    
+    // New nested keys
+    enum TemplateKeys: String, CodingKey {
+        case id
+        case templateName
+        case muscleFocus
+        case dayOfWeek
+        case estimatedDurationMinutes
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // 1. Try new nested format: { template: {...}, exercises: [...] }
+        if let templateContainer = try? container.nestedContainer(keyedBy: TemplateKeys.self, forKey: .template) {
+            id = try templateContainer.decode(String.self, forKey: .id)
+            templateName = try templateContainer.decode(String.self, forKey: .templateName)
+            muscleFocus = try? templateContainer.decode(String.self, forKey: .muscleFocus)
+            dayOfWeek = try? templateContainer.decode(Int.self, forKey: .dayOfWeek)
+            estimatedDurationMinutes = try? templateContainer.decode(Int.self, forKey: .estimatedDurationMinutes)
+            
+            // Exercises are at the root level of the response object in the new format
+            exercises = try? container.decode([ProgramTemplateExerciseResponse].self, forKey: .exercises)
+        } 
+        // 2. Fallback to old flat format
+        else {
+            id = try container.decode(String.self, forKey: .id)
+            templateName = try container.decode(String.self, forKey: .templateName)
+            muscleFocus = try? container.decode(String.self, forKey: .muscleFocus)
+            dayOfWeek = try? container.decode(Int.self, forKey: .dayOfWeek)
+            estimatedDurationMinutes = try? container.decode(Int.self, forKey: .estimatedDurationMinutes)
+            exercises = try? container.decode([ProgramTemplateExerciseResponse].self, forKey: .exercises)
+        }
+    }
+    
+    // Add memberwise initializer manually since we defined a custom init(from:)
+    init(id: String, templateName: String, muscleFocus: String?, dayOfWeek: Int?, estimatedDurationMinutes: Int?, exercises: [ProgramTemplateExerciseResponse]?) {
+        self.id = id
+        self.templateName = templateName
+        self.muscleFocus = muscleFocus
+        self.dayOfWeek = dayOfWeek
+        self.estimatedDurationMinutes = estimatedDurationMinutes
+        self.exercises = exercises
+    }
 }
 
 struct ProgramTemplateExerciseResponse: Codable {

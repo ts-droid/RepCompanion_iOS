@@ -149,7 +149,7 @@ struct StatisticsView: View {
                                     HistoryRow(
                                         title: item.name,
                                         date: item.date.formatted(date: .abbreviated, time: .omitted),
-                                        time: "\(item.duration)m",
+                                        time: "\(item.duration) min",
                                         status: item.status == "completed" ? "Slutfört" : "Avbrutet",
                                         isCompleted: item.status == "completed",
                                         colorScheme: colorScheme

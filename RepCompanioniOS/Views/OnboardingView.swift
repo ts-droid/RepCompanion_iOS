@@ -40,9 +40,11 @@ struct OnboardingView: View {
     @State private var birthYear: Int?
     @State private var healthDataFetched = false
     @State private var goalStrength = 25
-    @State private var goalVolume = 25
+    @State private var goalHypertrophy = 25
     @State private var goalEndurance = 25
     @State private var goalCardio = 25
+    @State private var focusTags: [String] = []
+    @State private var selectedIntent: String? = nil
     @State private var goalsCalculated = false // Track if goals have been auto-calculated
     @State private var sessionsPerWeek = 3
     @State private var sessionDuration = 60
@@ -55,13 +57,18 @@ struct OnboardingView: View {
     @State private var selectedEquipment: [String] = []
     
     // Gym details
-    @State private var gymName: String = "Mitt Gym"
+    @State private var gymName: String = String(localized: "My Gym")
+    
+    @State private var customSportName: String = ""
     
     @StateObject private var locationService = LocationService.shared
     @State private var showNearbyGyms = false
 
     @State private var gymAddress: String = ""
     @State private var gymIsPublic: Bool = false
+    @State private var selectedNearbyGymId: String? = nil
+    @State private var searchRadius: Double = 50.0
+    @State private var selectedNearbyGym: NearbyGym? = nil
     
     @State private var selectedTheme = "Main" // Default theme
     @State private var selectedColorScheme: String = "auto"
@@ -86,14 +93,31 @@ struct OnboardingView: View {
         case gymAddress
     }
     
+    // Gym tracking
+    @State private var lastCreatedGymId: String? = nil
+    
     // Equipment catalog
     @State private var availableEquipment: [EquipmentCatalog] = []
     @State private var isLoadingEquipment = false
     @State private var showCamera = false
     
     private var totalSteps: Int {
-        // New order: Motivation → Training Level → Health Data → Personal Info → Goals → 1RM → Frequency → Equipment → Gym Details → Step Goal → Theme
-        motivationType == "sport" ? 10 : 11
+        // New order: 
+        // 1. Motivation
+        // 2. Sport (if sport)
+        // 3. Health Data
+        // 4. Personal Info
+        // 5. Goals
+        // 6. Level (Habits)
+        // 7. 1RM
+        // 8. Frequency
+        // 9. Equipment
+        // 10. Gym Details
+        // 11. Step Goal
+        // 12. Theme (if not sport)
+        
+        // Both paths have 11 active steps
+        11
     }
     
     private var progressPercentage: Double {
@@ -105,29 +129,31 @@ struct OnboardingView: View {
         case 1:
             return !motivationType.isEmpty
         case 2:
+            // Sport selection (only for sport motivation)
             if motivationType == "sport" {
                 return !specificSport.isEmpty
             }
-            return !trainingLevel.isEmpty
+            return true // Should be skipped if not sport
         case 3:
-            // Health data step is optional - user can proceed even if they skip it
-            return true
+            return true // Health Data (Optional)
         case 4:
             return age != nil && sex != "" && bodyWeight != nil && height != nil && birthDay != nil && birthMonth != nil && birthYear != nil
         case 5:
-            return goalStrength + goalVolume + goalEndurance + goalCardio == 100
+            return goalStrength + goalHypertrophy + goalEndurance + goalCardio == 100
         case 6:
-            return true // 1RM is optional (auto-calculated defaults)
+            return !trainingLevel.isEmpty // Level is now mandatory for everyone
         case 7:
-            return sessionsPerWeek > 0 && sessionDuration > 0
+            return true // 1RM (Optional/Auto)
         case 8:
-            return !selectedEquipment.isEmpty
+            return sessionsPerWeek > 0 && sessionDuration > 0
         case 9:
-            return !gymName.isEmpty // Gym details - name is required
+            return !selectedEquipment.isEmpty
         case 10:
-            return true // Step Goal (shown while Program AI works)
+            return !gymName.isEmpty
         case 11:
-            return true // Theme selection (only if not sport)
+            return true // Step Goal
+        case 12:
+            return true // Theme
         default:
             return false
         }
@@ -163,14 +189,15 @@ struct OnboardingView: View {
                     
                     .padding()
                 
-                // Hide navigation buttons for Equipment step as it has its own Bottom overlay in the unified view
-                if currentStep != 8 {
+                
+                // Navigation buttons
+                if true {
                     HStack {
                         if currentStep > 1 {
                             Button(action: goToPreviousStep) {
                                 HStack {
                                     Image(systemName: "chevron.left")
-                                    Text("Back", comment: "Back button")
+                                    Text(String(localized: "Back"))
                                 }
                                 .foregroundColor(Color.textPrimary(for: colorScheme))
                                 .padding()
@@ -240,14 +267,14 @@ struct OnboardingView: View {
                 }
             }
             .navigationBarHidden(true)
-            .alert("Programgenerering misslyckades", isPresented: $showGenerationErrorAlert) {
-                Button(String(localized: "Försöka igen")) {
+            .alert(String(localized: "Program generation failed"), isPresented: $showGenerationErrorAlert) {
+                Button(String(localized: "Try again")) {
                     generationError = nil
                     showGenerationErrorAlert = false
                     // Retry program generation
                     completeOnboarding()
                 }
-                Button(String(localized: "Fortsätt utan program"), role: .cancel) {
+                Button(String(localized: "Continue without program"), role: .cancel) {
                     generationError = nil
                     showGenerationErrorAlert = false
                     // Continue to next step or finish if at end
@@ -259,17 +286,17 @@ struct OnboardingView: View {
                 }
             } message: {
                 if let error = generationError {
-                    Text(String(localized: "Programgenerering lyckades inte just nu. \(error)\n\nVill du försöka igen eller fortsätta utan program?"))
+                    Text(String(format: String(localized: "Program generation did not succeed at this time. %@\n\nDo you want to try again or continue without a program?"), error))
                 } else {
-                    Text(String(localized: "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller fortsätta utan program?"))
+                    Text(String(localized: "Program generation did not succeed at this time.\n\nDo you want to try again or continue without a program?"))
                 }
             }
-            .alert("Kontrollera värde", isPresented: $showValueValidationAlert) {
+            .alert(String(localized: "Check value"), isPresented: $showValueValidationAlert) {
                 Button(String(localized: "OK")) {
                     showValueValidationAlert = false
                 }
             } message: {
-                Text(valueValidationMessage)
+                Text(LocalizedStringKey(valueValidationMessage))
             }
             .sheet(isPresented: $showCamera) {
                 EquipmentCameraView { equipment in
@@ -319,36 +346,29 @@ struct OnboardingView: View {
             if motivationType == "sport" {
                 sportSelectionStep
             } else {
-                trainingLevelStep
+                EmptyView() // Should be skipped
             }
         case 3:
-            // Always show Health Data step (optional, user can skip)
             healthDataStep
         case 4:
-            // Personal Info (shows imported data if Health import was done)
             personalInfoStep
         case 5:
-            // Training Goals → Starts 1RM AI query when user clicks "Continue"
             trainingGoalsStep
         case 6:
-            // 1RM (shows standardized values while AI works)
-            oneRmStep
+            trainingLevelStep
         case 7:
-            // Training Frequency
-            trainingFrequencyStep
+            oneRmStep
         case 8:
-            // Equipment → Starts Program AI query when user clicks "Continue", saves gym as "Mitt Gym"
-            equipmentStep
+            trainingFrequencyStep
         case 9:
-            // Gym Details → User enters gym name, address, and type
             gymDetailsStep
         case 10:
-            // Step Goal (shown while Program AI works)
-            stepGoalStep
+            equipmentStep
         case 11:
-            // Theme (if not sport)
+            stepGoalStep
+        case 12:
             if motivationType == "sport" {
-                EmptyView() // No theme step for sport
+                EmptyView() // Skipped for sport
             } else {
                 themeStep
             }
@@ -369,57 +389,75 @@ struct OnboardingView: View {
             
             VStack(spacing: 16) {
                 MotivationOption(
-                    title: LocalizedStringKey("Lose weight"),
-                    description: LocalizedStringKey("Lose weight and improve your health."),
-                    isSelected: motivationType == "viktminskning",
+                    title: String(localized: "Lose weight"),
+                    description: String(localized: "Lose weight and improve your health."),
+                    isSelected: motivationType == "lose_weight",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "viktminskning" }
+                    action: {
+                        motivationType = "lose_weight"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 MotivationOption(
-                    title: LocalizedStringKey("Rehabilitation"),
-                    description: LocalizedStringKey("Recover from injury or illness."),
+                    title: String(localized: "Rehabilitation"),
+                    description: String(localized: "Recover from injury or illness."),
                     isSelected: motivationType == "rehabilitation",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "rehabilitation" }
+                    action: {
+                        motivationType = "rehabilitation"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 MotivationOption(
-                    title: LocalizedStringKey("Better health"),
-                    description: LocalizedStringKey("Improve stamina, fitness and energy."),
+                    title: String(localized: "Better health"),
+                    description: String(localized: "Improve stamina, fitness and energy."),
                     isSelected: motivationType == "better_health",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "better_health" }
+                    action: {
+                        motivationType = "better_health"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 MotivationOption(
-                    title: LocalizedStringKey("Build muscle"),
-                    description: LocalizedStringKey("Build muscle mass and get stronger."),
+                    title: String(localized: "Build muscle"),
+                    description: String(localized: "Build muscle mass and get stronger."),
                     isSelected: motivationType == "build_muscle",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "build_muscle" }
+                    action: {
+                        motivationType = "build_muscle"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 MotivationOption(
-                    title: LocalizedStringKey("Sports performance"),
-                    description: LocalizedStringKey("Train to perform better in your sport."),
+                    title: String(localized: "Sports performance"),
+                    description: String(localized: "Train to perform better in your sport."),
                     isSelected: motivationType == "sport",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "sport" }
+                    action: {
+                        motivationType = "sport"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 MotivationOption(
-                    title: LocalizedStringKey("Mobility"),
-                    description: LocalizedStringKey("Increase mobility, reduce stiffness and prevent injury."),
+                    title: String(localized: "Mobility"),
+                    description: String(localized: "Increase mobility, reduce stiffness and prevent injury."),
                     isSelected: motivationType == "mobility",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { motivationType = "mobility" }
+                    action: {
+                        motivationType = "mobility"
+                        calculatePresetGoals()
+                    }
                 )
             }
         }
@@ -435,22 +473,60 @@ struct OnboardingView: View {
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            VStack(spacing: 16) {
-                ForEach(["fotboll", "ishockey", "basket", "tennis", "löpning", "cykling", "simning", "annat"], id: \.self) { sport in
-                    Button(action: { specificSport = sport }) {
-                        HStack {
-                            Text(sport.capitalized)
-                                .foregroundColor(Color.textPrimary(for: colorScheme))
-                            Spacer()
-                            if specificSport == sport {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+            VStack(spacing: 8) {
+                let sports = [
+                    "alpine_skiing", "badminton", "basketball", "cycling",
+                    "floorball", "football", "track_and_field", "golf",
+                    "handball", "ice_hockey", "martial_arts", "cross_country_skiing",
+                    "padel", "running", "swimming", "tennis", "other"
+                ]
+                
+                ForEach(sports, id: \.self) { sport in
+                    Button(action: { 
+                        specificSport = sport 
+                        calculatePresetGoals()
+                    }) {
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text(LocalizationService.localizeSpecificSport(sport))
+                                    .foregroundColor(Color.textPrimary(for: colorScheme))
+                                Spacer()
+                                if specificSport == sport {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                                }
+                            }
+                            
+                            // Show custom input field if "Other" is selected
+                            if sport == "other" && specificSport == "other" {
+                                Divider()
+                                
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(String(localized: "Enter your sport"))
+                                        .font(.caption)
+                                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                                    
+                                    TextField(String(localized: "e.g. Rowing, Boxing..."), text: $customSportName)
+                                        .padding()
+                                        .background(Color.appBackground(for: colorScheme))
+                                        .cornerRadius(8)
+                                        .submitLabel(.done)
+                                        .onSubmit {
+                                            if !customSportName.isEmpty {
+                                                calculatePresetGoals()
+                                            }
+                                        }
+                                        .onChange(of: customSportName) { _, _ in
+                                            // Debounce could be added here, but for now we rely on submit or "Next"
+                                        }
+                                }
+                                .padding(.top, 4)
                             }
                         }
                         .padding()
                         .background(
                             specificSport == sport
-                                ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.2)
+                                ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.1)
                                 : Color.cardBackground(for: colorScheme)
                         )
                         .cornerRadius(12)
@@ -459,7 +535,7 @@ struct OnboardingView: View {
                                 .stroke(
                                     specificSport == sport
                                         ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
-                                        : Color.textSecondary(for: colorScheme).opacity(0.2),
+                                        : Color.textSecondary(for: colorScheme).opacity(0.1),
                                     lineWidth: specificSport == sport ? 2 : 1
                                 )
                         )
@@ -486,39 +562,51 @@ struct OnboardingView: View {
             
             VStack(spacing: 16) {
                 LevelOption(
-                    title: "Beginner",
-                    description: "New to training or returning after a long break",
-                    isSelected: trainingLevel == "nybörjare",
+                    title: String(localized: "Beginner"),
+                    description: String(localized: "New to training or returning after a long break"),
+                    isSelected: trainingLevel == "nybörjare", // Keeping current internal value for now but standardizing title/desc
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { trainingLevel = "nybörjare" }
+                    action: { 
+                        trainingLevel = "nybörjare"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 LevelOption(
-                    title: "Intermediate",
-                    description: "Trained regularly for 6+ months",
+                    title: String(localized: "Intermediate"),
+                    description: String(localized: "Trained regularly for 6+ months"),
                     isSelected: trainingLevel == "van",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { trainingLevel = "van" }
+                    action: { 
+                        trainingLevel = "van"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 LevelOption(
-                    title: "Advanced",
-                    description: "Trained consistently for 2+ years",
+                    title: String(localized: "Advanced"),
+                    description: String(localized: "Trained consistently for 2+ years"),
                     isSelected: trainingLevel == "mycket_van",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { trainingLevel = "mycket_van" }
+                    action: { 
+                        trainingLevel = "mycket_van"
+                        calculatePresetGoals()
+                    }
                 )
                 
                 LevelOption(
-                    title: "Elite",
-                    description: "Professional or competitive athlete",
+                    title: String(localized: "Elite"),
+                    description: String(localized: "Professional or competitive athlete"),
                     isSelected: trainingLevel == "elit",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
-                    action: { trainingLevel = "elit" }
+                    action: { 
+                        trainingLevel = "elit"
+                        calculatePresetGoals()
+                    }
                 )
             }
         }
@@ -542,7 +630,7 @@ struct OnboardingView: View {
             Button(action: fetchHealthData) {
                 HStack {
                     Image(systemName: healthDataFetched ? "checkmark.circle.fill" : "heart.fill")
-                    Text(healthDataFetched ? LocalizedStringKey("Health data imported") : LocalizedStringKey("Import from Apple Health"))
+                    Text(healthDataFetched ? String(localized: "Health data imported") : String(localized: "Import from Apple Health"))
                 }
                 .foregroundColor(.white)
                 .padding()
@@ -583,7 +671,7 @@ struct OnboardingView: View {
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Vi behöver lite information om dig för att anpassa din träning")
+            Text(String(localized: "We need some information about you to adapt your training"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
@@ -597,16 +685,16 @@ struct OnboardingView: View {
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                     HStack(spacing: 12) {
                         Button(action: {
-                            sex = "man"
+                            sex = "male"
                         }) {
                             Text(String(localized: "Male"))
                                 .font(.subheadline)
-                                .foregroundColor(sex == "man" ? .white : Color.textPrimary(for: colorScheme))
+                                .foregroundColor(sex == "male" ? .white : Color.textPrimary(for: colorScheme))
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     Group {
-                                        if sex == "man" {
+                                        if sex == "male" {
                                             Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme)
                                         } else {
                                             Color.cardBackground(for: colorScheme)
@@ -617,16 +705,16 @@ struct OnboardingView: View {
                         }
                         
                         Button(action: {
-                            sex = "kvinna"
+                            sex = "female"
                         }) {
                             Text(String(localized: "Female"))
                                 .font(.subheadline)
-                                .foregroundColor(sex == "kvinna" ? .white : Color.textPrimary(for: colorScheme))
+                                .foregroundColor(sex == "female" ? .white : Color.textPrimary(for: colorScheme))
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     Group {
-                                        if sex == "kvinna" {
+                                        if sex == "female" {
                                             Color.themeGradient(theme: selectedTheme, colorScheme: colorScheme)
                                         } else {
                                             Color.cardBackground(for: colorScheme)
@@ -645,7 +733,7 @@ struct OnboardingView: View {
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                     HStack(spacing: 8) {
                         ScrollablePicker(
-                            label: "Dag",
+                            label: String(localized: "Day"),
                             value: $birthDay,
                             range: 1...31,
                             colorScheme: colorScheme,
@@ -654,7 +742,7 @@ struct OnboardingView: View {
                         .frame(maxWidth: .infinity)
                         
                         ScrollablePicker(
-                            label: "Månad",
+                            label: String(localized: "Month"),
                             value: $birthMonth,
                             range: 1...12,
                             colorScheme: colorScheme,
@@ -666,7 +754,7 @@ struct OnboardingView: View {
                         .frame(maxWidth: .infinity)
                         
                         ScrollablePicker(
-                            label: "År",
+                            label: String(localized: "Year"),
                             value: $birthYear,
                             range: 1920...2010,
                             colorScheme: colorScheme,
@@ -729,7 +817,7 @@ struct OnboardingView: View {
             Spacer()
         }
         .onAppear {
-            applyDefaultPersonalInfoIfNeeded(for: sex.isEmpty ? "man" : sex)
+            applyDefaultPersonalInfoIfNeeded(for: sex.isEmpty ? "male" : sex)
         }
         .onChange(of: sex) { _, newValue in
             applyDefaultPersonalInfoIfNeeded(for: newValue)
@@ -802,10 +890,10 @@ struct OnboardingView: View {
         let defaultWeight: Int
         
         switch normalizedSex {
-        case "kvinna":
+        case "female", "kvinna":
             defaultHeight = 165
             defaultWeight = 65
-        case "man":
+        case "male", "man":
             defaultHeight = 175
             defaultWeight = 75
         default:
@@ -834,10 +922,12 @@ struct OnboardingView: View {
     }
     
     private func monthName(for month: Int) -> String {
-        let months = ["Januari", "Februari", "Mars", "April", "Maj", "Juni",
-                      "Juli", "Augusti", "September", "Oktober", "November", "December"]
+        let months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
         guard month >= 1 && month <= 12 else { return "" }
-        return months[month - 1]
+        return String(localized: LocalizedStringResource(stringLiteral: months[month - 1]))
     }
     
     private var summaryText: String {
@@ -845,12 +935,14 @@ struct OnboardingView: View {
         
         // Start with gender
         if !sex.isEmpty {
-            parts.append(sex == "man" ? "Man" : "Kvinna")
+            let localizedSex = (sex == "male" || sex == "man") ? String(localized: "Male") : String(localized: "Female")
+            parts.append(localizedSex)
         }
         
-        // Add birth date with "född" (born)
+        // Add birth date with "born"
         if let day = birthDay, let month = birthMonth, let year = birthYear {
-            parts.append("född \(day) \(monthName(for: month)) \(year)")
+            let bornStr = String(localized: "born")
+            parts.append("\(bornStr) \(day) \(monthName(for: month)) \(year)")
         }
         
         // Add height and weight
@@ -877,7 +969,7 @@ struct OnboardingView: View {
             // Hard limit: 10% over max
             age = 110
             if shouldShowAlert {
-                valueValidationMessage = "Age exceeds 110 years. Please check your value."
+                valueValidationMessage = String(localized: "Age exceeds 110 years. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedAge = 110
             }
@@ -885,21 +977,21 @@ struct OnboardingView: View {
             // Hard limit: 10% under min
             age = 9
             if shouldShowAlert {
-                valueValidationMessage = "Age is below 9 years. Please check your value."
+                valueValidationMessage = String(localized: "Age is below 9 years. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedAge = 9
             }
         } else if ageValue > 100 {
             // Over normal max, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Entered age (\(ageValue) years) is higher than normal. Please check your value."
+                valueValidationMessage = String(localized: "Entered age (\(ageValue) years) is higher than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedAge = ageValue
             }
         } else if ageValue < 10 {
             // Under normal min, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Entered age (\(ageValue) years) is lower than normal. Please check your value."
+                valueValidationMessage = String(localized: "Entered age (\(ageValue) years) is lower than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedAge = ageValue
             }
@@ -919,7 +1011,7 @@ struct OnboardingView: View {
             // Hard limit: 10% over max
             bodyWeight = 330
             if shouldShowAlert {
-                valueValidationMessage = "Weight exceeds 330 kg. Please check your value."
+                valueValidationMessage = String(localized: "Weight exceeds 330 kg. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedWeight = 330
             }
@@ -927,21 +1019,21 @@ struct OnboardingView: View {
             // Hard limit: 10% under min
             bodyWeight = 18
             if shouldShowAlert {
-                valueValidationMessage = "Weight is below 18 kg. Please check your value."
+                valueValidationMessage = String(localized: "Weight is below 18 kg. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedWeight = 18
             }
         } else if weight > 300 {
             // Over normal max, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Entered weight (\(weight) kg) is higher than normal. Please check your value."
+                valueValidationMessage = String(localized: "Entered weight (\(weight) kg) is higher than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedWeight = weight
             }
         } else if weight < 20 {
             // Under normal min, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Entered weight (\(weight) kg) is lower than normal. Please check your value."
+                valueValidationMessage = String(localized: "Entered weight (\(weight) kg) is lower than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedWeight = weight
             }
@@ -961,7 +1053,7 @@ struct OnboardingView: View {
             // Hard limit: 10% over max
             height = 253
             if shouldShowAlert {
-                valueValidationMessage = "Height exceeds 253 cm. Please check your value."
+                valueValidationMessage = String(localized: "Height exceeds 253 cm. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedHeight = 253
             }
@@ -969,21 +1061,21 @@ struct OnboardingView: View {
             // Hard limit: 10% under min
             height = 90
             if shouldShowAlert {
-                valueValidationMessage = "Längd understiger 90 cm. Vänligen kontrollera ditt angivna värde."
+                valueValidationMessage = String(localized: "Height is below 90 cm. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedHeight = 90
             }
         } else if heightValue > 230 {
             // Over normal max, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Angiven längd (\(heightValue) cm) är högre än normalt. Vänligen kontrollera ditt angivna värde."
+                valueValidationMessage = String(localized: "Entered height (\(heightValue) cm) is higher than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedHeight = heightValue
             }
         } else if heightValue < 100 {
             // Under normal min, but within 10% tolerance - show warning, don't change value
             if shouldShowAlert {
-                valueValidationMessage = "Angiven längd (\(heightValue) cm) är lägre än normalt. Vänligen kontrollera ditt angivna värde."
+                valueValidationMessage = String(localized: "Entered height (\(heightValue) cm) is lower than normal. Please check your value.")
                 showValueValidationAlert = true
                 lastValidatedHeight = heightValue
             }
@@ -1010,11 +1102,11 @@ struct OnboardingView: View {
             
             VStack(spacing: 20) {
                 GoalSlider(
-                    title: "Strength",
+                    title: String(localized: "Strength"),
                     value: Binding(
                         get: { goalStrength },
                         set: { newValue in
-                            adjustGoals(changed: .strength, to: newValue)
+                            adjustGoals(changed: .statusStrength, to: newValue)
                         }
                     ),
                     colorScheme: colorScheme,
@@ -1022,11 +1114,11 @@ struct OnboardingView: View {
                 )
                 
                 GoalSlider(
-                    title: "Volume",
+                    title: String(localized: "Hypertrophy"),
                     value: Binding(
-                        get: { goalVolume },
+                        get: { goalHypertrophy },
                         set: { newValue in
-                            adjustGoals(changed: .volume, to: newValue)
+                            adjustGoals(changed: .statusHypertrophy, to: newValue)
                         }
                     ),
                     colorScheme: colorScheme,
@@ -1034,11 +1126,11 @@ struct OnboardingView: View {
                 )
                 
                 GoalSlider(
-                    title: "Endurance",
+                    title: String(localized: "Endurance"),
                     value: Binding(
                         get: { goalEndurance },
                         set: { newValue in
-                            adjustGoals(changed: .endurance, to: newValue)
+                            adjustGoals(changed: .statusEndurance, to: newValue)
                         }
                     ),
                     colorScheme: colorScheme,
@@ -1046,11 +1138,11 @@ struct OnboardingView: View {
                 )
                 
                 GoalSlider(
-                    title: "Cardio",
+                    title: String(localized: "Cardio"),
                     value: Binding(
                         get: { goalCardio },
                         set: { newValue in
-                            adjustGoals(changed: .cardio, to: newValue)
+                            adjustGoals(changed: .statusCardio, to: newValue)
                         }
                     ),
                     colorScheme: colorScheme,
@@ -1058,14 +1150,55 @@ struct OnboardingView: View {
                 )
             }
             
-            let total = goalStrength + goalVolume + goalEndurance + goalCardio
-            Text(String(localized: "Total: \(total)%%"))
+            let total = goalStrength + goalHypertrophy + goalEndurance + goalCardio
+            Text(String(localized: "Total: \(total)%"))
                 .font(.caption)
                 .foregroundColor(
-                    goalStrength + goalVolume + goalEndurance + goalCardio == 100
+                    goalStrength + goalHypertrophy + goalEndurance + goalCardio == 100
                         ? Color.green
                         : Color.red
                 )
+            
+            Divider()
+                .padding(.vertical, 8)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(String(localized: "Extra Focus"))
+                        .font(.headline)
+                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                    
+                    Spacer()
+                    
+                    Text(String(localized: "\(focusTags.count)/3"))
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                }
+                
+                Text(String(localized: "Tags that refine your programming (max 3)"))
+                    .font(.caption)
+                    .foregroundColor(Color.textSecondary(for: colorScheme))
+                
+                let tags = ["Explosiveness", "Technique", "Mobility", "Rehab/Recovery", "Conditioning/Metcon"]
+                
+                FocusFlowLayout(spacing: 8) {
+                    ForEach(tags, id: \.self) { tag in
+                        FocusTagChip(
+                            title: LocalizationService.localizeFocusTag(tag),
+                            isSelected: focusTags.contains(tag),
+                            colorScheme: colorScheme,
+                            selectedTheme: selectedTheme,
+                            action: {
+                                if focusTags.contains(tag) {
+                                    focusTags.removeAll(where: { $0 == tag })
+                                } else if focusTags.count < 3 {
+                                    focusTags.append(tag)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
         .onAppear {
             // Auto-calculate preset goals if not already calculated and we have required data
@@ -1084,36 +1217,46 @@ struct OnboardingView: View {
     // MARK: - Step 6: Training Frequency
     
     private var trainingFrequencyStep: some View {
-        VStack(spacing: 24) {
-            Text(String(localized: "Training Frequency"))
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(Color.textPrimary(for: colorScheme))
-                .multilineTextAlignment(.center)
-            
+        ScrollView {
             VStack(spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(String(localized: "Sessions per week: \(sessionsPerWeek)"))
-                        .font(.headline)
-                        .foregroundColor(Color.textPrimary(for: colorScheme))
-                    Slider(value: Binding(
-                        get: { Double(sessionsPerWeek) },
-                        set: { sessionsPerWeek = Int($0) }
-                    ), in: 1...7, step: 1)
-                    .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
-                }
+                Text(String(localized: "Training Frequency"))
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.textPrimary(for: colorScheme))
+                    .multilineTextAlignment(.center)
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(String(localized: "Session duration: \(sessionDuration) minutes"))
-                        .font(.headline)
-                        .foregroundColor(Color.textPrimary(for: colorScheme))
-                    Slider(value: Binding(
-                        get: { Double(sessionDuration) },
-                        set: { sessionDuration = Int($0) }
-                    ), in: 30...180, step: 15)
-                    .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                VStack(spacing: 32) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(localized: "Sessions per week: \(sessionsPerWeek)"))
+                            .font(.headline)
+                            .foregroundColor(Color.textPrimary(for: colorScheme))
+                        
+                        Slider(value: Binding(
+                            get: { Double(sessionsPerWeek) },
+                            set: { sessionsPerWeek = Int($0) }
+                        ), in: 1...7, step: 1)
+                        .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(localized: "Session duration: \(sessionDuration) minutes"))
+                            .font(.headline)
+                            .foregroundColor(Color.textPrimary(for: colorScheme))
+                        
+                        Slider(value: Binding(
+                            get: { Double(sessionDuration) },
+                            set: { sessionDuration = Int($0) }
+                        ), in: 15...120, step: 15)
+                        .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                    }
                 }
+                .padding()
+                .background(Color.cardBackground(for: colorScheme))
+                .cornerRadius(16)
+                
+                Spacer(minLength: 40)
             }
+            .padding()
         }
     }
     
@@ -1134,7 +1277,7 @@ struct OnboardingView: View {
             
             VStack(spacing: 16) {
                 OneRmField(
-                    title: "Bench Press",
+                    title: String(localized: "Bench Press"),
                     value: Binding(
                         get: { oneRmBench },
                         set: { oneRmBench = $0 }
@@ -1143,7 +1286,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Overhead Press",
+                    title: String(localized: "Overhead Press"),
                     value: Binding(
                         get: { oneRmOhp },
                         set: { oneRmOhp = $0 }
@@ -1152,7 +1295,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Deadlift",
+                    title: String(localized: "Deadlift"),
                     value: Binding(
                         get: { oneRmDeadlift },
                         set: { oneRmDeadlift = $0 }
@@ -1161,7 +1304,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Squat",
+                    title: String(localized: "Squat"),
                     value: Binding(
                         get: { oneRmSquat },
                         set: { oneRmSquat = $0 }
@@ -1170,7 +1313,7 @@ struct OnboardingView: View {
                 )
                 
                 OneRmField(
-                    title: "Lat Pulldown",
+                    title: String(localized: "Lat Pulldown"),
                     value: Binding(
                         get: { oneRmLatpull },
                         set: { oneRmLatpull = $0 }
@@ -1253,151 +1396,302 @@ struct OnboardingView: View {
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
             
-            VStack(spacing: 20) {
-                // Manual Entry Section
-                VStack(alignment: .leading, spacing: 16) {
+            VStack(spacing: 24) {
+                // MARK: - Find Nearby Section (Now Prominent)
+                VStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(String(localized: "Gym Name"))
-                            .font(.caption)
-                            .foregroundColor(Color.textSecondary(for: colorScheme))
-                        TextField("Enter gym name", text: $gymName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .focused($focusedField, equals: .gymName)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(String(localized: "Address (Optional)"))
+                        Text(String(localized: "Search Distance"))
                             .font(.caption)
                             .foregroundColor(Color.textSecondary(for: colorScheme))
                         
+                        HStack(spacing: 10) {
+                            ForEach([5, 10, 20, 50, 100], id: \.self) { km in
+                                Button(action: { searchRadius = Double(km) }) {
+                                    Text("\(km)km")
+                                        .font(.caption)
+                                        .fontWeight(searchRadius == Double(km) ? .bold : .regular)
+                                        .padding(.vertical, 8)
+                                        .frame(maxWidth: .infinity)
+                                        .background(
+                                            searchRadius == Double(km)
+                                                ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
+                                                : Color.cardBackground(for: colorScheme)
+                                        )
+                                        .foregroundColor(
+                                            searchRadius == Double(km)
+                                                ? .white
+                                                : Color.textPrimary(for: colorScheme)
+                                        )
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.textSecondary(for: colorScheme).opacity(0.2), lineWidth: 1)
+                                        )
+                                }
+                            }
+                        }
+                    }
+                    
+                    Button(action: {
+                        locationService.requestPermission()
+                        locationService.searchNearbyGyms(radiusKm: searchRadius)
+                        showNearbyGyms = true
+                    }) {
                         HStack {
-                            TextField("Enter address", text: $gymAddress)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .focused($focusedField, equals: .gymAddress)
-                                .onChange(of: gymAddress) { _, newValue in
-                                    locationService.searchQuery = newValue
-                                }
-                            
-                            if !gymAddress.isEmpty {
-                                Button(action: { gymAddress = "" }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.gray)
-                                }
+                            Spacer()
+                            Image(systemName: "location.magnifyingglass")
+                                .font(.title3)
+                            if locationService.isSearching {
+                                ProgressView()
+                                    .padding(.horizontal, 8)
+                            } else {
+                                Text(String(localized: "Search for nearby gyms"))
+                                    .font(.headline)
                             }
+                            Spacer()
                         }
-                        
-                        // Address Autocomplete Suggestions
-                        if !locationService.suggestions.isEmpty && focusedField == .gymAddress {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Divider()
-                                ForEach(locationService.suggestions.prefix(3)) { suggestion in
-                                    Button(action: {
-                                        self.gymAddress = suggestion.title
-                                        locationService.searchQuery = ""
-                                        focusedField = nil
-                                    }) {
-                                        VStack(alignment: .leading) {
-                                            Text(suggestion.title)
-                                                .font(.subheadline)
-                                                .foregroundColor(Color.textPrimary(for: colorScheme))
-                                            Text(suggestion.subtitle)
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.vertical, 4)
-                                    }
-                                    Divider()
-                                }
-                            }
-                            .padding(.vertical, 8)
-                            .background(Color.cardBackground(for: colorScheme))
-                            .cornerRadius(8)
-                        }
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme),
+                                    Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.8)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                        .foregroundColor(.white)
+                        .shadow(color: Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.3), radius: 8, x: 0, y: 4)
                     }
-                    
-                    Toggle("Public Gym", isOn: $gymIsPublic)
-                        .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.cardBackground(for: colorScheme))
-                )
-                
-                // Find Nearby Section
-                Button(action: {
-                    locationService.requestPermission()
-                    locationService.searchNearbyGyms()
-                    showNearbyGyms = true
-                }) {
-                    HStack {
-                        Image(systemName: "location.fill")
-                        if locationService.isSearching {
-                            ProgressView()
-                                .padding(.leading, 8)
-                        } else {
-                            Text("Sök gym i närheten")
-                        }
-                        Spacer()
-                    }
-                    .padding()
-                    .background(Color.cardBackground(for: colorScheme))
-                    .cornerRadius(12)
-                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
                 }
                 
                 // Nearby Gyms List
-                if showNearbyGyms && !locationService.nearbyGyms.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Gym i närheten")
+                if showNearbyGyms {
+                    if locationService.isSearching {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                            Text(String(localized: "Finding gyms..."))
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                    } else if locationService.nearbyGyms.isEmpty {
+                        Text(String(localized: "No gyms found nearby. Try increasing search distance."))
                             .font(.caption)
                             .foregroundColor(.gray)
-                            .padding(.horizontal)
-                        
-                        ScrollView {
-                            VStack(spacing: 8) {
-                                ForEach(locationService.nearbyGyms.prefix(5)) { nearby in
-                                    Button(action: {
-                                        self.gymName = nearby.name
-                                        self.gymAddress = nearby.address ?? ""
-                                        // We don't have separate lat/long state in OnboardingView yet, 
-                                        // but getting name/address is the main goal.
-                                        self.showNearbyGyms = false
-                                    }) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text(nearby.name)
-                                                    .foregroundColor(Color.textPrimary(for: colorScheme))
-                                                if let addr = nearby.address {
-                                                    Text(addr)
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
-                                                        .lineLimit(1)
+                            .multilineTextAlignment(.center)
+                            .padding(.vertical, 20)
+                    } else {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(String(localized: "Nearby gyms"))
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Text("\(locationService.nearbyGyms.count) \(String(localized: "found"))")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal, 4)
+                            
+                            ScrollView {
+                                VStack(spacing: 10) {
+                                    ForEach(locationService.nearbyGyms) { nearby in
+                                        Button(action: {
+                                            self.gymName = nearby.name
+                                            self.gymAddress = nearby.address ?? ""
+                                            self.selectedNearbyGymId = nearby.apiGymId // KEY: Sets the skip logic
+                                            self.selectedNearbyGym = nearby
+                                            self.gymIsPublic = nearby.isRepCompanionGym
+                                            withAnimation {
+                                                self.showNearbyGyms = false
+                                            }
+                                        }) {
+                                            HStack(spacing: 12) {
+                                                // Icon/Indicator
+                                                ZStack {
+                                                    Circle()
+                                                        .fill(nearby.isRepCompanionGym ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.1) : Color.gray.opacity(0.1))
+                                                        .frame(width: 40, height: 40)
+                                                    
+                                                    Image(systemName: nearby.isRepCompanionGym ? "checkmark.seal.fill" : "building.2.fill")
+                                                        .foregroundColor(nearby.isRepCompanionGym ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : .gray)
+                                                }
+                                                
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(nearby.name)
+                                                        .font(.subheadline)
+                                                        .fontWeight(.bold)
+                                                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                                                    
+                                                    if let addr = nearby.address {
+                                                        Text(addr)
+                                                            .font(.caption2)
+                                                            .foregroundColor(.gray)
+                                                            .lineLimit(1)
+                                                    }
+                                                    
+                                                    if nearby.isRepCompanionGym {
+                                                        Text(String(localized: "Equipment verified"))
+                                                            .font(.system(size: 8, weight: .bold))
+                                                            .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                                                            .padding(.horizontal, 4)
+                                                            .padding(.vertical, 2)
+                                                            .background(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.1))
+                                                            .cornerRadius(4)
+                                                            .padding(.top, 2)
+                                                    }
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                VStack(alignment: .trailing, spacing: 4) {
+                                                    if nearby.distance < 1000 {
+                                                        Text("\(Int(nearby.distance)) m")
+                                                            .font(.caption2)
+                                                            .fontWeight(.bold)
+                                                            .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                                                    } else {
+                                                        Text(String(format: "%.1f km", nearby.distance / 1000.0))
+                                                            .font(.caption2)
+                                                            .fontWeight(.bold)
+                                                            .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                                                    }
+                                                    
+                                                    Image(systemName: "chevron.right")
+                                                        .font(.caption2)
+                                                        .foregroundColor(.gray.opacity(0.5))
                                                 }
                                             }
-                                            Spacer()
-                                            if nearby.distance < 1000 {
-                                                Text("\(Int(nearby.distance)) m")
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
-                                            } else {
-                                                Text(String(format: "%.1f km", nearby.distance / 1000.0))
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
-                                            }
+                                            .padding()
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(Color.cardBackground(for: colorScheme))
+                                                    .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
+                                            )
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(selectedNearbyGymId == nearby.apiGymId ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : Color.clear, lineWidth: 2)
+                                            )
                                         }
-                                        .padding()
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.cardBackground(for: colorScheme).opacity(0.8))
-                                        )
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
+                            .frame(maxHeight: 250)
+                        }
+                    }
+                }
+                
+                // MARK: - Manual Entry Section
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text(String(localized: "Or enter manually"))
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        if !gymName.isEmpty && selectedNearbyGymId != nil {
+                            Button(action: {
+                                selectedNearbyGymId = nil
+                                selectedNearbyGym = nil
+                                gymName = ""
+                                gymAddress = ""
+                            }) {
+                                Text(String(localized: "Reset"))
+                                    .font(.caption2)
+                                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 4)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "Gym Name"))
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Color.textSecondary(for: colorScheme))
+                            TextField(String(localized: "Enter gym name"), text: $gymName)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(12)
+                                .background(Color.appBackground(for: colorScheme).opacity(0.5))
+                                .cornerRadius(8)
+                                .focused($focusedField, equals: .gymName)
+                                .onChange(of: gymName) { _, _ in
+                                    // If user types manually, reset the "matched" gym ID unless it was a selection
+                                    // Actually, better to only reset if they are changing a pre-filled value
+                                }
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "Address (Optional)"))
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Color.textSecondary(for: colorScheme))
+                            
+                            HStack {
+                                TextField(String(localized: "Enter address"), text: $gymAddress)
+                                    .textFieldStyle(PlainTextFieldStyle())
+                                    .padding(12)
+                                    .background(Color.appBackground(for: colorScheme).opacity(0.5))
+                                    .cornerRadius(8)
+                                    .focused($focusedField, equals: .gymAddress)
+                                    .onChange(of: gymAddress) { _, newValue in
+                                        locationService.searchQuery = newValue
+                                    }
+                                
+                                if !gymAddress.isEmpty {
+                                    Button(action: { gymAddress = "" }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.gray)
                                     }
                                 }
                             }
+                            
+                            // Address Autocomplete Suggestions
+                            if !locationService.suggestions.isEmpty && focusedField == .gymAddress {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    ForEach(locationService.suggestions.prefix(3)) { suggestion in
+                                        Button(action: {
+                                            self.gymAddress = suggestion.title
+                                            locationService.searchQuery = ""
+                                            focusedField = nil
+                                        }) {
+                                            VStack(alignment: .leading) {
+                                                Text(suggestion.title)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(Color.textPrimary(for: colorScheme))
+                                                Text(suggestion.subtitle)
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.vertical, 4)
+                                        }
+                                        if suggestion.id != locationService.suggestions.prefix(3).last?.id {
+                                            Divider()
+                                        }
+                                    }
+                                }
+                                .padding()
+                                .background(Color.cardBackground(for: colorScheme))
+                                .cornerRadius(8)
+                                .shadow(radius: 4)
+                            }
                         }
-                        .frame(maxHeight: 200)
+                        
+                        Toggle(String(localized: "Public Gym"), isOn: $gymIsPublic)
+                            .font(.subheadline)
+                            .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
                     }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.cardBackground(for: colorScheme))
+                    )
                 }
             }
         }
@@ -1596,7 +1890,7 @@ struct OnboardingView: View {
                                         : nil
                                 )
                             
-                            Text(theme)
+                            Text(LocalizedStringKey(theme))
                                 .font(.caption)
                                 .foregroundColor(Color.textPrimary(for: colorScheme))
                         }
@@ -1612,7 +1906,7 @@ struct OnboardingView: View {
                 
                 HStack(spacing: 16) {
                     ColorSchemeButton(
-                        title: "Light",
+                        title: String(localized: "Light"),
                         icon: "sun.max.fill",
                         isSelected: selectedColorScheme == "light",
                         colorScheme: colorScheme,
@@ -1623,7 +1917,7 @@ struct OnboardingView: View {
                     )
                     
                     ColorSchemeButton(
-                        title: "Dark",
+                        title: String(localized: "Dark"),
                         icon: "moon.fill",
                         isSelected: selectedColorScheme == "dark",
                         colorScheme: colorScheme,
@@ -1634,7 +1928,7 @@ struct OnboardingView: View {
                     )
                     
                     ColorSchemeButton(
-                        title: "Auto",
+                        title: String(localized: "Auto"),
                         icon: "circle.lefthalf.filled",
                         isSelected: selectedColorScheme == "auto",
                         colorScheme: colorScheme,
@@ -1652,30 +1946,41 @@ struct OnboardingView: View {
     
     private func goToNextStep() {
         if currentStep < totalSteps {
-            // Start 1RM calculation when user proceeds from Personal Info step (step 4) to Training Goals step (step 5)
-            // This ensures the calculation runs in the background while user adjusts training goals
-            if currentStep == 4 && !oneRmCalculated {
-                // Check if we have all required data for 1RM calculation
-                if age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
-                    print("[Onboarding] 🚀 Starting 1RM calculation in background (user clicked Fortsätt on Personal Info step)...")
-                    print("[Onboarding] 📊 Data: age=\(age!), weight=\(bodyWeight!), height=\(height!), sex=\(sex), level=\(trainingLevel), motivation=\(motivationType)")
-                    calculateSuggestedOneRm()
-                } else {
-                    print("[Onboarding] ⚠️ Missing data for 1RM calculation: age=\(age?.description ?? "nil"), bodyWeight=\(bodyWeight?.description ?? "nil"), height=\(height?.description ?? "nil"), sex=\(sex.isEmpty ? "empty" : sex), trainingLevel=\(trainingLevel), motivationType=\(motivationType)")
+            
+            // Step 1 -> 2 logic is handled by the Button action usually, but if standard nav:
+            if currentStep == 1 {
+                if motivationType != "sport" {
+                    // Skip step 2 (sport selection)
+                    currentStep += 2
+                    updateStepIcon()
+                    return
                 }
             }
             
-            // Start Program AI query when user clicks "Continue" on Gym Details step (step 9)
-            // Save gym and start program generation in background
-            if currentStep == 9 {
-                print("[Onboarding] 🚀 Starting program generation from Gym Details step...")
+            // Start 1RM calculation when user proceeds from Training Level step (step 6) to 1RM step (step 7)
+            // This ensures we have both goals (step 5) and level (step 6)
+            if currentStep == 6 && !oneRmCalculated {
+                // Check if we have all required data for 1RM calculation
+                if age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
+                    print("[Onboarding] 🚀 Starting 1RM calculation in background (user finished Level step)...")
+                    print("[Onboarding] 📊 Data: level=\(trainingLevel), motivation=\(motivationType), info ready")
+                    calculateSuggestedOneRm()
+                } else {
+                    print("[Onboarding] ⚠️ Missing data for 1RM calculation: level=\(trainingLevel), motivation=\(motivationType)")
+                }
+            }
+            
+            // Start Program AI query when user clicks "Continue"
+            // This can now happen either from Gym Details (9) if skipped equipment,
+            // or Equipment (10) if not skipped.
+            if (currentStep == 9 && selectedNearbyGymId != nil) || (currentStep == 10) {
+                print("[Onboarding] 🚀 Starting program generation...")
                 startProgramGeneration()
             }
             
-            // Handle Step Goal step (step 10) - just proceed to Theme
-            if currentStep == 10 && currentStep < totalSteps {
-                // Just proceed to next step (Theme)
-                currentStep += 1
+            // Skip logic for Equipment (step 10)
+            if currentStep == 9 && selectedNearbyGymId != nil {
+                currentStep += 2 // Skip 10, go to 11
                 updateStepIcon()
                 return
             }
@@ -1687,6 +1992,21 @@ struct OnboardingView: View {
     
     private func goToPreviousStep() {
         if currentStep > 1 {
+            // Skip logic for back button
+            if currentStep == 11 && selectedNearbyGymId != nil {
+                currentStep = 9 // Go back from 11 to 9 if we skipped 10
+                updateStepIcon()
+                return
+            }
+            
+            if currentStep == 3 { // Going back from Health Data (3)
+                if motivationType != "sport" {
+                    // Skip step 2, go to 1
+                    currentStep = 1
+                    updateStepIcon()
+                    return
+                }
+            }
             currentStep -= 1
             updateStepIcon()
         }
@@ -1698,38 +2018,65 @@ struct OnboardingView: View {
         Task {
             let userId = authService.currentUserId ?? "dev-user-123"
             
-            // Save gym with user details
-            print("[Onboarding] 🏋️ Creating gym '\(gymName)' with \(selectedEquipment.count) equipment items")
-            _ = try await GymService.shared.createGym(
-                name: gymName,
-                location: gymAddress.isEmpty ? nil : gymAddress,
-                equipmentIds: selectedEquipment,
-                isPublic: gymIsPublic,
-                userId: userId,
-                modelContext: modelContext
-            )
-            
-            // Mark that generation started early
-            await MainActor.run {
-                programGenerationStartedEarly = true
-                isGeneratingProgram = true
-            }
-            
-            // Start the actual program generation in background
-            // This will run while user is on Step Goal step
-            print("[Onboarding] 🚀 Starting program generation in background from Equipment step...")
-            
             do {
+                // Upsert gym: create if new, update if returning
+                if let gymId = lastCreatedGymId {
+                    print("[Onboarding] 🏋️ Updating existing gym '\(gymName)' (id: \(gymId))")
+                    
+                    // Fetch the gym object to update
+                    let descriptor = FetchDescriptor<Gym>(
+                        predicate: #Predicate { $0.id == gymId }
+                    )
+                    if let existingGym = try? modelContext.fetch(descriptor).first {
+                        try await GymService.shared.updateGym(
+                            gym: existingGym,
+                            name: gymName,
+                            location: gymAddress.isEmpty ? nil : gymAddress,
+                            latitude: nil, 
+                            longitude: nil,
+                            equipmentIds: selectedEquipment,
+                            isPublic: gymIsPublic,
+                            modelContext: modelContext
+                        )
+                        print("[Onboarding] ✅ Gym updated successfully")
+                    }
+                } else {
+                    print("[Onboarding] 🏋️ Creating gym '\(gymName)' with \(selectedEquipment.count) equipment items")
+                    let newGym = try await GymService.shared.createGym(
+                        name: gymName,
+                        location: gymAddress.isEmpty ? nil : gymAddress,
+                        equipmentIds: selectedEquipment,
+                        isPublic: gymIsPublic,
+                        userId: userId,
+                        modelContext: modelContext
+                    )
+                    await MainActor.run {
+                        lastCreatedGymId = newGym.id
+                    }
+                    print("[Onboarding] ✅ Gym created with ID: \(newGym.id)")
+                }
+                
+                // Mark that generation started early
+                await MainActor.run {
+                    programGenerationStartedEarly = true
+                    isGeneratingProgram = true
+                }
+                
+                // Start the actual program generation in background
+                print("[Onboarding] 🚀 Starting program generation in background from Gym Details step...")
+                
                 let profileData = APIService.OnboardingCompleteRequest.ProfileData(
                     motivationType: motivationType,
                     trainingLevel: trainingLevel,
                     specificSport: motivationType == "sport" ? specificSport : nil,
+                    focusTags: focusTags,
+                    selectedIntent: selectedIntent,
                     age: age,
                     sex: sex.isEmpty ? nil : sex,
                     bodyWeight: bodyWeight,
                     height: height,
                     goalStrength: goalStrength,
-                    goalVolume: goalVolume,
+                    goalVolume: goalHypertrophy,
                     goalEndurance: goalEndurance,
                     goalCardio: goalCardio,
                     sessionsPerWeek: sessionsPerWeek,
@@ -1752,15 +2099,11 @@ struct OnboardingView: View {
                 print("[Onboarding] ✅ Program generation started, response received")
                 print("[Onboarding] 📋 Response: success=\(response.success), hasProgram=\(response.hasProgram ?? false), templatesCreated=\(response.templatesCreated ?? 0)")
                 
-                // Store jobId if available
                 if let jobId = response.program?.jobId {
                     await MainActor.run {
                         generationJobId = jobId
                     }
                 }
-                
-                // Program generation is now running in background
-                // User can proceed to Step Goal step while it generates
                 
                 if response.success && (response.hasProgram == true || (response.templatesCreated ?? 0) > 0) {
                     await MainActor.run {
@@ -1769,13 +2112,10 @@ struct OnboardingView: View {
                     }
                 }
             } catch {
-                print("[Onboarding] ❌ Error starting program generation: \(error.localizedDescription)")
-                print("[Onboarding] ℹ️ User can continue onboarding - error will be shown if they wait for program")
+                print("[Onboarding] ❌ Error in startProgramGeneration: \(error.localizedDescription)")
                 await MainActor.run {
                     isGeneratingProgram = false
                     programGenerationStartedEarly = false
-                    // Don't show alert immediately - let user continue to next steps
-                    // Error will be shown later if user tries to wait for program completion
                 }
             }
         }
@@ -1794,34 +2134,38 @@ struct OnboardingView: View {
         case 5:
             currentStepIcon = "target"
         case 6:
-            currentStepIcon = "dumbbell.fill"
+            currentStepIcon = "chart.bar.fill" // Level
         case 7:
-            currentStepIcon = "calendar"
+            currentStepIcon = "dumbbell.fill" // 1RM
         case 8:
-            currentStepIcon = "square.grid.2x2.fill"
+            currentStepIcon = "calendar" // Frequency
         case 9:
-            currentStepIcon = "figure.walk" // Step Goal
+            currentStepIcon = "square.grid.2x2.fill" // Equipment
         case 10:
-            currentStepIcon = "paintpalette.fill"
+            currentStepIcon = "mappin.and.ellipse" // Gym Details
+        case 11:
+            currentStepIcon = "figure.walk" // Step Goal
+        case 12:
+            currentStepIcon = "paintpalette.fill" // Theme
         default:
             currentStepIcon = "circle.fill"
         }
     }
     
-    private func adjustGoals(changed: GoalType, to newValue: Int) {
+    private func adjustGoals(changed: OnboardingGoalType, to newValue: Int) {
         // Clamp the new value to valid range
         let clampedNewValue = max(0, min(100, newValue))
         
         // Get the old value of the changed goal
         let oldValue: Int
         switch changed {
-        case .strength:
+        case .statusStrength:
             oldValue = goalStrength
-        case .volume:
-            oldValue = goalVolume
-        case .endurance:
+        case .statusHypertrophy:
+            oldValue = goalHypertrophy
+        case .statusEndurance:
             oldValue = goalEndurance
-        case .cardio:
+        case .statusCardio:
             oldValue = goalCardio
         }
         
@@ -1833,22 +2177,22 @@ struct OnboardingView: View {
         
         // Update the changed goal first
         switch changed {
-        case .strength:
+        case .statusStrength:
             goalStrength = clampedNewValue
-        case .volume:
-            goalVolume = clampedNewValue
-        case .endurance:
+        case .statusHypertrophy:
+            goalHypertrophy = clampedNewValue
+        case .statusEndurance:
             goalEndurance = clampedNewValue
-        case .cardio:
+        case .statusCardio:
             goalCardio = clampedNewValue
         }
         
         // Get current values of other goals
-        let otherGoals: [(GoalType, Int)] = [
-            (.strength, goalStrength),
-            (.volume, goalVolume),
-            (.endurance, goalEndurance),
-            (.cardio, goalCardio)
+        let otherGoals: [(OnboardingGoalType, Int)] = [
+            (.statusStrength, goalStrength),
+            (.statusHypertrophy, goalHypertrophy),
+            (.statusEndurance, goalEndurance),
+            (.statusCardio, goalCardio)
         ].filter { $0.0 != changed }
         
         // Calculate total of other goals
@@ -1867,10 +2211,10 @@ struct OnboardingView: View {
                 for (index, (goal, _)) in otherGoals.enumerated() {
                     let value = equalShare + (index < remainder ? 1 : 0)
                     switch goal {
-                    case .strength: goalStrength = value
-                    case .volume: goalVolume = value
-                    case .endurance: goalEndurance = value
-                    case .cardio: goalCardio = value
+                    case .statusStrength: goalStrength = value
+                    case .statusHypertrophy: goalHypertrophy = value
+                    case .statusEndurance: goalEndurance = value
+                    case .statusCardio: goalCardio = value
                     }
                 }
             } else {
@@ -1897,16 +2241,16 @@ struct OnboardingView: View {
                     let adjustment = adjustments[index]
                     let newValue: Int
                     switch goal {
-                    case .strength:
+                    case .statusStrength:
                         newValue = max(0, min(100, goalStrength + adjustment))
                         goalStrength = newValue
-                    case .volume:
-                        newValue = max(0, min(100, goalVolume + adjustment))
-                        goalVolume = newValue
-                    case .endurance:
+                    case .statusHypertrophy:
+                        newValue = max(0, min(100, goalHypertrophy + adjustment))
+                        goalHypertrophy = newValue
+                    case .statusEndurance:
                         newValue = max(0, min(100, goalEndurance + adjustment))
                         goalEndurance = newValue
-                    case .cardio:
+                    case .statusCardio:
                         newValue = max(0, min(100, goalCardio + adjustment))
                         goalCardio = newValue
                     }
@@ -1915,25 +2259,25 @@ struct OnboardingView: View {
         }
         
         // Final check: ensure exact 100% (handle any edge cases)
-        let finalTotal = goalStrength + goalVolume + goalEndurance + goalCardio
+        let finalTotal = goalStrength + goalHypertrophy + goalEndurance + goalCardio
         if finalTotal != 100 {
             let difference = 100 - finalTotal
             // Apply difference to the changed goal (clamp if needed)
             switch changed {
-            case .strength:
+            case .statusStrength:
                 goalStrength = max(0, min(100, goalStrength + difference))
-            case .volume:
-                goalVolume = max(0, min(100, goalVolume + difference))
-            case .endurance:
+            case .statusHypertrophy:
+                goalHypertrophy = max(0, min(100, goalHypertrophy + difference))
+            case .statusEndurance:
                 goalEndurance = max(0, min(100, goalEndurance + difference))
-            case .cardio:
+            case .statusCardio:
                 goalCardio = max(0, min(100, goalCardio + difference))
             }
         }
     }
     
-    private enum GoalType {
-        case strength, volume, endurance, cardio
+    private enum OnboardingGoalType {
+        case statusStrength, statusHypertrophy, statusEndurance, statusCardio
     }
     
     /// Calculate preset goals based on motivationType and trainingLevel (local calculation)
@@ -1941,98 +2285,183 @@ struct OnboardingView: View {
         print("[Onboarding] 🎯 Calculating preset training goals based on \(motivationType) + \(trainingLevel)...")
         
         var strength = 25
-        var volume = 25
+        var hypertrophy = 25
         var endurance = 25
         var cardio = 25
         
         // Base distribution on motivationType
         switch motivationType.lowercased() {
-        case "viktminskning":
+        case "lose_weight", "viktminskning":
             cardio = 40
             endurance = 30
             strength = 20
-            volume = 10
-        case "rehabilitering":
+            hypertrophy = 10
+        case "rehabilitation", "rehabilitering":
             strength = 30
             endurance = 40
-            volume = 20
+            hypertrophy = 20
             cardio = 10
-        case "bättre_hälsa":
+        case "better_health", "bättre_hälsa":
             endurance = 35
             cardio = 35
             strength = 20
-            volume = 10
+            hypertrophy = 10
         case "sport":
-            strength = 35
-            endurance = 30
-            volume = 20
-            cardio = 15
+            // Adjust base focus based on specific sport
+            switch specificSport.lowercased() {
+            case "alpine_skiing":
+                strength = 35; hypertrophy = 15; endurance = 25; cardio = 25
+                focusTags = ["Explosiveness", "Mobility", "Rehab/Recovery"]
+                selectedIntent = "strength_power"
+            case "badminton":
+                strength = 20; hypertrophy = 10; endurance = 30; cardio = 40
+                focusTags = ["Explosiveness", "Technique", "Mobility"]
+                selectedIntent = "agile"
+            case "basketball":
+                strength = 25; hypertrophy = 15; endurance = 25; cardio = 35
+                focusTags = ["Explosiveness", "Conditioning/Metcon", "Mobility"]
+                selectedIntent = "explosive"
+            case "cycling":
+                strength = 15; hypertrophy = 5; endurance = 40; cardio = 40
+                focusTags = ["Conditioning/Metcon", "Rehab/Recovery", "Mobility"]
+                selectedIntent = "endurance"
+            case "floorball":
+                strength = 25; hypertrophy = 10; endurance = 25; cardio = 40
+                focusTags = ["Explosiveness", "Conditioning/Metcon", "Mobility"]
+                selectedIntent = "agile"
+            case "football":
+                strength = 20; hypertrophy = 10; endurance = 25; cardio = 45
+                focusTags = ["Explosiveness", "Conditioning/Metcon", "Rehab/Recovery"]
+                selectedIntent = "explosive"
+            case "track_and_field":
+                strength = 30; hypertrophy = 10; endurance = 25; cardio = 35
+                focusTags = ["Explosiveness", "Technique", "Mobility"]
+                selectedIntent = "explosive"
+            case "golf":
+                strength = 30; hypertrophy = 10; endurance = 25; cardio = 35
+                focusTags = ["Technique", "Mobility", "Explosiveness"]
+                selectedIntent = "controlled"
+            case "handball":
+                strength = 25; hypertrophy = 15; endurance = 20; cardio = 40
+                focusTags = ["Explosiveness", "Conditioning/Metcon", "Rehab/Recovery"]
+                selectedIntent = "explosive"
+            case "ice_hockey":
+                strength = 30; hypertrophy = 15; endurance = 20; cardio = 35
+                focusTags = ["Explosiveness", "Conditioning/Metcon", "Mobility"]
+                selectedIntent = "explosive"
+            case "martial_arts":
+                strength = 25; hypertrophy = 10; endurance = 30; cardio = 35
+                focusTags = ["Technique", "Mobility", "Conditioning/Metcon"]
+                selectedIntent = "focused"
+            case "cross_country_skiing":
+                strength = 20; hypertrophy = 5; endurance = 40; cardio = 35
+                focusTags = ["Conditioning/Metcon", "Mobility", "Rehab/Recovery"]
+                selectedIntent = "endurance"
+            case "padel":
+                strength = 20; hypertrophy = 10; endurance = 25; cardio = 45
+                focusTags = ["Technique", "Explosiveness", "Mobility"]
+                selectedIntent = "agile"
+            case "running":
+                strength = 15; hypertrophy = 5; endurance = 45; cardio = 35
+                focusTags = ["Rehab/Recovery", "Mobility", "Conditioning/Metcon"]
+                selectedIntent = "endurance"
+            case "swimming":
+                strength = 20; hypertrophy = 5; endurance = 40; cardio = 35
+                focusTags = ["Technique", "Mobility", "Rehab/Recovery"]
+                selectedIntent = "endurance"
+            case "tennis":
+                strength = 20; hypertrophy = 10; endurance = 25; cardio = 45
+                focusTags = ["Technique", "Explosiveness", "Mobility"]
+                selectedIntent = "agile"
+            case "other":
+                strength = 25; hypertrophy = 25; endurance = 25; cardio = 25
+                focusTags = []
+                selectedIntent = "balanced"
+            default:
+                strength = 35; endurance = 30; hypertrophy = 20; cardio = 15
+                focusTags = []
+                selectedIntent = nil
+            }
         case "build_muscle", "bygga_muskler", "hypertrofi", "fitness":
-            // Focus on strength and volume for muscle building
+            // Focus on strength and hypertrophy for muscle building
             strength = 30
-            volume = 30
+            hypertrophy = 30
             endurance = 25
             cardio = 15
         case "mobility", "bli_rörligare":
             // Focus on mobility, flexibility, and injury prevention
             strength = 25
-            volume = 20
+            hypertrophy = 20
             endurance = 30
             cardio = 25
         default:
             // Default balanced distribution
             strength = 30
-            volume = 30
+            hypertrophy = 30
             endurance = 25
             cardio = 15
         }
         
         // Adjust based on training level
-        switch trainingLevel.lowercased() {
-        case "nybörjare":
-            // For "bygga_muskler", keep higher strength/volume even for beginners
+        // Adjust based on training level
+        // NOTE: Level might be empty if user hasn't reached that step yet (now step 6)
+        // So we default to "intermediate" logic if empty for preset calculation
+        let levelForCalc = trainingLevel.isEmpty ? "van" : trainingLevel
+        
+        switch levelForCalc.lowercased() {
+        case "beginner", "nybörjare":
+            // For "build_muscle", keep higher strength/hypertrophy even for beginners
             if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
-                // Smaller adjustment for muscle building - still prioritize strength/volume
+                // Smaller adjustment for muscle building - still prioritize strength/hypertrophy
                 strength = max(25, strength - 5)
-                volume = max(25, volume - 5)
+                hypertrophy = max(25, hypertrophy - 5)
                 endurance += 5
                 cardio += 5
             } else {
                 // For other goals, larger adjustment for beginners
                 strength = max(15, strength - 10)
-                volume = max(10, volume - 10)
+                hypertrophy = max(10, hypertrophy - 10)
                 endurance += 10
                 cardio += 10
             }
-        case "mycket_van", "elit":
+        case "advanced", "mycket_van", "elite", "elit":
             strength += 10
-            volume += 5
+            hypertrophy += 5
             endurance = max(15, endurance - 10)
             cardio = max(10, cardio - 5)
         default:
-            // "van" (intermediate) - no adjustment
+            // "intermediate", "van" - no adjustment
             break
         }
         
         // Normalize to 100%
-        let total = strength + volume + endurance + cardio
+        let total = strength + hypertrophy + endurance + cardio
         let normalizedStrength = Int((Double(strength) / Double(total)) * 100)
-        let normalizedVolume = Int((Double(volume) / Double(total)) * 100)
+        let normalizedHypertrophy = Int((Double(hypertrophy) / Double(total)) * 100)
         let normalizedEndurance = Int((Double(endurance) / Double(total)) * 100)
         let normalizedCardio = Int((Double(cardio) / Double(total)) * 100)
         
         // Final check to ensure sum is exactly 100
-        let sum = normalizedStrength + normalizedVolume + normalizedEndurance + normalizedCardio
+        let sum = normalizedStrength + normalizedHypertrophy + normalizedEndurance + normalizedCardio
         let diff = 100 - sum
         
         goalStrength = normalizedStrength
-        goalVolume = normalizedVolume
+        goalHypertrophy = normalizedHypertrophy
         goalEndurance = normalizedEndurance
         goalCardio = normalizedCardio + diff // Add difference to cardio
         
         goalsCalculated = true
         
-        print("[Onboarding] ✅ Preset goals calculated: Strength=\(goalStrength)%, Volume=\(goalVolume)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%")
+        print("[Onboarding] ✅ Preset goals calculated: Strength=\(goalStrength)%, Hypertrophy=\(goalHypertrophy)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%")
+        
+        // If sport is 'other' or unknown, fetch AI suggestions
+        // Otherwise we use the hardcoded presets above to avoid API latency
+        if motivationType == "sport" && specificSport == "other" {
+            // Only fetch if we have a custom name entered, otherwise wait
+            if !customSportName.isEmpty {
+                calculateSuggestedGoals()
+            }
+        }
     }
     
     /// Calculate suggested goals via API (fallback or for refinement)
@@ -2040,9 +2469,14 @@ struct OnboardingView: View {
         Task {
             do {
                 print("[Onboarding] 🎯 Calculating suggested training goals via API...")
+                
+                // Use custom name if "other", otherwise specificSport (which shouldn't happen here due to optimization, but safe to keep)
+                let sportToQuery = (specificSport == "other" && !customSportName.isEmpty) ? customSportName : specificSport
+                
                 let suggestedGoals = try await APIService.shared.suggestTrainingGoals(
                     motivationType: motivationType,
-                    trainingLevel: trainingLevel,
+                    trainingLevel: trainingLevel.isEmpty ? "intermediate" : trainingLevel,
+                    specificSport: motivationType == "sport" ? sportToQuery : nil,
                     age: age,
                     sex: sex.isEmpty ? nil : sex,
                     bodyWeight: bodyWeight,
@@ -2056,12 +2490,20 @@ struct OnboardingView: View {
                 
                 await MainActor.run {
                     goalStrength = suggestedGoals.goalStrength
-                    goalVolume = suggestedGoals.goalVolume
+                    goalHypertrophy = suggestedGoals.goalHypertrophy
                     goalEndurance = suggestedGoals.goalEndurance
                     goalCardio = suggestedGoals.goalCardio
+                    
+                    if let tags = suggestedGoals.focusTags {
+                        focusTags = tags
+                    }
+                    if let intent = suggestedGoals.selectedIntent {
+                        selectedIntent = intent
+                    }
+                    
                     goalsCalculated = true
                     
-                    print("[Onboarding] ✅ Suggested goals calculated: Strength=\(goalStrength)%, Volume=\(goalVolume)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%")
+                    print("[Onboarding] ✅ Suggested goals calculated: Strength=\(goalStrength)%, Hypertrophy=\(goalHypertrophy)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%, Tags=\(focusTags)")
                 }
             } catch {
                 print("[Onboarding] ⚠️ Error calculating suggested goals: \(error.localizedDescription)")
@@ -2099,8 +2541,8 @@ struct OnboardingView: View {
         print("[Onboarding] ⚠️ Using local fallback for 1RM calculation")
         
         let userWeight = Double(bodyWeight ?? 75)
-        let isMale = (sex == "man" || sex.isEmpty)
-        let isBeginner = (trainingLevel == "nybörjare" || trainingLevel.isEmpty)
+        let isMale = (sex == "male" || sex == "man" || sex.isEmpty)
+        let isBeginner = (trainingLevel == "beginner" || trainingLevel == "nybörjare" || trainingLevel.isEmpty)
         
         // Multipliers based on sex and experience (very rough estimates)
         let benchMultiplier = isMale ? (isBeginner ? 0.6 : 0.9) : (isBeginner ? 0.4 : 0.6)
@@ -2286,6 +2728,7 @@ struct OnboardingView: View {
         Task {
             await MainActor.run {
                 isGeneratingProgram = true
+                showGenerationProgress = true
             }
             
             // capture state safely
@@ -2296,8 +2739,7 @@ struct OnboardingView: View {
                 if complete {
                     print("[Onboarding] ✅ Generation already complete, showing completion animation...")
                     await MainActor.run {
-                        showGenerationProgress = true
-                        generationStatus = "Slutför..."
+                        generationStatus = String(localized: "Finalizing...")
                     }
                     
                     // Show "fake" completion animation for 10s as requested to allow full sync/population
@@ -2306,86 +2748,76 @@ struct OnboardingView: View {
                     finalizeOnboarding()
                 } else {
                     print("[Onboarding] ⏳ Generation still in progress, waiting for completion...")
-                    await MainActor.run {
-                        showGenerationProgress = true
-                    }
                     waitForGenerationCompletion()
                 }
-                return
-            }
-        
-        Task {
-            isGeneratingProgram = true
-            showGenerationProgress = true
-            generationStatus = "Genererar ditt program..."
-            
-            do {
-
+            } else {
+                // Not started early (fallback or alternative flow)
+                generationStatus = String(localized: "Generating your program...")
                 
-                // Start program generation now (original flow)
-                let profileData = APIService.OnboardingCompleteRequest.ProfileData(
-                    motivationType: motivationType,
-                    trainingLevel: trainingLevel,
-                    specificSport: motivationType == "sport" ? specificSport : nil,
-                    age: age,
-                    sex: sex.isEmpty ? nil : sex,
-                    bodyWeight: bodyWeight,
-                    height: height,
-                    goalStrength: goalStrength,
-                    goalVolume: goalVolume,
-                    goalEndurance: goalEndurance,
-                    goalCardio: goalCardio,
-                    sessionsPerWeek: sessionsPerWeek,
-                    sessionDuration: sessionDuration,
-                    oneRmBench: oneRmBench,
-                    oneRmOhp: oneRmOhp,
-                    oneRmDeadlift: oneRmDeadlift,
-                    oneRmSquat: oneRmSquat,
-                    oneRmLatpull: oneRmLatpull,
-                    theme: selectedTheme
-                )
-                
-                // Minimum animation duration of 10s
-                let minDuration = TimeInterval(10)
-                let startTime = Date()
-                
-                print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
-                async let responseTask = APIService.shared.completeOnboarding(
-                    profile: profileData,
-                    equipment: selectedEquipment,
-                    useV4: true // Use V4 AI architecture for program generation
-                )
-                
-                // Wait for both the API call and the minimum duration
-                let response = try await responseTask
-                let elapsed = Date().timeIntervalSince(startTime)
-                let remaining = minDuration - elapsed
-                
-                if remaining > 0 {
-                    print("[Onboarding] ⏳ Waiting \(remaining)s to meet minimum animation time...")
-                    try await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
-                }
-                
-                if response.success {
-                    print("[Onboarding] ✅ Success! Passing response to finalize...")
-                    finalizeOnboarding(response: response)
-                } else {
+                do {
+                    let profileData = APIService.OnboardingCompleteRequest.ProfileData(
+                        motivationType: motivationType,
+                        trainingLevel: trainingLevel,
+                        specificSport: motivationType == "sport" ? specificSport : nil,
+                        focusTags: focusTags,
+                        selectedIntent: selectedIntent,
+                        age: age,
+                        sex: sex.isEmpty ? nil : sex,
+                        bodyWeight: bodyWeight,
+                        height: height,
+                        goalStrength: goalStrength,
+                        goalVolume: goalHypertrophy,
+                        goalEndurance: goalEndurance,
+                        goalCardio: goalCardio,
+                        sessionsPerWeek: sessionsPerWeek,
+                        sessionDuration: sessionDuration,
+                        oneRmBench: oneRmBench,
+                        oneRmOhp: oneRmOhp,
+                        oneRmDeadlift: oneRmDeadlift,
+                        oneRmSquat: oneRmSquat,
+                        oneRmLatpull: oneRmLatpull,
+                        theme: selectedTheme
+                    )
+                    
+                    // Minimum animation duration of 10s
+                    let minDuration = TimeInterval(10)
+                    let startTime = Date()
+                    
+                    print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding (late flow)...")
+                    let response = try await APIService.shared.completeOnboarding(
+                        profile: profileData,
+                        equipment: selectedEquipment,
+                        useV4: true
+                    )
+                    
+                    let elapsed = Date().timeIntervalSince(startTime)
+                    let remaining = minDuration - elapsed
+                    
+                    if remaining > 0 {
+                        print("[Onboarding] ⏳ Waiting \(remaining)s to meet minimum animation time...")
+                        try await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+                    }
+                    
+                    if response.success {
+                        print("[Onboarding] ✅ Success! Passing response to finalize...")
+                        finalizeOnboarding(response: response)
+                    } else {
+                        await MainActor.run {
+                            generationError = String(localized: "Program generation failed.")
+                            showGenerationErrorAlert = true
+                            isGeneratingProgram = false
+                            showGenerationProgress = false
+                        }
+                    }
+                } catch {
+                    print("[Onboarding] ❌ Error completing onboarding: \(error.localizedDescription)")
                     await MainActor.run {
-                        generationError = "Programgenerering misslyckades."
+                        generationError = String(format: String(localized: "An unexpected error occurred: %@"), error.localizedDescription)
                         showGenerationErrorAlert = true
                         isGeneratingProgram = false
                         showGenerationProgress = false
                     }
                 }
-            } catch {
-                print("[Onboarding] ❌ Error completing onboarding: \(error.localizedDescription)")
-                await MainActor.run {
-                    generationError = "Ett oväntat fel uppstod: \(error.localizedDescription)"
-                    showGenerationErrorAlert = true
-                    isGeneratingProgram = false
-                    showGenerationProgress = false
-                }
-            }
             }
         }
     }
@@ -2413,7 +2845,7 @@ struct OnboardingView: View {
                     // If we timed out waiting, but the task is technically still running in background,
                     // we might want to check status explicitly or just show error.
                     // For now, assume it failed or got stuck.
-                    generationError = "Programgenerering tog för lång tid. Vänligen försök igen."
+                    generationError = String(localized: "Program generation took too long. Please try again.")
                     showGenerationErrorAlert = true
                     isGeneratingProgram = false
                     showGenerationProgress = false
@@ -2455,6 +2887,10 @@ struct OnboardingView: View {
                     
                     try? modelContext.save()
                     print("[Onboarding] ✅ Profile marked as onboarding completed and synced")
+                    
+                    // Force a full profile sync from server to ensure all fields (including computed ones) are correct
+                    print("[Onboarding] 🔄 Performing full profile sync from server...")
+                    try? await SyncService.shared.syncUserProfile(userId: userId, modelContext: modelContext)
                     
                     // Fetch the generated program templates immediately so they appear on HomeView
                     print("[Onboarding] 🔄 Fetching generated program templates...")
@@ -2529,7 +2965,7 @@ struct OnboardingView: View {
                     if !syncSuccess {
                         print("[Onboarding] ❌ Failed to sync templates after 5 attempts")
                         await MainActor.run {
-                            generationError = "Programmet är klart men kunde inte laddas. Försök öppna appen igen."
+                            generationError = String(localized: "The program is ready but could not be loaded. Please try opening the app again.")
                             showGenerationErrorAlert = true
                             isGeneratingProgram = false
                             showGenerationProgress = false
@@ -2551,8 +2987,8 @@ struct OnboardingView: View {
                         // Create default gym with selected equipment from onboarding
                         print("[Onboarding] 🏋️ Creating default gym with \(selectedEquipment.count) equipment items")
                         _ = try await GymService.shared.createGym(
-                            name: "Mitt Gym",
-                            location: "Standard plats",
+                            name: String(localized: "My Gym"),
+                            location: String(localized: "Standard location"),
                             equipmentIds: selectedEquipment,
                             userId: userId,
                             modelContext: modelContext
@@ -2571,7 +3007,7 @@ struct OnboardingView: View {
                     return
                 } else if status.status == "failed" {
                     await MainActor.run {
-                        generationError = status.error ?? "Programgenerering misslyckades"
+                        generationError = status.error ?? String(localized: "Program generation failed")
                         showGenerationErrorAlert = true
                         isGeneratingProgram = false
                         showGenerationProgress = false
@@ -2609,23 +3045,23 @@ struct OnboardingView: View {
     private func statusMessage(for status: String, progress: Int) -> String {
         switch status {
         case "queued":
-            return "Köar programgenerering..."
+            return String(localized: "Queuing program generation...")
         case "generating":
             if progress < 30 {
-                return "Förbereder data..."
+                return String(localized: "Preparing data...")
             } else if progress < 70 {
-                return "Genererar träningsprogram..."
+                return String(localized: "Generating workout program...")
             } else if progress < 90 {
-                return "Validerar program..."
+                return String(localized: "Validating program...")
             } else {
-                return "Slutför program..."
+                return String(localized: "Finalizing program...")
             }
         case "completed":
-            return "Program genererat!"
+            return String(localized: "Program generated!")
         case "failed":
-            return "Generering misslyckades"
+            return String(localized: "Generation failed")
         default:
-            return "Bearbetar..."
+            return String(localized: "Processing...")
         }
     }
     
@@ -2718,8 +3154,8 @@ struct OnboardingView: View {
 // MARK: - Helper Views
 
 struct MotivationOption: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    let title: String
+    let description: String
     let isSelected: Bool
     let colorScheme: ColorScheme
     let selectedTheme: String
@@ -2758,8 +3194,8 @@ struct MotivationOption: View {
 }
 
 struct LevelOption: View {
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    let title: String
+    let description: String
     let isSelected: Bool
     let colorScheme: ColorScheme
     let selectedTheme: String
@@ -2806,7 +3242,7 @@ struct OneRmField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
             TextField("kg", value: $value, format: .number)

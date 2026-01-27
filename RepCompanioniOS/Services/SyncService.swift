@@ -294,7 +294,7 @@ class SyncService: ObservableObject {
         for gym in allGyms {
             let gymEquipIds = allEquipment
                 .filter { $0.gymId == gym.id && $0.available }
-                .map { $0.equipmentType }
+                .map { $0.equipmentName }
             
             if !gymEquipIds.isEmpty {
                 gym.equipmentIds = gymEquipIds

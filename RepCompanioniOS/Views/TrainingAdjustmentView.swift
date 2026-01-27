@@ -22,9 +22,11 @@ struct TrainingAdjustmentView: View {
     // State for adjustments
     @State private var motivationType: String = "bygga_muskler"
     @State private var goalStrength: Int = 25
-    @State private var goalVolume: Int = 25
+    @State private var goalHypertrophy: Int = 25
     @State private var goalEndurance: Int = 25
     @State private var goalCardio: Int = 25
+    @State private var focusTags: [String] = []
+    @State private var selectedIntent: String? = nil
     
     @State private var sessionsPerWeek: Int = 3
     @State private var sessionDuration: Int = 60
@@ -32,11 +34,13 @@ struct TrainingAdjustmentView: View {
     // Steps
     enum AdjustmentStep {
         case motivation
+        case sportSelection
         case goals
         case logistics
         case processing
     }
     @State private var currentStep: AdjustmentStep = .motivation
+    @State private var specificSport: String = ""
     
     // Processing
     @State private var isProcessing = false
@@ -56,12 +60,19 @@ struct TrainingAdjustmentView: View {
                                 .padding()
                         }
                         
+                    case .sportSelection:
+                        ScrollView {
+                            sportSelectionStep
+                                .padding()
+                        }
+                        
                     case .goals:
                         GoalSelectionView(
                             goalStrength: $goalStrength,
-                            goalVolume: $goalVolume,
+                            goalHypertrophy: $goalHypertrophy,
                             goalEndurance: $goalEndurance,
                             goalCardio: $goalCardio,
+                            focusTags: $focusTags,
                             colorScheme: colorScheme,
                             selectedTheme: selectedTheme
                         )
@@ -95,7 +106,7 @@ struct TrainingAdjustmentView: View {
                         Spacer()
                         
                         Button(action: nextStep) {
-                            Text(currentStep == .logistics ? "Generera nytt program" : "Nästa")
+                            Text(currentStep == .logistics ? String(localized: "Generate new program") : String(localized: "Next"))
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .padding()
@@ -107,7 +118,7 @@ struct TrainingAdjustmentView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Justera Träning")
+            .navigationTitle(String(localized: "Adjust Training"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -117,10 +128,10 @@ struct TrainingAdjustmentView: View {
                 }
             }
             .onAppear(perform: loadCurrentSettings)
-            .alert("Fel", isPresented: $showErrorAlert) {
+            .alert(String(localized: "Error"), isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text(errorMessage ?? "Ett okänt fel uppstod.")
+                Text(errorMessage ?? String(localized: "An unknown error occurred."))
             }
         }
     }
@@ -129,9 +140,9 @@ struct TrainingAdjustmentView: View {
         VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.5)
-            Text("Genererar ditt nya program...")
+            Text(String(localized: "Generating your new program..."))
                 .font(.headline)
-            Text("Detta kan ta en stund. Analyserar dina nya mål och utrustning.")
+            Text(String(localized: "This may take a moment. Analyzing your new goals and equipment."))
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.gray)
@@ -151,11 +162,11 @@ struct TrainingAdjustmentView: View {
                 MotivationOption(
                     title: "Lose weight",
                     description: "Lose weight and improve your health.",
-                    isSelected: motivationType == "viktminskning",
+                    isSelected: motivationType == "lose_weight",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: {
-                        motivationType = "viktminskning"
+                        motivationType = "lose_weight"
                         calculatePresetGoals()
                     }
                 )
@@ -163,11 +174,11 @@ struct TrainingAdjustmentView: View {
                 MotivationOption(
                     title: "Rehabilitation",
                     description: "Recover from injury or illness.",
-                    isSelected: motivationType == "rehabilitering",
+                    isSelected: motivationType == "rehabilitation",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: {
-                        motivationType = "rehabilitering"
+                        motivationType = "rehabilitation"
                         calculatePresetGoals()
                     }
                 )
@@ -175,11 +186,11 @@ struct TrainingAdjustmentView: View {
                 MotivationOption(
                     title: "Better health",
                     description: "Improve stamina, fitness and energy.",
-                    isSelected: motivationType == "bättre_hälsa",
+                    isSelected: motivationType == "better_health",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: {
-                        motivationType = "bättre_hälsa"
+                        motivationType = "better_health"
                         calculatePresetGoals()
                     }
                 )
@@ -187,11 +198,11 @@ struct TrainingAdjustmentView: View {
                 MotivationOption(
                     title: "Build muscle",
                     description: "Build muscle mass and get stronger.",
-                    isSelected: motivationType == "bygga_muskler",
+                    isSelected: motivationType == "build_muscle",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: {
-                        motivationType = "bygga_muskler"
+                        motivationType = "build_muscle"
                         calculatePresetGoals()
                     }
                 )
@@ -211,11 +222,11 @@ struct TrainingAdjustmentView: View {
                 MotivationOption(
                     title: "Mobility",
                     description: "Increase mobility, reduce stiffness and prevent injury.",
-                    isSelected: motivationType == "bli_rörligare",
+                    isSelected: motivationType == "mobility",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: {
-                        motivationType = "bli_rörligare"
+                        motivationType = "mobility"
                         calculatePresetGoals()
                     }
                 )
@@ -223,14 +234,69 @@ struct TrainingAdjustmentView: View {
         }
     }
     
+    private var sportSelectionStep: some View {
+        VStack(spacing: 24) {
+            Text(String(localized: "Which sport are you training for?"))
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+                .multilineTextAlignment(.center)
+            
+            VStack(spacing: 8) {
+                let sports = [
+                    "alpine_skiing", "badminton", "basketball", "cycling",
+                    "floorball", "football", "track_and_field", "golf",
+                    "handball", "ice_hockey", "martial_arts", "cross_country_skiing",
+                    "padel", "running", "swimming", "tennis", "other"
+                ]
+                
+                ForEach(sports, id: \.self) { sport in
+                    Button(action: { 
+                        specificSport = sport 
+                        calculatePresetGoals()
+                    }) {
+                        HStack {
+                            Text(LocalizedStringKey(sport.capitalized.replacingOccurrences(of: "_", with: " ")))
+                                .foregroundColor(Color.textPrimary(for: colorScheme))
+                            Spacer()
+                            if specificSport == sport {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
+                            }
+                        }
+                        .padding()
+                        .background(
+                            specificSport == sport
+                                ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme).opacity(0.1)
+                                : Color.cardBackground(for: colorScheme)
+                        )
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    specificSport == sport
+                                        ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme)
+                                        : Color.textSecondary(for: colorScheme).opacity(0.1),
+                                    lineWidth: specificSport == sport ? 2 : 1
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
     private func loadCurrentSettings() {
         guard let profile = currentProfile else { return }
         
-        motivationType = profile.motivationType ?? "bygga_muskler"
+        motivationType = profile.motivationType ?? "build_muscle"
+        specificSport = profile.specificSport ?? ""
         goalStrength = profile.goalStrength
-        goalVolume = profile.goalVolume
+        goalHypertrophy = profile.goalVolume
         goalEndurance = profile.goalEndurance
         goalCardio = profile.goalCardio
+        focusTags = profile.focusTags
+        selectedIntent = profile.selectedIntent
         
         sessionsPerWeek = profile.sessionsPerWeek
         sessionDuration = profile.sessionDuration
@@ -244,8 +310,14 @@ struct TrainingAdjustmentView: View {
             switch currentStep {
             case .motivation:
                 break
-            case .goals:
+            case .sportSelection:
                 currentStep = .motivation
+            case .goals:
+                if motivationType == "sport" {
+                    currentStep = .sportSelection
+                } else {
+                    currentStep = .motivation
+                }
             case .logistics:
                 currentStep = .goals
             case .processing:
@@ -258,6 +330,12 @@ struct TrainingAdjustmentView: View {
         withAnimation {
             switch currentStep {
             case .motivation:
+                if motivationType == "sport" {
+                    currentStep = .sportSelection
+                } else {
+                    currentStep = .goals
+                }
+            case .sportSelection:
                 currentStep = .goals
             case .goals:
                 currentStep = .logistics
@@ -277,10 +355,13 @@ struct TrainingAdjustmentView: View {
         
         // Update profile locally first
         profile.motivationType = motivationType
+        profile.specificSport = specificSport
         profile.goalStrength = goalStrength
-        profile.goalVolume = goalVolume
+        profile.goalVolume = goalHypertrophy
         profile.goalEndurance = goalEndurance
         profile.goalCardio = goalCardio
+        profile.focusTags = focusTags
+        profile.selectedIntent = selectedIntent
         profile.sessionsPerWeek = sessionsPerWeek
         profile.sessionDuration = sessionDuration
         
@@ -291,13 +372,15 @@ struct TrainingAdjustmentView: View {
                 let profileData = APIService.OnboardingCompleteRequest.ProfileData(
                     motivationType: motivationType,
                     trainingLevel: profile.trainingLevel ?? "intermediate",
-                    specificSport: profile.specificSport,
+                    specificSport: specificSport,
+                    focusTags: focusTags,
+                    selectedIntent: selectedIntent,
                     age: profile.age,
                     sex: profile.sex,
                     bodyWeight: profile.bodyWeight,
                     height: profile.height,
                     goalStrength: goalStrength,
-                    goalVolume: goalVolume,
+                    goalVolume: goalHypertrophy,
                     goalEndurance: goalEndurance,
                     goalCardio: goalCardio,
                     sessionsPerWeek: sessionsPerWeek,
@@ -363,95 +446,145 @@ struct TrainingAdjustmentView: View {
     }
     
     private func calculatePresetGoals() {
-        let trainingLevel = currentProfile?.trainingLevel ?? "nybörjare"
+        let trainingLevel = currentProfile?.trainingLevel ?? "beginner"
         
         var strength = 25
-        var volume = 25
+        var hypertrophy = 25
         var endurance = 25
         var cardio = 25
         
         // Base distribution on motivationType
         switch motivationType.lowercased() {
-        case "viktminskning":
+        case "lose_weight", "weight_loss", "viktminskning":
             cardio = 40
             endurance = 30
             strength = 20
-            volume = 10
-        case "rehabilitering":
+            hypertrophy = 10
+        case "rehabilitation", "rehabilitering":
             strength = 30
             endurance = 40
-            volume = 20
+            hypertrophy = 20
             cardio = 10
-        case "bättre_hälsa":
+        case "better_health", "bättre_hälsa":
             endurance = 35
             cardio = 35
             strength = 20
-            volume = 10
+            hypertrophy = 10
         case "sport":
-            strength = 35
-            endurance = 30
-            volume = 20
-            cardio = 15
-        case "bygga_muskler", "hypertrofi", "fitness":
-            // Focus on strength and volume for muscle building
+            // Adjust base focus based on specific sport
+            switch specificSport.lowercased() {
+            case "football":
+                strength = 30; hypertrophy = 20; endurance = 25; cardio = 25
+                focusTags = ["power", "conditioning"]
+            case "floorball":
+                strength = 25; hypertrophy = 20; endurance = 30; cardio = 25
+                focusTags = ["conditioning", "power"]
+            case "golf":
+                strength = 40; hypertrophy = 10; endurance = 30; cardio = 20
+                focusTags = ["skill", "mobility"]
+            case "ice_hockey":
+                strength = 40; hypertrophy = 20; endurance = 20; cardio = 20
+                focusTags = ["power", "conditioning"]
+            case "handball":
+                strength = 35; hypertrophy = 20; endurance = 25; cardio = 20
+                focusTags = ["power", "conditioning"]
+            case "track_and_field":
+                strength = 45; hypertrophy = 15; endurance = 25; cardio = 15
+                focusTags = ["power", "skill"]
+            case "cross_country_skiing":
+                strength = 20; hypertrophy = 10; endurance = 45; cardio = 25
+                focusTags = ["conditioning", "recovery"]
+            case "martial_arts":
+                strength = 35; hypertrophy = 15; endurance = 30; cardio = 20
+                focusTags = ["power", "skill"]
+            case "tennis":
+                strength = 30; hypertrophy = 15; endurance = 30; cardio = 25
+                focusTags = ["power", "skill"]
+            case "basketball":
+                strength = 35; hypertrophy = 20; endurance = 25; cardio = 20
+                focusTags = ["power", "conditioning"]
+            case "swimming":
+                strength = 25; hypertrophy = 15; endurance = 35; cardio = 25
+                focusTags = ["conditioning", "recovery"]
+            case "badminton":
+                strength = 25; hypertrophy = 15; endurance = 35; cardio = 25
+                focusTags = ["power", "skill"]
+            case "cycling":
+                strength = 20; hypertrophy = 10; endurance = 45; cardio = 25
+                focusTags = ["conditioning", "recovery"]
+            case "padel":
+                strength = 30; hypertrophy = 15; endurance = 30; cardio = 25
+                focusTags = ["power", "skill"]
+            case "alpine_skiing":
+                strength = 40; hypertrophy = 20; endurance = 25; cardio = 15
+                focusTags = ["power", "conditioning"]
+            case "running":
+                strength = 20; hypertrophy = 15; endurance = 40; cardio = 25
+                focusTags = ["conditioning", "recovery"]
+            default:
+                strength = 35; endurance = 30; hypertrophy = 20; cardio = 15
+                focusTags = []
+            }
+        case "build_muscle", "bygga_muskler", "hypertrofi", "fitness":
+            // Focus on strength and hypertrophy for muscle building
             strength = 30
-            volume = 30
+            hypertrophy = 30
             endurance = 25
             cardio = 15
-        case "bli_rörligare":
+        case "mobility", "bli_rörligare":
             // Focus on mobility, flexibility, and injury prevention
             strength = 25
-            volume = 20
+            hypertrophy = 20
             endurance = 30
             cardio = 25
         default:
             // Default balanced distribution
             strength = 30
-            volume = 30
+            hypertrophy = 30
             endurance = 25
             cardio = 15
         }
         
         // Adjust based on training level
         switch trainingLevel.lowercased() {
-        case "nybörjare":
-            // For "bygga_muskler", keep higher strength/volume even for beginners
-            if motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
-                // Smaller adjustment for muscle building - still prioritize strength/volume
+        case "beginner", "nybörjare":
+            // For muscle building, keep higher strength/hypertrophy even for beginners
+            if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
+                // Smaller adjustment for muscle building - still prioritize strength/hypertrophy
                 strength = max(25, strength - 5)
-                volume = max(25, volume - 5)
+                hypertrophy = max(25, hypertrophy - 5)
                 endurance += 5
                 cardio += 5
             } else {
                 // For other goals, larger adjustment for beginners
                 strength = max(15, strength - 10)
-                volume = max(10, volume - 10)
+                hypertrophy = max(10, hypertrophy - 10)
                 endurance += 10
                 cardio += 10
             }
-        case "mycket_van", "elit":
+        case "advanced", "mycket_van", "elite", "elit":
             strength += 10
-            volume += 5
+            hypertrophy += 5
             endurance = max(15, endurance - 10)
             cardio = max(10, cardio - 5)
         default:
-            // "van" (intermediate) - no adjustment
+            // "intermediate", "van" - no adjustment
             break
         }
         
         // Normalize to 100%
-        let total = strength + volume + endurance + cardio
+        let total = strength + hypertrophy + endurance + cardio
         let normalizedStrength = Int((Double(strength) / Double(total)) * 100)
-        let normalizedVolume = Int((Double(volume) / Double(total)) * 100)
+        let normalizedHypertrophy = Int((Double(hypertrophy) / Double(total)) * 100)
         let normalizedEndurance = Int((Double(endurance) / Double(total)) * 100)
         let normalizedCardio = Int((Double(cardio) / Double(total)) * 100)
         
         // Final check to ensure sum is exactly 100
-        let sum = normalizedStrength + normalizedVolume + normalizedEndurance + normalizedCardio
+        let sum = normalizedStrength + normalizedHypertrophy + normalizedEndurance + normalizedCardio
         let diff = 100 - sum
         
         goalStrength = normalizedStrength
-        goalVolume = normalizedVolume
+        goalHypertrophy = normalizedHypertrophy
         goalEndurance = normalizedEndurance
         goalCardio = normalizedCardio + diff // Add difference to cardio
     }

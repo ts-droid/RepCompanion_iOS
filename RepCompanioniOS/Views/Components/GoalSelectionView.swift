@@ -2,33 +2,34 @@ import SwiftUI
 
 // Enum for goal types
 enum GoalType {
-    case strength, volume, endurance, cardio
+    case strength, hypertrophy, endurance, cardio
 }
 
 struct GoalSelectionView: View {
     @Binding var goalStrength: Int
-    @Binding var goalVolume: Int
+    @Binding var goalHypertrophy: Int
     @Binding var goalEndurance: Int
     @Binding var goalCardio: Int
+    @Binding var focusTags: [String]
     let colorScheme: ColorScheme
     let selectedTheme: String
     
     var body: some View {
         VStack(spacing: 24) {
-            Text("Träningsmål")
+            Text(String(localized: "Training Goals"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
-            Text("Fördela 100% mellan dina träningsmål")
+            Text(String(localized: "Distribute 100% between your training goals"))
                 .font(.subheadline)
                 .foregroundColor(Color.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 20) {
                 GoalSlider(
-                    title: "Styrka",
+                    title: String(localized: "Strength"),
                     value: Binding(
                         get: { goalStrength },
                         set: { newValue in
@@ -40,11 +41,11 @@ struct GoalSelectionView: View {
                 )
                 
                 GoalSlider(
-                    title: "Volym",
+                    title: String(localized: "Hypertrophy"),
                     value: Binding(
-                        get: { goalVolume },
+                        get: { goalHypertrophy },
                         set: { newValue in
-                            adjustGoals(changed: .volume, to: newValue)
+                            adjustGoals(changed: .hypertrophy, to: newValue)
                         }
                     ),
                     colorScheme: colorScheme,
@@ -52,7 +53,7 @@ struct GoalSelectionView: View {
                 )
                 
                 GoalSlider(
-                    title: "Uthållighet",
+                    title: String(localized: "Endurance"),
                     value: Binding(
                         get: { goalEndurance },
                         set: { newValue in
@@ -64,7 +65,7 @@ struct GoalSelectionView: View {
                 )
                 
                 GoalSlider(
-                    title: "Kondition",
+                    title: String(localized: "Cardio"),
                     value: Binding(
                         get: { goalCardio },
                         set: { newValue in
@@ -76,13 +77,54 @@ struct GoalSelectionView: View {
                 )
             }
             
-            Text("Totalt: \(goalStrength + goalVolume + goalEndurance + goalCardio)%")
+            Text(String(localized: "Total: \(goalStrength + goalHypertrophy + goalEndurance + goalCardio)%"))
                 .font(.caption)
                 .foregroundColor(
-                    goalStrength + goalVolume + goalEndurance + goalCardio == 100
+                    goalStrength + goalHypertrophy + goalEndurance + goalCardio == 100
                         ? Color.green
                         : Color.red
                 )
+            
+            Divider()
+                .padding(.vertical, 8)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(String(localized: "Extra Focus"))
+                        .font(.headline)
+                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                    
+                    Spacer()
+                    
+                    Text(String(localized: "\(focusTags.count)/3"))
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                }
+                
+                Text(String(localized: "Tags that refine your programming (max 3)"))
+                    .font(.caption)
+                    .foregroundColor(Color.textSecondary(for: colorScheme))
+                
+                let tags = ["Explosiveness", "Technique", "Mobility", "Rehab/Recovery", "Conditioning/Metcon"]
+                
+                FocusFlowLayout(spacing: 8) {
+                    ForEach(tags, id: \.self) { tag in
+                        FocusTagChip(
+                            title: LocalizationService.localizeFocusTag(tag),
+                            isSelected: focusTags.contains(tag),
+                            colorScheme: colorScheme,
+                            selectedTheme: selectedTheme,
+                            action: {
+                                if focusTags.contains(tag) {
+                                    focusTags.removeAll(where: { $0 == tag })
+                                } else if focusTags.count < 3 {
+                                    focusTags.append(tag)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
     
@@ -95,7 +137,7 @@ struct GoalSelectionView: View {
         let oldValue: Int
         switch changed {
         case .strength: oldValue = goalStrength
-        case .volume: oldValue = goalVolume
+        case .hypertrophy: oldValue = goalHypertrophy
         case .endurance: oldValue = goalEndurance
         case .cardio: oldValue = goalCardio
         }
@@ -109,7 +151,7 @@ struct GoalSelectionView: View {
         // Update the changed goal first
         switch changed {
         case .strength: goalStrength = clampedNewValue
-        case .volume: goalVolume = clampedNewValue
+        case .hypertrophy: goalHypertrophy = clampedNewValue
         case .endurance: goalEndurance = clampedNewValue
         case .cardio: goalCardio = clampedNewValue
         }
@@ -117,7 +159,7 @@ struct GoalSelectionView: View {
         // Get current values of other goals
         let otherGoals: [(GoalType, Int)] = [
             (.strength, goalStrength),
-            (.volume, goalVolume),
+            (.hypertrophy, goalHypertrophy),
             (.endurance, goalEndurance),
             (.cardio, goalCardio)
         ].filter { $0.0 != changed }
@@ -139,7 +181,7 @@ struct GoalSelectionView: View {
                     let value = equalShare + (index < remainder ? 1 : 0)
                     switch goal {
                     case .strength: goalStrength = value
-                    case .volume: goalVolume = value
+                    case .hypertrophy: goalHypertrophy = value
                     case .endurance: goalEndurance = value
                     case .cardio: goalCardio = value
                     }
@@ -168,7 +210,7 @@ struct GoalSelectionView: View {
                     let newValue = otherGoals[index].1 + adjustments[index]
                     switch goal {
                     case .strength: goalStrength = newValue
-                    case .volume: goalVolume = newValue
+                    case .hypertrophy: goalHypertrophy = newValue
                     case .endurance: goalEndurance = newValue
                     case .cardio: goalCardio = newValue
                     }

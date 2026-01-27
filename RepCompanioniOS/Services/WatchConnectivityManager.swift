@@ -103,7 +103,89 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                  Task {
                      handleSyncRequest()
                  }
+             } else if type == "workout_update" {
+                 print("[iOS] 📥 Received workout_update from Watch")
+                 Task { @MainActor in
+                     self.handleWorkoutUpdate(message: message)
+                 }
+             } else if type == "workout_complete" {
+                 print("[iOS] 📥 Received workout_complete from Watch")
+                 Task { @MainActor in
+                     self.handleWorkoutComplete(message: message)
+                 }
              }
+        }
+    }
+    
+    @MainActor
+    private func handleWorkoutUpdate(message: [String: Any]) {
+        guard let sessionIdString = message["sessionId"] as? String,
+              let sessionId = UUID(uuidString: sessionIdString),
+              let exerciseName = message["exerciseName"] as? String,
+              let setNumber = message["setNumber"] as? Int else {
+            return
+        }
+        
+        let reps = message["reps"] as? Int
+        let weight = message["weight"] as? Double
+        let orderIndex = message["exerciseOrderIndex"] as? Int ?? 0
+        
+        let container = PersistenceController.shared.container
+        let context = ModelContext(container)
+        
+        // 1. Ensure session exists and is active
+        let sessionDescriptor = FetchDescriptor<WorkoutSession>(predicate: #Predicate { $0.id == sessionId })
+        if let session = try? context.fetch(sessionDescriptor).first {
+            // Keep timer "fresh" if it was active
+            if session.status == "active" && session.lastStartTime == nil {
+                // If it was paused, maybe we should unpause it implicitly?
+                // For now, let's keep the user's explicit pause/active logic on iPhone
+            }
+        }
+        
+        // 2. Log the set
+        let log = ExerciseLog(
+            workoutSessionId: sessionId,
+            exerciseKey: exerciseName.lowercased().replacingOccurrences(of: " ", with: "-"),
+            exerciseTitle: exerciseName,
+            exerciseOrderIndex: orderIndex,
+            setNumber: setNumber,
+            weight: weight,
+            reps: reps,
+            completed: true
+        )
+        context.insert(log)
+        try? context.save()
+        
+        print("[iOS] ✅ Logged set from Watch: \(exerciseName) Set \(setNumber)")
+        NotificationCenter.default.post(name: NSNotification.Name("WatchLogReceived"), object: nil)
+    }
+    
+    @MainActor
+    private func handleWorkoutComplete(message: [String: Any]) {
+        guard let sessionIdString = message["sessionId"] as? String,
+              let sessionId = UUID(uuidString: sessionIdString) else {
+            return
+        }
+        
+        let context = ModelContext(PersistenceController.shared.container)
+        let sessionDescriptor = FetchDescriptor<WorkoutSession>(predicate: #Predicate { $0.id == sessionId })
+        
+        if let session = try? context.fetch(sessionDescriptor).first {
+            if session.status != "completed" {
+                session.status = "completed"
+                session.completedAt = Date()
+                
+                // Final duration update
+                if let start = session.lastStartTime {
+                    session.accumulatedTime += Date().timeIntervalSince(start)
+                }
+                session.lastStartTime = nil
+                
+                try? context.save()
+                print("[iOS] ✅ Workout completed from Watch: \(sessionIdString)")
+                NotificationCenter.default.post(name: NSNotification.Name("WatchWorkoutCompleted"), object: nil)
+            }
         }
     }
     

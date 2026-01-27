@@ -11,6 +11,8 @@ struct WorkoutGenerationInput {
     let mainGoal: String
     let motivationType: String?
     let specificSport: String?
+    let focusTags: [String]
+    let selectedIntent: String?
     let distribution: GoalDistribution
     let sessionsPerWeek: Int
     let sessionLengthMinutes: Int
@@ -47,6 +49,8 @@ struct WorkoutProgram: Codable {
         let heightCm: Int
         let trainingLevel: String
         let mainGoal: String
+        let focusTags: [String]?
+        let selectedIntent: String?
         let distribution: GoalDistribution
         let sessionsPerWeek: Int
         let sessionLengthMinutes: Int
@@ -130,22 +134,31 @@ class WorkoutGenerationService: ObservableObject {
         
         // Map sex to gender format
         let genderMap: [String: String] = [
-            "man": "Man",
-            "kvinna": "Kvinna",
             "male": "Man",
+            "man": "Man",
             "female": "Kvinna",
-            "icke-binär": "Icke-binär",
+            "kvinna": "Kvinna",
+            "other": "Annat",
             "annat": "Annat"
         ]
         let gender = genderMap[profile.sex?.lowercased() ?? ""] ?? "Annat"
         
-        // Map motivation type to main goal
+        // Map motivation type to main goal (labels used for AI prompt context)
         let goalMap: [String: String] = [
             "fitness": "Generell fitness",
+            "lose_weight": "Viktminskning och hälsa",
+            "weight_loss": "Viktminskning och hälsa",
             "viktminskning": "Viktminskning och hälsa",
+            "rehabilitation": "Rehabilitering",
             "rehabilitering": "Rehabilitering",
+            "better_health": "Hälsa och livsstil",
+            "bättre_hälsa": "Hälsa och livsstil",
             "hälsa_livsstil": "Hälsa och livsstil",
+            "build_muscle": "Muskelökning och hypertrofi",
+            "bygga_muskler": "Muskelökning och hypertrofi",
             "hypertrofi": "Muskelökning och hypertrofi",
+            "mobility": "Rörlighet och flexibilitet",
+            "bli_rörligare": "Rörlighet och flexibilitet",
             "sport": "Sportprestation",
             "hälsa": "Generell fitness",
             "styrka": "Muskelökning",
@@ -156,12 +169,14 @@ class WorkoutGenerationService: ObservableObject {
         
         // Map training level
         let levelMap: [String: String] = [
+            "beginner": "Nybörjare",
             "nybörjare": "Nybörjare",
+            "intermediate": "Van",
             "van": "Van",
+            "advanced": "Mycket van",
             "mycket_van": "Mycket van",
-            "elit": "Elit",
-            "mellannivå": "Van",
-            "avancerad": "Mycket van"
+            "elite": "Elit",
+            "elit": "Elit"
         ]
         let trainingLevel = levelMap[profile.trainingLevel?.lowercased() ?? ""] ?? "Van"
         
@@ -180,6 +195,8 @@ class WorkoutGenerationService: ObservableObject {
             mainGoal: mainGoal,
             motivationType: motivationType,
             specificSport: profile.specificSport,
+            focusTags: profile.focusTags,
+            selectedIntent: profile.selectedIntent,
             distribution: WorkoutGenerationInput.GoalDistribution(
                 strengthPercent: profile.goalStrength,
                 hypertrophyPercent: profile.goalVolume,
@@ -285,7 +302,7 @@ class WorkoutGenerationService: ObservableObject {
                 }
                 
                 return WorkoutProgram.WeeklySession.MainExercise(
-                    exerciseName: v4Ex.exerciseID, // Will be resolved by backend
+                    exerciseName: v4Ex.exerciseName ?? v4Ex.exerciseID,
                     sets: v4Ex.sets,
                     reps: v4Ex.reps,
                     restSeconds: v4Ex.restSeconds ?? 90,
@@ -335,6 +352,8 @@ class WorkoutGenerationService: ObservableObject {
                 heightCm: input.heightCm,
                 trainingLevel: input.trainingLevel,
                 mainGoal: input.mainGoal,
+                focusTags: input.focusTags,
+                selectedIntent: input.selectedIntent,
                 distribution: WorkoutProgram.UserProfileData.GoalDistribution(
                     strengthPercent: input.distribution.strengthPercent,
                     hypertrophyPercent: input.distribution.hypertrophyPercent,
@@ -345,17 +364,17 @@ class WorkoutGenerationService: ObservableObject {
                 sessionLengthMinutes: input.sessionLengthMinutes,
                 availableEquipment: input.availableEquipment
             ),
-            programOverview: WorkoutProgram.ProgramOverview(
-                weekFocusSummary: v4Program.programName ?? "Personligt träningsprogram",
-                expectedDifficulty: "Medel",
-                notesOnProgression: "Öka vikten gradvis varje vecka"
-            ),
-            weeklySessions: sessions,
-            recoveryTips: [
-                "Sov 7-9 timmar per natt för optimal återhämtning",
-                "Ät protein inom 2 timmar efter träning",
-                "Vila minst en dag mellan intensiva pass"
-            ]
+                programOverview: WorkoutProgram.ProgramOverview(
+                    weekFocusSummary: v4Program.programName ?? String(localized: "Personal Training Program"),
+                    expectedDifficulty: String(localized: "Medium"),
+                    notesOnProgression: String(localized: "Increase weight gradually each week")
+                ),
+                weeklySessions: sessions,
+                recoveryTips: [
+                    String(localized: "Sleep 7-9 hours per night for optimal recovery"),
+                    String(localized: "Eat protein within 2 hours after training"),
+                    String(localized: "Rest at least one day between intense sessions")
+                ]
         )
     }
     
@@ -395,6 +414,8 @@ class WorkoutGenerationService: ObservableObject {
                 heightCm: input.heightCm,
                 trainingLevel: input.trainingLevel,
                 mainGoal: input.mainGoal,
+                focusTags: input.focusTags,
+                selectedIntent: input.selectedIntent,
                 distribution: WorkoutProgram.UserProfileData.GoalDistribution(
                     strengthPercent: input.distribution.strengthPercent,
                     hypertrophyPercent: input.distribution.hypertrophyPercent,
@@ -406,21 +427,29 @@ class WorkoutGenerationService: ObservableObject {
                 availableEquipment: input.availableEquipment
             ),
             programOverview: WorkoutProgram.ProgramOverview(
-                weekFocusSummary: "Balanserat helkroppsprogram med fokus på grundläggande rörelser",
-                expectedDifficulty: "Medel",
-                notesOnProgression: "Öka vikten gradvis varje vecka"
+                weekFocusSummary: String(localized: "Balanced full-body program with focus on basic movements"),
+                expectedDifficulty: String(localized: "Medium"),
+                notesOnProgression: String(localized: "Increase weight gradually each week")
             ),
             weeklySessions: sessions,
             recoveryTips: [
-                "Sov 7-9 timmar per natt för optimal återhämtning",
-                "Ät protein inom 2 timmar efter träning",
-                "Vila minst en dag mellan intensiva pass"
+                String(localized: "Sleep 7-9 hours per night for optimal recovery"),
+                String(localized: "Eat protein within 2 hours after training"),
+                String(localized: "Rest at least one day between intense sessions")
             ]
         )
     }
     
     private func getWeekday(for sessionNumber: Int, totalSessions: Int) -> String {
-        let weekdays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        let weekdays = [
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         let spacing = 7 / totalSessions
         let index = (sessionNumber - 1) * spacing
         return weekdays[min(index, weekdays.count - 1)]
@@ -583,7 +612,15 @@ class WorkoutGenerationService: ObservableObject {
     }
     
     private func getDayOfWeek(from weekday: String) -> Int {
-        let weekdays = ["Måndag": 1, "Tisdag": 2, "Onsdag": 3, "Torsdag": 4, "Fredag": 5, "Lördag": 6, "Söndag": 7]
+        let weekdays = [
+            String(localized: "Monday"): 1,
+            String(localized: "Tuesday"): 2,
+            String(localized: "Wednesday"): 3,
+            String(localized: "Thursday"): 4,
+            String(localized: "Friday"): 5,
+            String(localized: "Saturday"): 6,
+            String(localized: "Sunday"): 7
+        ]
         return weekdays[weekday] ?? 1
     }
     

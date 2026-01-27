@@ -312,9 +312,10 @@ struct ActiveWorkoutView: View {
             showingCompletion = true
         }
         
-        // 2. Mark session as completed
+        // 2. Mark session as completed and notify iPhone
         session.status = "completed"
         session.completedAt = Date()
+        WatchPersistenceManager.shared.sendWorkoutComplete(sessionId: session.id)
         
         // 3. Advance the workout cycle for the user
         if let profile = userProfiles.first {

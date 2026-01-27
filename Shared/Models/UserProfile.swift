@@ -26,11 +26,18 @@ final class UserProfile {
     var trainingGoals: String?
     var trainingLevel: String?
     var specificSport: String?
+    var focusTags: [String] = []
+    var selectedIntent: String?
     var language: String = "en"
     var goalStrength: Int
     var goalVolume: Int
     var goalEndurance: Int
     var goalCardio: Int
+    
+    var goalHypertrophy: Int {
+        get { goalVolume }
+        set { goalVolume = newValue }
+    }
     
     var sessionsPerWeek: Int
     var sessionDuration: Int
@@ -103,7 +110,9 @@ final class UserProfile {
         currentPassNumber: Int = 1,
         programGenerationsThisWeek: Int = 0,
         weekStartDate: Date? = nil,
-        selectedGymId: String? = nil
+        selectedGymId: String? = nil,
+        focusTags: [String] = [],
+        selectedIntent: String? = nil
     ) {
         self.id = id
         self.userId = userId
@@ -126,6 +135,8 @@ final class UserProfile {
         self.goalVolume = goalVolume
         self.goalEndurance = goalEndurance
         self.goalCardio = goalCardio
+        self.focusTags = focusTags
+        self.selectedIntent = selectedIntent
         self.sessionsPerWeek = sessionsPerWeek
         self.sessionDuration = sessionDuration
         self.restTime = restTime
@@ -161,7 +172,8 @@ final class UserProfile {
         
         // Add sport name if applicable
         if motivation.lowercased() == "sport", let sport = specificSport, !sport.isEmpty {
-            return "\(localizedMotivation): \(sport.capitalized)"
+            let localizedSport = LocalizationService.localizeSpecificSport(sport)
+            return "\(localizedMotivation): \(localizedSport)"
         }
         
         return localizedMotivation

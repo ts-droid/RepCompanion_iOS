@@ -191,7 +191,7 @@ struct EditGymView: View {
                     }
                     
                     if showNearbyGyms && !locationService.nearbyGyms.isEmpty {
-                        ForEach(locationService.nearbyGyms.prefix(5)) { nearby in
+                        ForEach(locationService.nearbyGyms.prefix(50)) { nearby in
                             Button(action: {
                                 self.name = nearby.name
                                 self.location = nearby.address ?? ""
@@ -201,8 +201,17 @@ struct EditGymView: View {
                             }) {
                                 HStack {
                                     VStack(alignment: .leading) {
-                                        Text(nearby.name)
-                                            .foregroundColor(Color.textPrimary(for: colorScheme))
+                                        HStack {
+                                            Text(nearby.name)
+                                                .foregroundColor(Color.textPrimary(for: colorScheme))
+                                            
+                                            if nearby.isRepCompanionGym {
+                                                Image(systemName: "checkmark.seal.fill")
+                                                    .foregroundColor(.blue)
+                                                    .font(.caption)
+                                            }
+                                        }
+                                        
                                         if let addr = nearby.address {
                                             Text(addr)
                                                 .font(.caption)

@@ -5,6 +5,7 @@ struct ActiveWorkoutView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
     
     @State private var currentExerciseIndex = 0
     @State private var currentSetIndex = 0
@@ -209,6 +210,12 @@ struct ActiveWorkoutView: View {
                 )
                 
                 prefillInputs()
+                
+                // Start session timer for this active period
+                if session.status == "active" {
+                    session.lastStartTime = Date()
+                    try? modelContext.save()
+                }
             }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("WatchSyncRequested"))) { _ in
             print("[ActiveWorkoutView] Received sync request via notification")
@@ -221,12 +228,57 @@ struct ActiveWorkoutView: View {
         .onDisappear {
             print("[DEBUG ActiveWorkoutView] onDisappear")
             timer?.invalidate()
+            
+            // Accumulate time if session is still active
+            if session.status == "active" {
+                let isWatchActive = WatchConnectivityManager.shared.isReachable
+                
+                if isWatchActive {
+                    print("[DEBUG ActiveWorkoutView] onDisappear but Watch is reachable. Keeping timer alive.")
+                } else {
+                    if let start = session.lastStartTime {
+                        let additional = Date().timeIntervalSince(start)
+                        session.accumulatedTime += additional
+                        print("[DEBUG ActiveWorkoutView] onDisappear: accumulating \(additional)s. Total: \(session.accumulatedTime)s")
+                    }
+                    session.lastStartTime = nil
+                    try? modelContext.save()
+                }
+            }
         }
         .onChange(of: isResting) { _, newValue in
             if newValue {
                 startTimer()
             } else {
                 timer?.invalidate()
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if session.status == "active" {
+                if newPhase == .active {
+                    // App resumed: Start a new active period
+                    session.lastStartTime = Date()
+                    print("[DEBUG ActiveWorkoutView] App active, resuming timer")
+                } else {
+                    // App going to background or inactive: Accumulate time so far
+                    
+                    // Check if they are using Apple Watch (reachable)
+                    // Or if they have it installed, we can be more lenient to avoid accidental pauses
+                    let isWatchActive = WatchConnectivityManager.shared.isReachable
+                    
+                    if isWatchActive {
+                        print("[DEBUG ActiveWorkoutView] App inactive but Watch is reachable. Keeping timer alive.")
+                        // Don't clear lastStartTime, so it keeps calculating in background
+                    } else {
+                        if let start = session.lastStartTime {
+                            let additional = Date().timeIntervalSince(start)
+                            session.accumulatedTime += additional
+                            print("[DEBUG ActiveWorkoutView] App inactive, accumulating \(additional)s. Total: \(session.accumulatedTime)s")
+                        }
+                        session.lastStartTime = nil
+                    }
+                }
+                try? modelContext.save()
             }
         }
         .onChange(of: currentExerciseIndex) { _, _ in
@@ -822,6 +874,12 @@ struct ActiveWorkoutView: View {
         // Update session status
         session.status = "completed"
         session.completedAt = Date()
+        
+        // Final duration update
+        if let start = session.lastStartTime {
+            session.accumulatedTime += Date().timeIntervalSince(start)
+        }
+        session.lastStartTime = nil
         
         try? modelContext.save()
         showingCompletion = true

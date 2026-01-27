@@ -25,6 +25,16 @@
     "%lld" : {
 
     },
+    "%lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@"
+          }
+        }
+      }
+    },
     "%lld bpm" : {
 
     },
@@ -65,10 +75,16 @@
         }
       }
     },
+    "%lld/3" : {
+
+    },
     "%lld%%" : {
 
     },
     "%lldk" : {
+
+    },
+    "%lldkm" : {
 
     },
     "%llds" : {
@@ -107,7 +123,27 @@
     "90 dagar" : {
 
     },
+    "Accessories" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillbehör"
+          }
+        }
+      }
+    },
     "Address (Optional)" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adress (Valfritt)"
+          }
+        }
+      }
+    },
+    "Adjust Training" : {
 
     },
     "Admin" : {
@@ -127,7 +163,6 @@
       }
     },
     "Age" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -138,7 +173,6 @@
       }
     },
     "Age exceeds 110 years. Please check your value." : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -149,7 +183,6 @@
       }
     },
     "Age is below 9 years. Please check your value." : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -192,7 +225,16 @@
     "All utrustning har granskats." : {
 
     },
+    "All-round" : {
+
+    },
     "Alla övningar har granskats." : {
+
+    },
+    "An unexpected error occurred: %@" : {
+
+    },
+    "An unknown error occurred." : {
 
     },
     "Analys" : {
@@ -220,9 +262,6 @@
     "Anpassa appens utseende med ditt favoritfärgschema" : {
 
     },
-    "Anpassade råd för din träning" : {
-
-    },
     "Anslut hälsodata" : {
 
     },
@@ -235,6 +274,17 @@
     "Apple Health" : {
 
     },
+    "April" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "April"
+          }
+        }
+      }
+    },
     "ÅTERHÄMTNINGSDETALJER" : {
 
     },
@@ -245,6 +295,30 @@
 
     },
     "Åtkomst nekad" : {
+
+    },
+    "Attachment" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillbehör"
+          }
+        }
+      }
+    },
+    "August" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Augusti"
+          }
+        }
+      }
+    },
+    "Auto" : {
 
     },
     "av %@" : {
@@ -293,6 +367,9 @@
         }
       }
     },
+    "Balanced full-body program with focus on basic movements" : {
+
+    },
     "Bänkpress" : {
 
     },
@@ -324,12 +401,21 @@
       }
     },
     "Bench Press" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bänkpress"
+          }
+        }
+      }
+    },
+    "Benches" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bänkar"
           }
         }
       }
@@ -349,6 +435,22 @@
           }
         }
       }
+    },
+    "Better Health" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bättre hälsa"
+          }
+        }
+      }
+    },
+    "Between exercises" : {
+
+    },
+    "Between sets" : {
+
     },
     "Bläddra övningar" : {
 
@@ -370,6 +472,16 @@
         }
       }
     },
+    "Bodyweight" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kroppsvikt"
+          }
+        }
+      }
+    },
     "Börja om på Pass 1" : {
 
     },
@@ -379,10 +491,30 @@
     "Börja träna" : {
 
     },
+    "born" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "född"
+          }
+        }
+      }
+    },
     "Bra jobbat!" : {
 
     },
     "Build muscle" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bygga muskler"
+          }
+        }
+      }
+    },
+    "Build Muscle" : {
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -446,8 +578,10 @@
         }
       }
     },
+    "Calorie intake matters for progression. If you strive for muscle building, a small calorie surplus is needed (200-300 kcal/day)." : {
+
+    },
     "Cardio" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -456,6 +590,9 @@
           }
         }
       }
+    },
+    "Check value" : {
+
     },
     "Choose Theme" : {
       "localizations" : {
@@ -486,6 +623,17 @@
     "CloudKit-synkning" : {
 
     },
+    "cm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cm"
+          }
+        }
+      }
+    },
     "Color Scheme" : {
       "localizations" : {
         "sv" : {
@@ -498,6 +646,16 @@
     },
     "Companion" : {
 
+    },
+    "Conditioning/Metcon" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kondition/Metcon"
+          }
+        }
+      }
     },
     "Connect health data" : {
       "localizations" : {
@@ -519,6 +677,9 @@
         }
       }
     },
+    "Continue without program" : {
+
+    },
     "Customize app appearance" : {
       "localizations" : {
         "sv" : {
@@ -533,10 +694,16 @@
 
     },
     "Daily Step Goal" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dagligt stegmål"
+          }
+        }
+      }
     },
     "Dark" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -550,13 +717,29 @@
 
     },
     "Date of Birth" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Födelsedatum"
+          }
+        }
+      }
     },
     "Datum" : {
 
     },
+    "Day" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dag"
+          }
+        }
+      }
+    },
     "Deadlift" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -566,10 +749,18 @@
         }
       }
     },
-    "Deltar" : {
-
+    "December" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "December"
+          }
+        }
+      }
     },
-    "Detta kan ta en stund. Analyserar dina nya mål och utrustning." : {
+    "Deltar" : {
 
     },
     "Detta kommer att återställa onboarding och du kommer att behöva gå igenom onboarding igen." : {
@@ -612,10 +803,26 @@
     "Ditt program har lägst fokus på **%@**. Överväg att lägga till en övning för denna muskelgrupp för en mer balanserad fysik." : {
 
     },
+    "Done" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klar"
+          }
+        }
+      }
+    },
     "Du ansvarar själv för att:" : {
 
     },
     "Du har genomfört hela ditt träningspass!" : {
+
+    },
+    "e.g. Rowing, Boxing..." : {
+
+    },
+    "Eat protein within 2 hours after training" : {
 
     },
     "Ej synkad" : {
@@ -634,14 +841,10 @@
         }
       }
     },
-    "Eller välj manuellt nedan" : {
-
-    },
     "Endast utvecklare har tillgång till denna vy." : {
 
     },
     "Endurance" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -669,13 +872,88 @@
       }
     },
     "Enter address" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ange adress"
+          }
+        }
+      }
     },
     "Enter gym name" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ange gymnamn"
+          }
+        }
+      }
+    },
+    "Enter your sport" : {
 
+    },
+    "Entered age (%lld years) is higher than normal. Please check your value." : {
+
+    },
+    "Entered age (%lld years) is lower than normal. Please check your value." : {
+
+    },
+    "Entered height (%lld cm) is higher than normal. Please check your value." : {
+
+    },
+    "Entered height (%lld cm) is lower than normal. Please check your value." : {
+
+    },
+    "Entered weight (%lld kg) is higher than normal. Please check your value." : {
+
+    },
+    "Entered weight (%lld kg) is lower than normal. Please check your value." : {
+
+    },
+    "Equipment verified" : {
+
+    },
+    "Error" : {
+
+    },
+    "Explosiveness" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explosivitet"
+          }
+        }
+      }
+    },
+    "Export Exercises" : {
+
+    },
+    "Extra Focus" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra fokus"
+          }
+        }
+      }
     },
     "Färgschema" : {
 
+    },
+    "February" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Februari"
+          }
+        }
+      }
     },
     "Fel" : {
 
@@ -690,6 +968,15 @@
         }
       }
     },
+    "Finalizing program..." : {
+
+    },
+    "Finalizing..." : {
+
+    },
+    "Finding gyms..." : {
+
+    },
     "Finish" : {
       "localizations" : {
         "sv" : {
@@ -699,6 +986,12 @@
           }
         }
       }
+    },
+    "Fitness" : {
+
+    },
+    "Focus" : {
+
     },
     "Förbättra ork, kondition och vardagsenergi." : {
       "extractionState" : "manual",
@@ -716,9 +1009,6 @@
           }
         }
       }
-    },
-    "Fördela 100% mellan dina träningsmål" : {
-
     },
     "Fördelning av set baserat på dina programmallar." : {
 
@@ -763,7 +1053,20 @@
     "Fortsätt med Google" : {
 
     },
-    "Fortsätt utan program" : {
+    "found" : {
+
+    },
+    "Free Weights" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frivikter"
+          }
+        }
+      }
+    },
+    "Friday" : {
 
     },
     "Gå ner i vikt" : {
@@ -827,7 +1130,22 @@
         }
       }
     },
+    "Generate new program" : {
+
+    },
+    "Generating workout program..." : {
+
+    },
+    "Generating your new program..." : {
+
+    },
+    "Generating your program..." : {
+
+    },
     "Generating your workout program..." : {
+
+    },
+    "Generation failed" : {
 
     },
     "Generera ett träningsprogram för att komma igång" : {
@@ -849,9 +1167,6 @@
           }
         }
       }
-    },
-    "Genererar ditt nya program..." : {
-
     },
     "Genom att fortsätta går du med på" : {
 
@@ -875,16 +1190,27 @@
 
     },
     "Gym Details" : {
-
-    },
-    "Gym i närheten" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gymdetaljer"
+          }
+        }
+      }
     },
     "Gym Information" : {
 
     },
     "Gym Name" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gymnamn"
+          }
+        }
+      }
     },
     "Gym Namn (t.ex. Mitt Gym)" : {
 
@@ -901,13 +1227,13 @@
     "Hälsotrender" : {
 
     },
-    "Hämtar utrustning..." : {
-
-    },
     "Hantera träningspass" : {
 
     },
     "Här är en sammanfattning av det du hann med." : {
+
+    },
+    "Health & Lifestyle" : {
 
     },
     "Health data imported" : {
@@ -937,7 +1263,14 @@
 
     },
     "Height" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Längd"
+          }
+        }
+      }
     },
     "Height (cm)" : {
       "extractionState" : "stale",
@@ -951,7 +1284,6 @@
       }
     },
     "Height exceeds 253 cm. Please check your value." : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -960,6 +1292,9 @@
           }
         }
       }
+    },
+    "Height is below 90 cm. Please check your value." : {
+
     },
     "Hem" : {
 
@@ -1012,6 +1347,16 @@
     "Hur kändes passet? Något att komma ihåg till nästa gång?" : {
 
     },
+    "Hypertrophy" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hypertrofi"
+          }
+        }
+      }
+    },
     "Identifierad utrustning:" : {
 
     },
@@ -1032,6 +1377,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hämta hälsodata"
+          }
+        }
+      }
+    },
+    "Improve Mobility" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bli rörligare"
           }
         }
       }
@@ -1062,6 +1417,9 @@
         }
       }
     },
+    "Increase weight gradually each week" : {
+
+    },
     "Information" : {
 
     },
@@ -1090,9 +1448,6 @@
 
     },
     "Ingen träningshistorik än" : {
-
-    },
-    "Ingen utrustning hittades." : {
 
     },
     "Ingen utrustning vald. Detta gym kommer endast att stödja kroppsviktsövningar." : {
@@ -1132,8 +1487,38 @@
     "Jag godkänner våra Villkor & Sekretesspolicy för att ta emot skräddarsydda erbjudanden från våra samarbetspartners samt träningsrelaterad marknadsföring." : {
 
     },
-    "Justera Träning" : {
-
+    "January" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Januari"
+          }
+        }
+      }
+    },
+    "July" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juli"
+          }
+        }
+      }
+    },
+    "June" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juni"
+          }
+        }
+      }
     },
     "Känner igen utrustning..." : {
 
@@ -1148,9 +1533,6 @@
 
     },
     "Kolla din e-post!" : {
-
-    },
-    "Kontrollera värde" : {
 
     },
     "Kräver Apple Watch för aktivitet" : {
@@ -1187,7 +1569,6 @@
 
     },
     "Lat Pulldown" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1197,8 +1578,10 @@
         }
       }
     },
+    "Level" : {
+
+    },
     "Light" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1218,6 +1601,19 @@
           }
         }
       }
+    },
+    "Loading equipment..." : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hämtar utrustning..."
+          }
+        }
+      }
+    },
+    "Log Out" : {
+
     },
     "Logga" : {
 
@@ -1257,6 +1653,16 @@
         }
       }
     },
+    "Machines" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maskiner"
+          }
+        }
+      }
+    },
     "Mål" : {
 
     },
@@ -1270,6 +1676,17 @@
         }
       }
     },
+    "March" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mars"
+          }
+        }
+      }
+    },
     "Max vikt" : {
 
     },
@@ -1279,10 +1696,21 @@
     "Maximera din träning!" : {
 
     },
-    "Mellan övningar" : {
+    "May" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maj"
+          }
+        }
+      }
+    },
+    "Medium" : {
 
     },
-    "Mellan set" : {
+    "Min/session" : {
 
     },
     "Mina Gym" : {
@@ -1298,6 +1726,19 @@
         }
       }
     },
+    "Monday" : {
+
+    },
+    "Month" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Månad"
+          }
+        }
+      }
+    },
     "Muskelbalans" : {
 
     },
@@ -1307,10 +1748,16 @@
     "Muskler: %@" : {
 
     },
+    "My Gym" : {
+
+    },
     "Name" : {
 
     },
     "Nästa" : {
+
+    },
+    "Nearby gyms" : {
 
     },
     "Nej, bara detta set" : {
@@ -1328,6 +1775,22 @@
           }
         }
       }
+    },
+    "Next" : {
+
+    },
+    "No equipment found." : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen utrustning hittades."
+          }
+        }
+      }
+    },
+    "No gyms found nearby. Try increasing search distance." : {
+
     },
     "No health data found. You can manually fill in the values in the next step" : {
       "localizations" : {
@@ -1362,6 +1825,20 @@
     "Notifikationsfel" : {
 
     },
+    "November" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "November"
+          }
+        }
+      }
+    },
+    "Nutrition" : {
+
+    },
     "Nuvarande" : {
 
     },
@@ -1375,6 +1852,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fetma"
+          }
+        }
+      }
+    },
+    "October" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oktober"
           }
         }
       }
@@ -1429,6 +1917,19 @@
         }
       }
     },
+    "Or choose manually below" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eller välj manuellt nedan"
+          }
+        }
+      }
+    },
+    "Or enter manually" : {
+
+    },
     "Or select manually" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1440,8 +1941,10 @@
         }
       }
     },
+    "Other" : {
+
+    },
     "Overhead Press" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1528,10 +2031,19 @@
         }
       }
     },
+    "Personal tips" : {
+
+    },
+    "Personal Training Program" : {
+
+    },
+    "Personalized advice for your training" : {
+
+    },
     "Personbästa" : {
 
     },
-    "Personliga tips" : {
+    "Preparing data..." : {
 
     },
     "Preparing your workout program..." : {
@@ -1560,6 +2072,9 @@
     "Privata gym sparas endast för dig." : {
 
     },
+    "Processing..." : {
+
+    },
     "Professional or competitive athlete" : {
       "localizations" : {
         "sv" : {
@@ -1576,10 +2091,22 @@
     "Program" : {
 
     },
-    "Programgenerering lyckades inte just nu.\n\nVill du försöka igen eller fortsätta utan program?" : {
+    "Program generated!" : {
 
     },
-    "Programgenerering lyckades inte just nu. %@\n\nVill du försöka igen eller fortsätta utan program?" : {
+    "Program generation did not succeed at this time.\n\nDo you want to try again or continue without a program?" : {
+
+    },
+    "Program generation did not succeed at this time. %@\n\nDo you want to try again or continue without a program?" : {
+
+    },
+    "Program generation failed" : {
+
+    },
+    "Program generation failed." : {
+
+    },
+    "Program generation took too long. Please try again." : {
 
     },
     "Programgenerering misslyckades" : {
@@ -1603,13 +2130,33 @@
 
     },
     "Public Gym" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publikt gym"
+          }
+        }
+      }
     },
     "Publikt gym" : {
 
     },
     "Push-notifikationer" : {
 
+    },
+    "Queuing program generation..." : {
+
+    },
+    "Racks/Rigs" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rack/Rigg"
+          }
+        }
+      }
     },
     "Radera allt och börja om?" : {
 
@@ -1629,6 +2176,16 @@
     },
     "Redigera pass" : {
 
+    },
+    "Rehab/Recovery" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rehab/Återhämtning"
+          }
+        }
+      }
     },
     "Rehabilitation" : {
       "localizations" : {
@@ -1684,8 +2241,30 @@
     "Reps (t.ex. 8-12)" : {
 
     },
+    "Reset" : {
+
+    },
+    "Rest" : {
+
+    },
+    "Rest at least one day between intense sessions" : {
+
+    },
     "Sammanfattning" : {
 
+    },
+    "Saturday" : {
+
+    },
+    "Scan equipment" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skanna utrustning"
+          }
+        }
+      }
     },
     "Scan Equipment" : {
       "extractionState" : "stale",
@@ -1701,6 +2280,19 @@
     "Se dina hälsomätvärden över tid" : {
 
     },
+    "Search Distance" : {
+
+    },
+    "Search for nearby gyms" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök efter gym i närheten"
+          }
+        }
+      }
+    },
     "Sekretess & Dataskydd" : {
 
     },
@@ -1713,14 +2305,42 @@
     "sekunder kvar" : {
 
     },
+    "Select Equipment" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj utrustning"
+          }
+        }
+      }
+    },
     "Senast synkad: %@" : {
 
+    },
+    "September" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "September"
+          }
+        }
+      }
     },
     "Service Tests" : {
 
     },
     "Session duration: %lld minutes" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passlängd: %lld minuter"
+          }
+        }
+      }
     },
     "sessioner" : {
 
@@ -1729,6 +2349,16 @@
 
     },
     "Sessions per week: %lld" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pass per vecka: %lld"
+          }
+        }
+      }
+    },
+    "Sessions/week" : {
 
     },
     "Set" : {
@@ -1754,9 +2384,19 @@
 
     },
     "Set your daily step goal to track your activity" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ställ in ditt dagliga stegmål för att spåra din aktivitet"
+          }
+        }
+      }
     },
     "Set: %lld" : {
+
+    },
+    "Sex" : {
 
     },
     "Skanna utrustning" : {
@@ -1766,6 +2406,9 @@
 
     },
     "Skicka Magic Link" : {
+
+    },
+    "Sleep 7-9 hours per night for optimal recovery" : {
 
     },
     "Slutför" : {
@@ -1821,6 +2464,16 @@
     "Spara ändringar" : {
 
     },
+    "Specific Sport" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Specifik idrott"
+          }
+        }
+      }
+    },
     "Sports performance" : {
       "localizations" : {
         "sv" : {
@@ -1832,7 +2485,6 @@
       }
     },
     "Squat" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1841,6 +2493,9 @@
           }
         }
       }
+    },
+    "Standard location" : {
+
     },
     "Stäng" : {
 
@@ -1858,10 +2513,16 @@
 
     },
     "steps" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "steg"
+          }
+        }
+      }
     },
     "Strength" : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -1872,6 +2533,9 @@
       }
     },
     "Styrkeutveckling" : {
+
+    },
+    "Sunday" : {
 
     },
     "Svenska" : {
@@ -1921,6 +2585,9 @@
     "Synkning slutförd" : {
 
     },
+    "System" : {
+
+    },
     "Ta bort" : {
 
     },
@@ -1930,6 +2597,26 @@
     "Ta om" : {
 
     },
+    "Tags that refine your programming (max 3)" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taggar som finjusterar din träning (max 3)"
+          }
+        }
+      }
+    },
+    "Technique" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teknik"
+          }
+        }
+      }
+    },
     "Test CloudKit" : {
 
     },
@@ -1937,6 +2624,9 @@
 
     },
     "Test Results" : {
+
+    },
+    "The program is ready but could not be loaded. Please try opening the app again." : {
 
     },
     "The values above are suggestions based on your profile. You can change them if you know your exact 1RM values." : {
@@ -1968,6 +2658,12 @@
           }
         }
       }
+    },
+    "This may take a moment. Analyzing your new goals and equipment." : {
+
+    },
+    "Thursday" : {
+
     },
     "Tillbaka" : {
       "extractionState" : "manual",
@@ -2001,10 +2697,18 @@
     "Total volym: %@" : {
 
     },
-    "Total: %lld%%%%" : {
-
+    "Total: %d%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalt: %d%%"
+          }
+        }
+      }
     },
-    "Totalt: %lld%%" : {
+    "Total: %lld%%" : {
 
     },
     "Train to perform better in your sport." : {
@@ -2101,6 +2805,12 @@
     "Trend" : {
 
     },
+    "Try again" : {
+
+    },
+    "Tuesday" : {
+
+    },
     "Typ" : {
 
     },
@@ -2150,6 +2860,9 @@
         }
       }
     },
+    "Validating program..." : {
+
+    },
     "Välj ett gym för att komma igång" : {
 
     },
@@ -2197,9 +2910,6 @@
     "Veckosammanfattning" : {
 
     },
-    "Vi behöver lite information om dig för att anpassa din träning" : {
-
-    },
     "Vi har skickat en inloggningslänk till **%@**. Klicka på länken i mejlet för att logga in." : {
 
     },
@@ -2216,9 +2926,6 @@
 
     },
     "Viktprogression" : {
-
-    },
-    "Vila" : {
 
     },
     "Vila innan nästa set" : {
@@ -2283,11 +2990,24 @@
         }
       }
     },
+    "We need some information about you to adapt your training" : {
+
+    },
+    "Wednesday" : {
+
+    },
     "Week" : {
 
     },
     "Weight" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vikt"
+          }
+        }
+      }
     },
     "Weight (kg)" : {
       "extractionState" : "stale",
@@ -2301,7 +3021,6 @@
       }
     },
     "Weight exceeds 330 kg. Please check your value." : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -2312,12 +3031,21 @@
       }
     },
     "Weight is below 18 kg. Please check your value." : {
-      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vikt understiger 18 kg. Vänligen kontrollera ditt angivna värde."
+          }
+        }
+      }
+    },
+    "Weight Loss" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viktminskning"
           }
         }
       }
@@ -2343,7 +3071,14 @@
       }
     },
     "Where will you be training?" : {
-
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Var kommer du att träna?"
+          }
+        }
+      }
     },
     "Which sport are you training for?" : {
       "localizations" : {
@@ -2351,6 +3086,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vilken sport tränar du för?"
+          }
+        }
+      }
+    },
+    "Year" : {
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "År"
           }
         }
       }

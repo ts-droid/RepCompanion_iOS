@@ -128,6 +128,7 @@ struct V4Exercise: Decodable, Identifiable, Hashable {
     var id: String { "\(exerciseID)-\(sets)-\(reps)-\(blockHint ?? "")" }
 
     let exerciseID: String
+    let exerciseName: String?
     let sets: Int
     let reps: String
     let restSeconds: Int?
@@ -139,6 +140,7 @@ struct V4Exercise: Decodable, Identifiable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case exerciseID = "exercise_id"
+        case exerciseName = "exercise_name"
         case sets
         case reps
         case restSeconds = "rest_seconds"
@@ -153,6 +155,7 @@ struct V4Exercise: Decodable, Identifiable, Hashable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
 
         self.exerciseID = (try? c.decode(String.self, forKey: .exerciseID)) ?? "unknown_exercise"
+        self.exerciseName = try? c.decode(String.self, forKey: .exerciseName)
         self.sets = (try? c.decode(Int.self, forKey: .sets)) ?? 0
         self.reps = (try? c.decode(String.self, forKey: .reps)) ?? ""
         self.restSeconds = try? c.decode(Int.self, forKey: .restSeconds)

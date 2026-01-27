@@ -28,7 +28,7 @@ struct EquipmentSelectionView: View {
                 Button(action: { showCamera = true }) {
                     HStack {
                         Image(systemName: "camera.fill")
-                        Text("Skanna utrustning")
+                        Text(String(localized: "Scan equipment"))
                     }
                     .font(.headline)
                     .foregroundColor(.white)
@@ -41,7 +41,7 @@ struct EquipmentSelectionView: View {
                 .padding(.horizontal)
                 .padding(.top, 16)
                 
-                Text("Eller välj manuellt nedan")
+                Text(String(localized: "Or choose manually below"))
                     .font(.caption)
                     .foregroundColor(Color.textSecondary(for: colorScheme))
             }
@@ -50,7 +50,7 @@ struct EquipmentSelectionView: View {
             
             if isLoading {
                 Spacer()
-                ProgressView("Hämtar utrustning...")
+                ProgressView(String(localized: "Loading equipment..."))
                     .padding()
                 Spacer()
             } else if availableEquipment.isEmpty {
@@ -58,8 +58,8 @@ struct EquipmentSelectionView: View {
                 VStack(spacing: 12) {
                     Image(systemName: "wifi.exclamationmark")
                         .font(.largeTitle)
-                    Text("Ingen utrustning hittades.")
-                    Button("Försök igen") { loadEquipment() }
+                    Text(String(localized: "No equipment found."))
+                    Button(String(localized: "Try again")) { loadEquipment() }
                         .buttonStyle(.bordered)
                 }
                 .foregroundColor(Color.textSecondary(for: colorScheme))
@@ -141,7 +141,7 @@ struct EquipmentSelectionView: View {
         .overlay(alignment: .bottom) {
             if onFinish != nil {
                 Button(action: { onFinish?() }) {
-                    Text("Fortsätt")
+                    Text(String(localized: "Continue"))
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
@@ -160,12 +160,12 @@ struct EquipmentSelectionView: View {
                 )
             }
         }
-        .navigationTitle("Välj utrustning")
+        .navigationTitle(String(localized: "Select Equipment"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if onFinish == nil {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Klar") {
+                    Button(String(localized: "Done")) {
                         dismiss()
                     }
                 }
@@ -216,11 +216,15 @@ struct EquipmentSelectionView: View {
     
     private func localizeCategory(_ key: String) -> String {
         switch key.lowercased() {
-        case "free_weights", "freeweights": return "Frivikter"
-        case "machine", "machines": return "Maskiner"
-        case "cardio": return "Cardio"
-        case "accessory", "accessories": return "Tillbehör"
-        case "bodyweight": return "Kroppsvikt"
+        case "free_weights", "freeweights": return String(localized: "Free Weights")
+        case "machine", "machines": return String(localized: "Machines")
+        case "cardio": return String(localized: "Cardio")
+        case "strength": return String(localized: "Strength")
+        case "accessory", "accessories": return String(localized: "Accessories")
+        case "bodyweight": return String(localized: "Bodyweight")
+        case "attachment", "attachments": return String(localized: "Attachment")
+        case "bench", "benches": return String(localized: "Benches")
+        case "rack_rig", "racks_rigs", "racks/rigs": return String(localized: "Racks/Rigs")
         default: return key.capitalized
         }
     }
