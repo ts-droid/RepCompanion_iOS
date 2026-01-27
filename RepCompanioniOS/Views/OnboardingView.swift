@@ -149,9 +149,9 @@ struct OnboardingView: View {
         case 8:
             return sessionsPerWeek > 0 && sessionDuration > 0
         case 9:
-            return !selectedEquipment.isEmpty
-        case 10:
             return !gymName.isEmpty || selectedNearbyGymId != nil
+        case 10:
+            return !selectedEquipment.isEmpty
         case 11:
             return true // Step Goal
         case 12:
@@ -1579,7 +1579,7 @@ struct OnboardingView: View {
                                             )
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(selectedNearbyGymId == nearby.apiGymId ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : Color.clear, lineWidth: 2)
+                                                    .stroke(selectedNearbyGymId != nil && nearby.apiGymId != nil && selectedNearbyGymId == nearby.apiGymId ? Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme) : Color.clear, lineWidth: 2)
                                             )
                                         }
                                     }
@@ -1713,7 +1713,11 @@ struct OnboardingView: View {
                     self.selectedNearbyGym = nil
                 }
                 pendingUnverifiedGym = nil
-                // User will continue to equipment selection on next step
+                // Navigate to equipment selection step
+                withAnimation {
+                    currentStep += 1
+                    updateStepIcon()
+                }
             }
         } message: {
             Text("Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig.")

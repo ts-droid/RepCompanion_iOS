@@ -141,16 +141,43 @@ class LocationService: NSObject, ObservableObject {
             guard let self = self else { return }
             self.isSearching = false
             
-            // Combine: RepCompanion gyms first, then Apple gyms (Deduplication via distance/name could be added here)
-            // For now, simple concatenation
+            // Filter Apple gyms by strict circular radius
+            let radiusMeters = radiusKm * 1000.0
+            let filteredAppleGyms = appleGyms.filter { $0.distance <= radiusMeters }
             
-            // Sort Apple gyms by distance
-            let sortedAppleGyms = appleGyms.sorted(by: { $0.distance < $1.distance })
+            // Merge results: RepCompanion gyms always take precedence
+            var mergedGyms = apiGyms
             
-            // Filter out Apple gyms that might be duplicates of API gyms (very rough check by name distance)
-            // This is complex, so we'll just stack them for now, API first.
+            // For each Apple gym, check if it's already represented in apiGyms
+            for appleGym in filteredAppleGyms {
+                let isDuplicate = apiGyms.contains { apiGym in
+                    // Proximity check: If coordinates are within 150m
+                    let apiLoc = CLLocation(latitude: apiGym.latitude, longitude: apiGym.longitude)
+                    let appleLoc = CLLocation(latitude: appleGym.latitude, longitude: appleGym.longitude)
+                    let distBetween = apiLoc.distance(from: appleLoc)
+                    
+                    if distBetween < 150 { return true }
+                    
+                    // Name match check: If names are very similar and distance is reasonably close
+                    if distBetween < 500 {
+                        let apiName = apiGym.name.lowercased()
+                        let appleName = appleGym.name.lowercased()
+                        if apiName.contains(appleName) || appleName.contains(apiName) {
+                            return true
+                        }
+                    }
+                    
+                    return false
+                }
+                
+                if !isDuplicate {
+                    mergedGyms.append(appleGym)
+                }
+            }
             
-            self.nearbyGyms = apiGyms + sortedAppleGyms
+            // Final sort by distance
+            self.nearbyGyms = mergedGyms.sorted(by: { $0.distance < $1.distance })
+            print("[LocationService] 🏁 Final merged list has \(self.nearbyGyms.count) gyms")
         }
     }
 }
