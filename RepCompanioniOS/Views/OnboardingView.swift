@@ -69,6 +69,8 @@ struct OnboardingView: View {
     @State private var selectedNearbyGymId: String? = nil
     @State private var searchRadius: Double = 50.0
     @State private var selectedNearbyGym: NearbyGym? = nil
+    @State private var showUnverifiedGymAlert = false
+    @State private var pendingUnverifiedGym: NearbyGym? = nil
     
     @State private var selectedTheme = "Main" // Default theme
     @State private var selectedColorScheme: String = "auto"
@@ -1502,13 +1504,20 @@ struct OnboardingView: View {
                                 VStack(spacing: 10) {
                                     ForEach(locationService.nearbyGyms) { nearby in
                                         Button(action: {
-                                            self.gymName = nearby.name
-                                            self.gymAddress = nearby.address ?? ""
-                                            self.selectedNearbyGymId = nearby.apiGymId // KEY: Sets the skip logic
-                                            self.selectedNearbyGym = nearby
-                                            self.gymIsPublic = nearby.isRepCompanionGym
-                                            withAnimation {
-                                                self.showNearbyGyms = false
+                                            if nearby.isRepCompanionGym {
+                                                // Verified gym - select directly
+                                                self.gymName = nearby.name
+                                                self.gymAddress = nearby.address ?? ""
+                                                self.selectedNearbyGymId = nearby.apiGymId
+                                                self.selectedNearbyGym = nearby
+                                                self.gymIsPublic = true // Verified gyms are public
+                                                withAnimation {
+                                                    self.showNearbyGyms = false
+                                                }
+                                            } else {
+                                                // Unverified gym - show alert
+                                                self.pendingUnverifiedGym = nearby
+                                                self.showUnverifiedGymAlert = true
                                             }
                                         }) {
                                             HStack(spacing: 12) {
@@ -1694,6 +1703,25 @@ struct OnboardingView: View {
                     )
                 }
             }
+        }
+        .alert("Gym ej verifierat", isPresented: $showUnverifiedGymAlert) {
+            Button("Välj annat gym", role: .cancel) {
+                pendingUnverifiedGym = nil
+            }
+            Button("Registrera utrustning") {
+                // Pre-fill gym data and proceed to equipment selection
+                if let gym = pendingUnverifiedGym {
+                    self.gymName = gym.name
+                    self.gymAddress = gym.address ?? ""
+                    self.gymIsPublic = false // Manual gyms default to private
+                    self.selectedNearbyGymId = nil // Not a verified gym
+                    self.selectedNearbyGym = nil
+                }
+                pendingUnverifiedGym = nil
+                // User will continue to equipment selection on next step
+            }
+        } message: {
+            Text("Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig.")
         }
         .onAppear {
              locationService.requestPermission()

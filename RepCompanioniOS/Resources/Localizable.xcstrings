@@ -1789,6 +1789,9 @@
         }
       }
     },
+    "Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig." : {
+
+    },
     "No gyms found nearby. Try increasing search distance." : {
       "localizations" : {
         "sv" : {
@@ -2292,6 +2295,12 @@
       }
     },
     "Se dina hälsomätvärden över tid" : {
+
+    },
+    "Gym ej verifierat" : {
+
+    },
+    "Registrera utrustning" : {
 
     },
     "Search Distance" : {
