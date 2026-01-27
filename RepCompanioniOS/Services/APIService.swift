@@ -2230,6 +2230,7 @@ struct NearbyGymResponse: Codable {
     let latitude: String?
     let longitude: String?
     let isPublic: Bool?
+    let isVerified: Bool?
     let distance: Double
     let createdAt: Date
 }

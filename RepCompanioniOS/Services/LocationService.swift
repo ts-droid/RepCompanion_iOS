@@ -95,7 +95,7 @@ class LocationService: NSObject, ObservableObject {
                         longitude: lng,
                         distance: gym.distance * 1000, // API returns km, we want meters for consistency
                         apiGymId: gym.id,
-                        isRepCompanionGym: true
+                        isRepCompanionGym: gym.isVerified ?? false
                     )
                 }
                 print("[LocationService] ✅ API found \(apiGyms.count) gyms")
