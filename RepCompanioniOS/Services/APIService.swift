@@ -325,6 +325,7 @@ class APIService {
     struct OnboardingCompleteRequest: Codable {
         let profile: ProfileData
         let equipment: [String]
+        let selectedGymId: String?
         
         struct ProfileData: Codable {
             let motivationType: String
@@ -408,7 +409,7 @@ class APIService {
         let oneRmLatpull: Int
     }
     
-    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], useV4: Bool = true) async throws -> OnboardingCompleteResponse {
+    func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], selectedGymId: String? = nil, useV4: Bool = true) async throws -> OnboardingCompleteResponse {
         print("[APIService] 🚀 Using V4 AI architecture: \(useV4)")
         
         var urlComponents = URLComponents(string: "\(baseURL)/api/onboarding/complete")!
@@ -442,7 +443,7 @@ class APIService {
             print("[APIService] ⚠️  No auth token found - request may fail")
         }
         
-        let body = OnboardingCompleteRequest(profile: profile, equipment: equipment)
+        let body = OnboardingCompleteRequest(profile: profile, equipment: equipment, selectedGymId: selectedGymId)
         request.httpBody = try JSONEncoder().encode(body)
         
         print("[APIService] ⏱️ Starting onboarding completion (timeout: 5 minutes for AI generation)...")

@@ -2049,7 +2049,14 @@ struct OnboardingView: View {
             
             do {
                 // Upsert gym: create if new, update if returning
-                if let gymId = lastCreatedGymId {
+                // Check if user selected a verified gym from the list
+                if let verifiedGymId = selectedNearbyGymId {
+                    print("[Onboarding] 🏋️ Using verified gym with ID: \(verifiedGymId)")
+                    await MainActor.run {
+                        lastCreatedGymId = verifiedGymId
+                    }
+                    print("[Onboarding] ✅ Verified gym associated")
+                } else if let gymId = lastCreatedGymId {
                     print("[Onboarding] 🏋️ Updating existing gym '\(gymName)' (id: \(gymId))")
                     
                     // Fetch the gym object to update
@@ -2122,6 +2129,7 @@ struct OnboardingView: View {
                 let response = try await APIService.shared.completeOnboarding(
                     profile: profileData,
                     equipment: selectedEquipment,
+                    selectedGymId: selectedNearbyGymId,
                     useV4: true
                 )
                 
@@ -2816,6 +2824,7 @@ struct OnboardingView: View {
                     let response = try await APIService.shared.completeOnboarding(
                         profile: profileData,
                         equipment: selectedEquipment,
+                        selectedGymId: selectedNearbyGymId,
                         useV4: true
                     )
                     
