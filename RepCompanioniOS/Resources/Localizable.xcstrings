@@ -763,6 +763,9 @@
     "Deltar" : {
 
     },
+    "Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig." : {
+
+    },
     "Detta kommer att återställa onboarding och du kommer att behöva gå igenom onboarding igen." : {
 
     },
@@ -1198,6 +1201,9 @@
           }
         }
       }
+    },
+    "Gym ej verifierat" : {
+
     },
     "Gym Information" : {
 
@@ -1789,9 +1795,6 @@
         }
       }
     },
-    "Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig." : {
-
-    },
     "No gyms found nearby. Try increasing search distance." : {
       "localizations" : {
         "sv" : {
@@ -2194,6 +2197,9 @@
     "Redigera pass" : {
 
     },
+    "Registrera utrustning" : {
+
+    },
     "Rehab/Recovery" : {
       "localizations" : {
         "sv" : {
@@ -2295,12 +2301,6 @@
       }
     },
     "Se dina hälsomätvärden över tid" : {
-
-    },
-    "Gym ej verifierat" : {
-
-    },
-    "Registrera utrustning" : {
 
     },
     "Search Distance" : {
@@ -2891,6 +2891,9 @@
       }
     },
     "Validating program..." : {
+
+    },
+    "Välj annat gym" : {
 
     },
     "Välj ett gym för att komma igång" : {

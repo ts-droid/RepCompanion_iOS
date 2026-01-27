@@ -2626,9 +2626,9 @@ struct OnboardingView: View {
                     let biologicalSex = try healthKitService.getBiologicalSex()
                     await MainActor.run {
                         if biologicalSex == .male {
-                            sex = "man"
+                            sex = "male"  // Match button value
                         } else if biologicalSex == .female {
-                            sex = "kvinna"
+                            sex = "female"  // Match button value
                         }
                     }
                 } catch {
