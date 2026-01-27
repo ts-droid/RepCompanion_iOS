@@ -151,7 +151,7 @@ struct OnboardingView: View {
         case 9:
             return !selectedEquipment.isEmpty
         case 10:
-            return !gymName.isEmpty
+            return !gymName.isEmpty || selectedNearbyGymId != nil
         case 11:
             return true // Step Goal
         case 12:
@@ -1505,15 +1505,10 @@ struct OnboardingView: View {
                                     ForEach(locationService.nearbyGyms) { nearby in
                                         Button(action: {
                                             if nearby.isRepCompanionGym {
-                                                // Verified gym - select directly
-                                                self.gymName = nearby.name
-                                                self.gymAddress = nearby.address ?? ""
+                                                // Verified gym - just mark it as selected
                                                 self.selectedNearbyGymId = nearby.apiGymId
                                                 self.selectedNearbyGym = nearby
-                                                self.gymIsPublic = true // Verified gyms are public
-                                                withAnimation {
-                                                    self.showNearbyGyms = false
-                                                }
+                                                // Keep list open, don't fill manual fields
                                             } else {
                                                 // Unverified gym - show alert
                                                 self.pendingUnverifiedGym = nearby
@@ -2008,6 +2003,12 @@ struct OnboardingView: View {
             
             // Skip logic for Equipment (step 10)
             if currentStep == 9 && selectedNearbyGymId != nil {
+                // Populate gym data from selected gym before proceeding
+                if let selectedGym = selectedNearbyGym {
+                    gymName = selectedGym.name
+                    gymAddress = selectedGym.address ?? ""
+                    gymIsPublic = selectedGym.isRepCompanionGym
+                }
                 currentStep += 2 // Skip 10, go to 11
                 updateStepIcon()
                 return
