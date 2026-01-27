@@ -21,5 +21,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Vi behöver din plats för att hitta gym i närheten</string>
 </dict>
 </plist>
