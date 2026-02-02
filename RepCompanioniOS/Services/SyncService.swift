@@ -236,12 +236,14 @@ class SyncService: ObservableObject {
                 // Update existing gym
                 existing.name = gymData.name
                 existing.location = gymData.location
+                existing.isVerified = gymData.isVerified ?? false
             } else {
                 // Create new gym
                 let gym = Gym(
                     id: gymData.id,
                     name: gymData.name,
                     location: gymData.location,
+                    isVerified: gymData.isVerified ?? false,
                     userId: userId
                 )
                 modelContext.insert(gym)
@@ -340,7 +342,8 @@ class SyncService: ObservableObject {
             goalCardio: data.goalCardio ?? 25,
             sessionsPerWeek: data.sessionsPerWeek ?? 3,
             sessionDuration: data.sessionDuration ?? 60,
-            onboardingCompleted: data.onboardingCompleted ?? false
+            onboardingCompleted: data.onboardingCompleted ?? false,
+            selectedGymId: data.selectedGymId
         )
     }
     
@@ -364,6 +367,7 @@ class SyncService: ObservableObject {
         profile.sessionsPerWeek = data.sessionsPerWeek ?? profile.sessionsPerWeek
         profile.sessionDuration = data.sessionDuration ?? profile.sessionDuration
         profile.onboardingCompleted = data.onboardingCompleted ?? profile.onboardingCompleted
+        profile.selectedGymId = data.selectedGymId
     }
     
     private func createTemplate(from data: ProgramTemplateResponse, userId: String) -> ProgramTemplate {

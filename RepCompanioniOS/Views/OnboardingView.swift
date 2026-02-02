@@ -104,25 +104,15 @@ struct OnboardingView: View {
     @State private var showCamera = false
     
     private var totalSteps: Int {
-        // New order: 
-        // 1. Motivation
-        // 2. Sport (if sport)
-        // 3. Health Data
-        // 4. Personal Info
-        // 5. Goals
-        // 6. Level (Habits)
-        // 7. 1RM
-        // 8. Frequency
-        // 9. Equipment
-        // 10. Gym Details
-        // 11. Step Goal
-        // 12. Theme (if not sport)
-        
-        // Both paths have 11 active steps
-        11
+        // Total possible steps in the switch statement is 12.
+        // Even if some steps are skipped (like sport selection), 
+        // they occupy a slot in the currentStep index.
+        12
     }
     
     private var progressPercentage: Double {
+        // Subtract 0.05 or similar if you want it to never look "empty" at step 1,
+        // or just use 1/totalSteps as minimum.
         Double(currentStep) / Double(totalSteps)
     }
     
@@ -2925,6 +2915,7 @@ struct OnboardingView: View {
                         profile.goalCardio = apiProfile.goalCardio ?? 25
                         profile.sessionsPerWeek = apiProfile.sessionsPerWeek ?? 3
                         profile.sessionDuration = apiProfile.sessionDuration ?? 60
+                        profile.selectedGymId = apiProfile.selectedGymId
                     }
                     
                     try? modelContext.save()

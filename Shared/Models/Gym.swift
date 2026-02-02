@@ -11,6 +11,7 @@ final class Gym {
     var equipmentIds: [String] // Store IDs of owned equipment
     var isSelected: Bool
     var isPublic: Bool
+    var isVerified: Bool
     var userId: String
     var createdAt: Date
     var updatedAt: Date
@@ -24,6 +25,7 @@ final class Gym {
         equipmentIds: [String] = [],
         isSelected: Bool = false,
         isPublic: Bool = false,
+        isVerified: Bool = false,
         userId: String,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -36,6 +38,7 @@ final class Gym {
         self.equipmentIds = equipmentIds
         self.isSelected = isSelected
         self.isPublic = isPublic
+        self.isVerified = isVerified
         self.userId = userId
         self.createdAt = createdAt
         self.updatedAt = updatedAt

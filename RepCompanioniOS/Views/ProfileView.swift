@@ -306,49 +306,48 @@ struct ProfileView: View {
                             
                             if let gym = selectedGym {
                                 NavigationLink(destination: EditGymView(gymToEdit: gym)) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text(gym.name)
-                                                .font(.headline)
-                                                .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                            HStack {
-                                                Image(systemName: "dumbbell.fill")
-                                                Text("\(gym.equipmentIds.count) utrustning")
-                                            }
-                                            .font(.caption)
-                                            .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
-                                        }
-                                        Spacer()
-                                        Text("Aktivt")
-                                            .font(.caption)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Color(hex: "6395B8"))
-                                            .foregroundColor(.white)
-                                            .cornerRadius(4)
-                                    }
+                                    GymRow(
+                                        gym: gym,
+                                        isSelected: true,
+                                        colorScheme: effectiveColorScheme,
+                                        selectedTheme: selectedTheme
+                                    )
                                 }
-                                .padding()
-                                .background(Color.cardBackground(for: effectiveColorScheme))
-                                .cornerRadius(12)
+                                .buttonStyle(PlainButtonStyle())
                                 .padding(.horizontal)
                             } else {
                                 NavigationLink(destination: GymListView()) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(Color.gray.opacity(0.1))
+                                                .frame(width: 40, height: 40)
+                                            Image(systemName: "dumbbell.fill")
+                                                .foregroundColor(.gray)
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 2) {
                                             Text("Inget gym valt")
-                                                .font(.headline)
+                                                .font(.subheadline)
+                                                .fontWeight(.bold)
                                                 .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
                                             Text("Välj ett gym för att komma igång")
-                                                .font(.caption)
+                                                .font(.caption2)
                                                 .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                         }
                                         Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray.opacity(0.5))
                                     }
                                     .padding()
-                                    .background(Color.cardBackground(for: effectiveColorScheme))
-                                    .cornerRadius(12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.cardBackground(for: effectiveColorScheme))
+                                            .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
+                                    )
                                 }
+                                .buttonStyle(PlainButtonStyle())
                                 .padding(.horizontal)
                             }
                         }

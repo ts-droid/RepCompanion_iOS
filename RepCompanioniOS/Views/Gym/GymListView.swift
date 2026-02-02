@@ -18,45 +18,77 @@ struct GymListView: View {
     @StateObject private var gymService = GymService.shared
     
     var body: some View {
-        List {
-            if gyms.isEmpty {
-                ContentUnavailableView(
-                    "Inga gym",
-                    systemImage: "dumbbell.fill",
-                    description: Text("Lägg till ditt första gym för att komma igång.")
-                )
-            } else {
-                ForEach(gyms) { gym in
-                    NavigationLink(destination: EditGymView(gymToEdit: gym)) {
-                        GymRowContent(
-                            gym: gym,
-                            isSelected: gym.isSelected,
-                            colorScheme: colorScheme,
-                            selectedTheme: selectedTheme
-                        )
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            gymService.deleteGym(gym: gym, modelContext: modelContext)
-                        } label: {
-                            Label("Ta bort", systemImage: "trash")
-                        }
+        ZStack {
+            Color.appBackground(for: colorScheme).ignoresSafeArea()
+            
+            List {
+                if gyms.isEmpty {
+                    VStack(spacing: 20) {
+                        Image(systemName: "dumbbell.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray.opacity(0.3))
                         
-                        Button {
-                            gymToEdit = gym
-                        } label: {
-                            Label("Redigera", systemImage: "pencil")
+                        Text("Inga gym")
+                            .font(.headline)
+                            .foregroundColor(Color.textPrimary(for: colorScheme))
+                        
+                        Text("Lägg till ditt första gym för att komma igång.")
+                            .font(.subheadline)
+                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .padding(.top, 100)
+                } else {
+                    ForEach(gyms) { gym in
+                        ZStack {
+                            NavigationLink(destination: EditGymView(gymToEdit: gym)) {
+                                EmptyView()
+                            }
+                            .opacity(0)
+                            
+                            GymRow(
+                                gym: gym,
+                                isSelected: gym.isSelected(profiles: profiles),
+                                colorScheme: colorScheme,
+                                selectedTheme: selectedTheme
+                            )
                         }
-                        .tint(.blue)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    gymService.deleteGym(gym: gym, modelContext: modelContext)
+                                }
+                            } label: {
+                                Label("Ta bort", systemImage: "trash")
+                            }
+                            
+                            Button {
+                                gymToEdit = gym
+                            } label: {
+                                Label("Redigera", systemImage: "pencil")
+                            }
+                            .tint(.blue)
+                        }
                     }
                 }
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
         .navigationTitle("Mina Gym")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { showingAddGym = true }) {
-                    Image(systemName: "plus")
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
                 }
             }
         }
@@ -87,45 +119,17 @@ struct GymListView: View {
             gymService.selectGym(gym: firstGym, modelContext: modelContext)
         }
     }
-    
-    private func selectGym(_ gym: Gym) {
-        withAnimation {
-            gymService.selectGym(gym: gym, modelContext: modelContext)
-        }
+}
+
+extension Gym {
+    func isSelected(profiles: [UserProfile]) -> Bool {
+        guard let profile = profiles.first(where: { $0.userId == self.userId }) else { return false }
+        return profile.selectedGymId == self.id
     }
 }
 
-struct GymRowContent: View {
-    let gym: Gym
-    let isSelected: Bool
-    let colorScheme: ColorScheme
-    let selectedTheme: String
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(gym.name)
-                    .font(.headline)
-                    .foregroundColor(Color.textPrimary(for: colorScheme))
-                
-                if let location = gym.location, !location.isEmpty {
-                    Text(location)
-                        .font(.caption)
-                        .foregroundColor(Color.textSecondary(for: colorScheme))
-                }
-                
-                Text("\(gym.equipmentIds.count) utrustning")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-            
-            Spacer()
-            
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
-                    .font(.title3)
-            }
-        }
+struct GymListView_Previews: PreviewProvider {
+    static var previews: some View {
+        GymListView()
     }
 }
