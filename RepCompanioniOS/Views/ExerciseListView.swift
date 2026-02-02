@@ -122,7 +122,7 @@ struct ExerciseListView: View {
                     }
                 }
             }
-            .alert("Synkning", isPresented: $showSyncAlert) {
+            .alert("Syncing", isPresented: $showSyncAlert) {
                 Button("OK") { }
             } message: {
                 Text(isLoading ? "Syncing exercise catalog..." : "Sync completed")

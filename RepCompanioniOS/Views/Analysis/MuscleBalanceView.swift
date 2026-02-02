@@ -45,7 +45,7 @@ struct MuscleBalanceView: View {
                             HStack {
                                 Image(systemName: "lightbulb.fill")
                                     .foregroundColor(.yellow)
-                                Text("Inblick")
+                                Text("Insights")
                                     .fontWeight(.semibold)
                             }
                             

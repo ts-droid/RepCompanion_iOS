@@ -52,7 +52,7 @@ struct ExerciseStatsListView: View {
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(Color.accentBlue)
-                            Text("sessioner")
+                            Text("sessions")
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

@@ -1693,7 +1693,7 @@ struct OnboardingView: View {
             Button("Select another gym", role: .cancel) {
                 pendingUnverifiedGym = nil
             }
-            Button("Registrera utrustning") {
+            Button("Register equipment") {
                 // Pre-fill gym data and proceed to equipment selection
                 if let gym = pendingUnverifiedGym {
                     self.gymName = gym.name

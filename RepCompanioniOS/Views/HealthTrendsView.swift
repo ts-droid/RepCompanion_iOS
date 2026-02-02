@@ -43,7 +43,7 @@ struct HealthTrendsView: View {
             VStack(spacing: 24) {
                 // Weekly Summary
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Veckosammanfattning")
+                    Text("Weekly summary")
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                         .padding(.horizontal)
@@ -118,7 +118,7 @@ struct HealthTrendsView: View {
                     
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Nuvarande")
+                            Text("Current")
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             Text("\(trend.current)")
@@ -128,7 +128,7 @@ struct HealthTrendsView: View {
                         }
                         Spacer()
                         VStack(alignment: .trailing) {
-                            Text("Snitt")
+                            Text("Average")
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             Text("\(trend.average)")
@@ -146,7 +146,7 @@ struct HealthTrendsView: View {
                 // Chart
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text("Historik")
+                        Text("History")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -330,14 +330,14 @@ struct HealthChartView: View {
             Chart {
                 ForEach(metrics, id: \.id) { metric in
                     LineMark(
-                        x: .value("Datum", metric.date, unit: .day),
+                        x: .value("Date", metric.date, unit: .day),
                         y: .value("Value", metric.value)
                     )
                     .foregroundStyle(Color.accentBlue)
                     .interpolationMethod(.catmullRom)
                     
                     AreaMark(
-                        x: .value("Datum", metric.date, unit: .day),
+                        x: .value("Date", metric.date, unit: .day),
                         y: .value("Value", metric.value)
                     )
                     .foregroundStyle(

@@ -116,7 +116,7 @@ struct WorkoutCompletionView: View {
                     
                     // Summary Grid
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Sammanfattning")
+                        Text("Summary")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         

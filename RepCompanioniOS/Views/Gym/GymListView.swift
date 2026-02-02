@@ -66,13 +66,13 @@ struct GymListView: View {
                                     gymService.deleteGym(gym: gym, modelContext: modelContext)
                                 }
                             } label: {
-                                Label("Ta bort", systemImage: "trash")
+                                Label("Delete", systemImage: "trash")
                             }
                             
                             Button {
                                 gymToEdit = gym
                             } label: {
-                                Label("Redigera", systemImage: "pencil")
+                                Label("Edit", systemImage: "pencil")
                             }
                             .tint(.blue)
                         }

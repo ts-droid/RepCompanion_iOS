@@ -183,7 +183,7 @@ struct ProgramTemplateDetailView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Redigera") {
+                    Button("Edit") {
                         onEdit?()
                     }
                 }

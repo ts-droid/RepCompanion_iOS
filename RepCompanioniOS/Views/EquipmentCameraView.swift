@@ -31,7 +31,7 @@ struct EquipmentCameraView: View {
                                         .cornerRadius(12)
                                 } else if !recognizedEquipment.isEmpty {
                                     VStack(alignment: .leading, spacing: 8) {
-                                        Text("Identifierad utrustning:")
+                                        Text("Identified equipment:")
                                             .font(.headline)
                                             .foregroundColor(.white)
                                         ForEach(recognizedEquipment, id: \.self) { equipment in
@@ -73,7 +73,7 @@ struct EquipmentCameraView: View {
                         )
                 }
             }
-            .navigationTitle("Skanna utrustning")
+            .navigationTitle("Scan equipment")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -83,14 +83,14 @@ struct EquipmentCameraView: View {
                 }
                 if capturedImage != nil {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Ta om") {
+                        Button("Redo") {
                             capturedImage = nil
                             recognizedEquipment = []
                         }
                     }
                 }
             }
-            .alert("Fel", isPresented: .constant(errorMessage != nil)) {
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
                 Button("OK") {
                     errorMessage = nil
                 }

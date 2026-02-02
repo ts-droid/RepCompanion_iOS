@@ -300,7 +300,7 @@ struct ActiveWorkoutView: View {
             }
         }
         .alert("Update remaining sets?", isPresented: $showApplyToAllDialog) {
-            Button("Ja, uppdatera alla") {
+            Button("Yes, update all") {
                 applyToRemainingSets()
                 completeSetActual()
             }
@@ -617,7 +617,7 @@ struct ActiveWorkoutView: View {
 
                     // Log Section
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("Logga set")
+                        Text("Log set")
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                         

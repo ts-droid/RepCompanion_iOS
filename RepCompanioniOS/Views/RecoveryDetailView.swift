@@ -218,7 +218,7 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "waveform.path.ecg")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Vilopuls")
+                            Text("Resting heart rate")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -247,7 +247,7 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "heart.circle.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Genomsnittlig puls")
+                            Text("Average heart rate")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

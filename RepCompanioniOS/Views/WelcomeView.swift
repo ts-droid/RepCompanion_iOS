@@ -216,12 +216,12 @@ struct LegalDetailView: View {
                     Divider()
                     
                     Group {
-                        Text("Sekretess & Dataskydd")
+                        Text("Privacy & Data Protection")
                             .font(.title2.bold())
                         
                         Text("RepCompanion values your privacy and handles personal data in accordance with applicable data protection legislation, including GDPR.")
                         
-                        Text("Vilken information vi samlar in:")
+                        Text("What information we collect:")
                         VStack(alignment: .leading, spacing: 8) {
                             BulletItem(text: "Basic profile information (e.g. age, gender, height, weight)")
                             BulletItem(text: "Information about training goals, level and preferences")
@@ -234,7 +234,7 @@ struct LegalDetailView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Villkor & Sekretess")
+            .navigationTitle("Terms & Privacy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

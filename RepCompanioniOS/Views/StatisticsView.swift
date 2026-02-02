@@ -91,7 +91,7 @@ struct StatisticsView: View {
                         // Strength Development Charts
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
-                                Text("Styrkeutveckling")
+                                Text("Strength development")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))

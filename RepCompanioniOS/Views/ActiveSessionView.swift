@@ -42,7 +42,7 @@ struct ActiveSessionView: View {
                     HStack {
                         Text("Set 2")
                         Spacer()
-                        Button("Logga") { }
+                        Button("Log") { }
                             .buttonStyle(.bordered)
                     }
                 }

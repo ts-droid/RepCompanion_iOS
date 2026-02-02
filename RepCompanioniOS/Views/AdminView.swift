@@ -57,7 +57,7 @@ struct AdminView: View {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.system(size: 40))
                                 .foregroundColor(.orange)
-                            Text("Fel")
+                            Text("Error")
                                 .font(.headline)
                             Text(error)
                                 .font(.subheadline)

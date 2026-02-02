@@ -14,7 +14,7 @@ struct ExerciseDetailView: View {
                 // Video Section
                 if let youtubeUrl = exercise.youtubeUrl {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Videoinstruktion")
+                        Text("Video instruction")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -116,7 +116,7 @@ struct ExerciseDetailView: View {
                 // Instructions
                 if let instructions = exercise.instructions {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Instruktioner")
+                        Text("Instructions")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         

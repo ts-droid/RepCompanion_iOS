@@ -101,14 +101,14 @@ struct ExerciseProgressionView: View {
                         Chart {
                             ForEach(progressionData) { point in
                                 LineMark(
-                                    x: .value("Datum", point.date, unit: .day),
+                                    x: .value("Date", point.date, unit: .day),
                                     y: .value("Vikt", point.weight)
                                 )
                                 .foregroundStyle(Color.accentBlue)
                                 .interpolationMethod(.catmullRom)
                                 
                                 PointMark(
-                                    x: .value("Datum", point.date, unit: .day),
+                                    x: .value("Date", point.date, unit: .day),
                                     y: .value("Vikt", point.weight)
                                 )
                                 .foregroundStyle(Color.accentBlue)

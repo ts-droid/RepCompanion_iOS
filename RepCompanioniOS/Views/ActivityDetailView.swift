@@ -207,7 +207,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "figure.walk")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Steg idag")
+                            Text("Steps today")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -288,7 +288,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "figure.run")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Distans")
+                            Text("Distance")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -306,7 +306,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "stairs")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Trappor")
+                            Text("Stairs")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

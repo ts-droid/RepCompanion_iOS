@@ -69,11 +69,11 @@ struct SettingsView: View {
                 }
                 
                 // Notifications
-                Section("Notifikationer") {
+                Section("Notifications") {
                     HStack {
                         Image(systemName: "bell.fill")
                             .foregroundColor(.blue)
-                        Text("Push-notifikationer")
+                        Text("Push notifications")
                         Spacer()
                         if notificationService.authorizationStatus == .authorized {
                             Text("Activated")
@@ -98,11 +98,11 @@ struct SettingsView: View {
                 }
                 
                 // Cloud Sync
-                Section("Synkning") {
+                Section("Syncing") {
                     HStack {
                         Image(systemName: "icloud.fill")
                             .foregroundColor(.blue)
-                        Text("CloudKit-synkning")
+                        Text("CloudKit sync")
                         Spacer()
                         if cloudKitService.isAvailable {
                             switch cloudKitService.syncStatus {
@@ -112,10 +112,10 @@ struct SettingsView: View {
                             case .syncing:
                                 ProgressView()
                             case .success:
-                                Text("Synkad")
+                                Text("Synced")
                                     .foregroundColor(.green)
                             case .error:
-                                Text("Fel")
+                                Text("Error")
                                     .foregroundColor(.red)
                             }
                         } else {
@@ -134,7 +134,7 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    Button("Synka nu") {
+                    Button("Sync now") {
                         Task {
                             // TODO: Pass modelContext
                             // try await cloudKitService.performFullSync(modelContext: modelContext)
@@ -151,11 +151,11 @@ struct SettingsView: View {
                         Text("Exercises")
                         Spacer()
                         if ExerciseCatalogService.shared.lastSyncDate != nil {
-                            Text("Synkad")
+                            Text("Synced")
                                 .font(.caption)
                                 .foregroundColor(.green)
                         } else {
-                            Text("Ej synkad")
+                            Text("Not synced")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
@@ -182,7 +182,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "trophy.fill")
                                 .foregroundColor(.yellow)
-                            Text("Utmaningar")
+                            Text("Challenges")
                         }
                     }
                     
@@ -190,7 +190,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "chart.bar.fill")
                                 .foregroundColor(.blue)
-                            Text("Topplista")
+                            Text("Leaderboard")
                         }
                     }
                 }
@@ -282,12 +282,12 @@ struct SettingsView: View {
             } message: {
                 Text("This will reset onboarding and you will need to go through onboarding again.")
             }
-            .alert("HealthKit-fel", isPresented: $showHealthKitAlert) {
+            .alert("HealthKit error", isPresented: $showHealthKitAlert) {
                 Button("OK") { }
             } message: {
                 Text("Could not activate HealthKit. Check that the app has permission in Settings.")
             }
-            .alert("Notifikationsfel", isPresented: $showNotificationAlert) {
+            .alert("Notification error", isPresented: $showNotificationAlert) {
                 Button("OK") { }
             } message: {
                 Text("Could not activate notifications. Check that the app has permission in Settings.")
@@ -454,7 +454,7 @@ struct ChallengesView: View {
                             .font(.caption)
                         Spacer()
                         if challenge.isParticipating {
-                            Text("Deltar")
+                            Text("Participating")
                                 .font(.caption)
                                 .foregroundColor(.green)
                         }
@@ -463,7 +463,7 @@ struct ChallengesView: View {
                 .padding(.vertical, 4)
             }
         }
-        .navigationTitle("Utmaningar")
+        .navigationTitle("Challenges")
         .task {
             isLoading = true
             do {
@@ -478,8 +478,8 @@ struct ChallengesView: View {
 
 struct LeaderboardView: View {
     var body: some View {
-        Text("Topplista kommer snart")
-            .navigationTitle("Topplista")
+        Text("Leaderboard coming soon")
+            .navigationTitle("Leaderboard")
     }
 }
 
