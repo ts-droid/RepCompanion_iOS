@@ -48,7 +48,7 @@ struct LoginView: View {
                                 Image("GoogleLogo")
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 20, height: 20)
+                                    .frame(width: 24, height: 24)
                                 Text("Fortsätt med Google")
                                     .font(.system(size: 19, weight: .semibold))
                             }
@@ -209,7 +209,21 @@ struct LoginView: View {
                 )
             } catch {
                 await MainActor.run {
-                    if let googleError = error as? GoogleSignInError {
+                    // Handle specific network errors with user-friendly messages
+                    if let urlError = error as? URLError {
+                        switch urlError.code {
+                        case .notConnectedToInternet:
+                            errorMessage = "Ingen internetanslutning. Kontrollera din uppkoppling."
+                        case .timedOut:
+                            errorMessage = "Servern svarade inte. Försök igen."
+                        case .cannotConnectToHost, .cannotFindHost:
+                            errorMessage = "Kunde inte ansluta till servern. Försök igen senare."
+                        case .networkConnectionLost:
+                            errorMessage = "Nätverksanslutningen avbröts. Försök igen."
+                        default:
+                            errorMessage = "Nätverksfel. Kontrollera din anslutning och försök igen."
+                        }
+                    } else if let googleError = error as? GoogleSignInError {
                         errorMessage = googleError.localizedDescription
                     } else {
                         errorMessage = "Kunde inte logga in med Google: \(error.localizedDescription)"
@@ -218,7 +232,7 @@ struct LoginView: View {
             }
         }
     }
-    
+
     private func sendMagicLink(completion: @escaping (Bool) -> Void) {
         guard !email.isEmpty else {
             errorMessage = "Vänligen fyll i din e-post"
