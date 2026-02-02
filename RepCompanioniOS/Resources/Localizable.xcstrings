@@ -515,17 +515,6 @@
         }
       }
     },
-    "April": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "April"
-          }
-        }
-      }
-    },
     "Assess whether suggested training is suitable for you": {
       "localizations": {
         "sv": {
@@ -542,17 +531,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tillbehör"
-          }
-        }
-      }
-    },
-    "August": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Augusti"
           }
         }
       }
@@ -583,17 +561,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Synka automatiskt träningsdata, steg, sömn och återhämtning från dina hälsoplattformar."
-          }
-        }
-      }
-    },
-    "Available Equipment": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tillgänglig utrustning"
           }
         }
       }
@@ -1074,23 +1041,6 @@
         }
       }
     },
-    "Check your email!": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check your email!"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kolla din e-post!"
-          }
-        }
-      }
-    },
     "Choose Theme": {
       "localizations": {
         "sv": {
@@ -1137,17 +1087,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "CloudKit entitlement saknas. Kontakta utvecklaren."
-          }
-        }
-      }
-    },
-    "cm": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "cm"
           }
         }
       }
@@ -1525,17 +1464,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Marklyft"
-          }
-        }
-      }
-    },
-    "December": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "December"
           }
         }
       }
@@ -2069,17 +1997,6 @@
         }
       }
     },
-    "February": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Februari"
-          }
-        }
-      }
-    },
     "Feel it in your back": {
       "localizations": {
         "sv": {
@@ -2569,17 +2486,6 @@
         }
       }
     },
-    "Height (cm)": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Längd (cm)"
-          }
-        }
-      }
-    },
     "Height exceeds 253 cm. Please check your value.": {
       "localizations": {
         "sv": {
@@ -2721,17 +2627,6 @@
         }
       }
     },
-    "Import health data": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hämta hälsodata"
-          }
-        }
-      }
-    },
     "Improve Mobility": {
       "localizations": {
         "sv": {
@@ -2838,39 +2733,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ogiltig view controller"
-          }
-        }
-      }
-    },
-    "January": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Januari"
-          }
-        }
-      }
-    },
-    "July": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Juli"
-          }
-        }
-      }
-    },
-    "June": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Juni"
           }
         }
       }
@@ -3065,17 +2927,6 @@
         }
       }
     },
-    "Loading equipment list...": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laddar utrustningslista..."
-          }
-        }
-      }
-    },
     "Loading equipment...": {
       "localizations": {
         "sv": {
@@ -3122,17 +2973,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Logga ut"
-          }
-        }
-      }
-    },
-    "Logga in": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logga in"
           }
         }
       }
@@ -3215,17 +3055,6 @@
         }
       }
     },
-    "March": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mars"
-          }
-        }
-      }
-    },
     "Mark as completed": {
       "localizations": {
         "sv": {
@@ -3282,17 +3111,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maximera din träning!"
-          }
-        }
-      }
-    },
-    "May": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maj"
           }
         }
       }
@@ -3807,17 +3625,6 @@
         }
       }
     },
-    "Normal weight": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Normalvikt"
-          }
-        }
-      }
-    },
     "Not available": {
       "localizations": {
         "sv": {
@@ -3838,45 +3645,12 @@
         }
       }
     },
-    "November": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "November"
-          }
-        }
-      }
-    },
     "Nutrition": {
       "localizations": {
         "sv": {
           "stringUnit": {
             "state": "translated",
             "value": "Kost"
-          }
-        }
-      }
-    },
-    "Obese": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fetma"
-          }
-        }
-      }
-    },
-    "October": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oktober"
           }
         }
       }
@@ -3991,17 +3765,6 @@
         }
       }
     },
-    "Or select manually": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eller välj manuellt"
-          }
-        }
-      }
-    },
     "Other": {
       "localizations": {
         "sv": {
@@ -4035,17 +3798,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Militärpress"
-          }
-        }
-      }
-    },
-    "Overweight": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Övervikt"
           }
         }
       }
@@ -4965,17 +4717,6 @@
         }
       }
     },
-    "Scan Equipment": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skanna utrustning"
-          }
-        }
-      }
-    },
     "Search Distance": {
       "localizations": {
         "sv": {
@@ -5179,17 +4920,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Skicka Magic Link"
-          }
-        }
-      }
-    },
-    "September": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "September"
           }
         }
       }
@@ -5454,17 +5184,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Inloggning misslyckades. Försök igen."
-          }
-        }
-      }
-    },
-    "Sign in with Magic Link": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logga in med Magic Link"
           }
         }
       }
@@ -6104,17 +5823,6 @@
       }
     },
     "Total volym: %@": {},
-    "Total: %d%%": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Totalt: %d%%"
-          }
-        }
-      }
-    },
     "Total: %lld%%": {},
     "Train safely": {
       "localizations": {
@@ -6311,17 +6019,6 @@
         }
       }
     },
-    "Underweight": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Undervikt"
-          }
-        }
-      }
-    },
     "Unique Exercises": {
       "localizations": {
         "sv": {
@@ -6508,17 +6205,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vikt"
-          }
-        }
-      }
-    },
-    "Weight (kg)": {
-      "extractionState": "stale",
-      "localizations": {
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vikt (kg)"
           }
         }
       }
