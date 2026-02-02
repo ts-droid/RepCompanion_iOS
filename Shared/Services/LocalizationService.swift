@@ -7,7 +7,7 @@ enum LocalizationService {
     
     /// Maps English motivation type keys to Swedish labels
     static func localizeMotivationType(_ key: String?) -> String {
-        guard let key = key else { return "Allround" }
+        guard let key = key else { return String(localized: "All-round") }
         
         switch key.lowercased() {
         case "build_muscle", "bygga_muskler":
@@ -55,7 +55,7 @@ enum LocalizationService {
     
     /// Maps English training level keys to Swedish labels
     static func localizeTrainingLevel(_ key: String?) -> String {
-        guard let key = key else { return "Nybörjare" }
+        guard let key = key else { return String(localized: "Beginner") }
         
         switch key.lowercased() {
         case "beginner", "nybörjare":
@@ -91,7 +91,7 @@ enum LocalizationService {
     
     /// Maps English sex keys to Swedish labels
     static func localizeSex(_ key: String?) -> String {
-        guard let key = key else { return "Ej angivet" }
+        guard let key = key else { return String(localized: "Not specified") }
         
         switch key.lowercased() {
         case "male", "man":
@@ -123,26 +123,26 @@ enum LocalizationService {
     
     /// Maps English sport keys to Swedish labels
     static func localizeSpecificSport(_ key: String?) -> String {
-        guard let key = key else { return "Ej angivet" }
+        guard let key = key else { return String(localized: "Not specified") }
         
         switch key.lowercased() {
-        case "football": return "Fotboll"
-        case "ice_hockey": return "Ishockey"
-        case "basketball": return "Basket"
-        case "tennis": return "Tennis"
-        case "running": return "Löpning"
-        case "cycling": return "Cykling"
-        case "swimming": return "Simning"
-        case "badminton": return "Badminton"
-        case "floorball": return "Innebandy"
-        case "golf": return "Golf"
-        case "handball": return "Handboll"
-        case "track_and_field": return "Friidrott"
-        case "cross_country_skiing": return "Längdskidor"
-        case "martial_arts": return "Kampsporter"
-        case "padel": return "Padel"
-        case "alpine_skiing": return "Alpin skidåkning"
-        case "other": return "Annat"
+        case "football": return String(localized: "Football")
+        case "ice_hockey": return String(localized: "Ice Hockey")
+        case "basketball": return String(localized: "Basketball")
+        case "tennis": return String(localized: "Tennis")
+        case "running": return String(localized: "Running")
+        case "cycling": return String(localized: "Cycling")
+        case "swimming": return String(localized: "Swimming")
+        case "badminton": return String(localized: "Badminton")
+        case "floorball": return String(localized: "Floorball")
+        case "golf": return String(localized: "Golf")
+        case "handball": return String(localized: "Handball")
+        case "track_and_field": return String(localized: "Track and Field")
+        case "cross_country_skiing": return String(localized: "Cross-country Skiing")
+        case "martial_arts": return String(localized: "Martial Arts")
+        case "padel": return String(localized: "Padel")
+        case "alpine_skiing": return String(localized: "Alpine Skiing")
+        case "other": return String(localized: "Other")
         default: return key.capitalized.replacingOccurrences(of: "_", with: " ")
         }
     }
@@ -160,7 +160,7 @@ enum LocalizationService {
         case "badminton": return "badminton"
         case "innebandy": return "floorball"
         case "golf": return "golf"
-        case "handboll": return "handball"
+        case "handball": return "handball"
         case "friidrott": return "track_and_field"
         case "längdskidor": return "cross_country_skiing"
         case "kampsporter": return "martial_arts"
@@ -187,12 +187,12 @@ enum LocalizationService {
     
     /// Maps English intent keys to Swedish labels
     static func localizeIntent(_ key: String?) -> String {
-        guard let key = key else { return "Normal" }
+        guard let key = key else { return String(localized: "Normal") }
         switch key.lowercased() {
-        case "explosive": return "Explosivt"
-        case "controlled": return "Kontrollerat"
-        case "quality": return "Kvalitet"
-        case "grindy": return "Tungt"
+        case "explosive": return String(localized: "Explosive")
+        case "controlled": return String(localized: "Controlled")
+        case "quality": return String(localized: "Quality")
+        case "grindy": return String(localized: "Heavy")
         default: return key.capitalized
         }
     }
@@ -200,10 +200,10 @@ enum LocalizationService {
     /// Maps English primary focus keys to Swedish labels
     static func localizePrimaryFocus(_ key: String) -> String {
         switch key.lowercased() {
-        case "strength": return "Styrka"
-        case "hypertrophy", "volume": return "Hypertrofi"
-        case "endurance": return "Uthållighet"
-        case "cardio": return "Cardio"
+        case "strength": return String(localized: "Strength")
+        case "hypertrophy", "volume": return String(localized: "Hypertrophy")
+        case "endurance": return String(localized: "Endurance")
+        case "cardio": return String(localized: "Cardio")
         default: return key.capitalized
         }
     }

@@ -61,22 +61,22 @@ struct ContentView: View {
                 TabView {
                     HomeView()
                         .tabItem {
-                            Label("Hem", systemImage: "house.fill")
+                            Label(String(localized: "Home"), systemImage: "house.fill")
                         }
                     
                     WorkoutListView()
                         .tabItem {
-                            Label("Program", systemImage: "dumbbell.fill")
+                            Label(String(localized: "Program"), systemImage: "dumbbell.fill")
                         }
                     
                     StatisticsView()
                         .tabItem {
-                            Label("Statistik", systemImage: "chart.bar.xaxis")
+                            Label(String(localized: "Statistics"), systemImage: "chart.bar.xaxis")
                         }
                     
                     ProfileView()
                         .tabItem {
-                            Label("Profil", systemImage: "person.fill")
+                            Label(String(localized: "Profile"), systemImage: "person.fill")
                         }
                 }
                 .preferredColorScheme(preferredColorScheme)

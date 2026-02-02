@@ -1689,11 +1689,11 @@ struct OnboardingView: View {
                 }
             }
         }
-        .alert("Gym not verified", isPresented: $showUnverifiedGymAlert) {
-            Button("Select another gym", role: .cancel) {
+        .alert(String(localized: "Gym not verified"), isPresented: $showUnverifiedGymAlert) {
+            Button(String(localized: "Select another gym"), role: .cancel) {
                 pendingUnverifiedGym = nil
             }
-            Button("Register equipment") {
+            Button(String(localized: "Register equipment")) {
                 // Pre-fill gym data and proceed to equipment selection
                 if let gym = pendingUnverifiedGym {
                     self.gymName = gym.name
@@ -1710,7 +1710,7 @@ struct OnboardingView: View {
                 }
             }
         } message: {
-            Text("This gym has not yet verified its equipment, therefore it is not selectable in the gym list. If you are at the gym, you can add it as a new gym, but you will need to select what equipment is available.")
+            Text(String(localized: "This gym has not yet verified its equipment, therefore it is not selectable in the gym list. If you are at the gym, you can add it as a new gym, but you will need to select what equipment is available."))
         }
         .onAppear {
              locationService.requestPermission()

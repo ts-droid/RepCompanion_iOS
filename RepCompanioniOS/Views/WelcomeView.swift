@@ -22,11 +22,11 @@ struct WelcomeView: View {
                             .padding(.top, 40)
                         
                         VStack(spacing: 12) {
-                            Text("Maximize your workout!")
+                            Text(String(localized: "Maximize your workout!"))
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(Color(hex: "1A237E"))
                             
-                            Text("RepCompanion is a simple and smart tool that helps you put together a training setup that fits your goals and daily life.")
+                            Text(String(localized: "RepCompanion is a simple and smart tool that helps you put together a training setup that fits your goals and daily life."))
                                 .font(.body)
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(hex: "546E7A"))
@@ -55,14 +55,14 @@ struct WelcomeView: View {
                                 icon: "bag.fill",
                                 iconBg: Color(hex: "E1F5FE"),
                                 iconColor: Color(hex: "0288D1"),
-                                title: "Exklusiva erbjudanden",
-                                subtitle: "Get discounts on training equipment and supplements."
+                                title: String(localized: "Exclusive offers"),
+                                subtitle: String(localized: "Get discounts on training equipment and supplements.")
                             )
                         }
                         .padding(.horizontal, 24)
                         
                         // Description expansion
-                        Text("Whether you want to lose weight, rehabilitate an injury, or train for ice hockey, we help you with the right focus.")
+                        Text(String(localized: "Whether you want to lose weight, rehabilitate an injury, or train for ice hockey, we help you with the right focus."))
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(hex: "78909C"))
@@ -76,7 +76,7 @@ struct WelcomeView: View {
                 VStack(spacing: 16) {
                     // Consent Checkbox
                     Toggle(isOn: $hasConsented) {
-                        Text("I agree to our Terms & Privacy Policy to receive tailored offers from our partners and fitness-related marketing.")
+                        Text(String(localized: "I agree to our Terms & Privacy Policy to receive tailored offers from our partners and fitness-related marketing."))
                             .font(.caption)
                             .foregroundColor(Color(hex: "546E7A"))
                     }
@@ -85,7 +85,7 @@ struct WelcomeView: View {
                     
                     HStack(spacing: 16) {
                         Button(action: { /* Do nothing or dismiss */ }) {
-                            Text("Decline")
+                            Text(String(localized: "Decline"))
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
@@ -100,7 +100,7 @@ struct WelcomeView: View {
                                 welcomeAccepted = true
                             }
                         }) {
-                            Text("Continue")
+                            Text(String(localized: "Continue"))
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
@@ -198,47 +198,47 @@ struct LegalDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Group {
-                        Text("Terms of Use – RepCompanion")
+                        Text(String(localized: "Terms of Use – RepCompanion"))
                             .font(.title2.bold())
                         
-                        Text("By creating an account or using RepCompanion, you agree to these terms.")
+                        Text(String(localized: "By creating an account or using RepCompanion, you agree to these terms."))
                         
-                        Text("RepCompanion is a training and planning app that provides general information, guidance, and suggestions about training and physical activity. The content in the app is intended for information and inspiration purposes and does not constitute medical advice or professional treatment.")
+                        Text(String(localized: "RepCompanion is a training and planning app that provides general information, guidance, and suggestions about training and physical activity. The content in the app is intended for information and inspiration purposes and does not constitute medical advice or professional treatment."))
                         
-                        Text("You are responsible for:")
+                        Text(String(localized: "You are responsible for:"))
                         VStack(alignment: .leading, spacing: 8) {
-                            BulletItem(text: "Assess whether suggested training is suitable for you")
-                            BulletItem(text: "Train safely")
-                            BulletItem(text: "Consult with a doctor, physiotherapist or other qualified healthcare professional when needed")
+                            BulletItem(text: String(localized: "Assess whether suggested training is suitable for you"))
+                            BulletItem(text: String(localized: "Train safely"))
+                            BulletItem(text: String(localized: "Consult with a doctor, physiotherapist or other qualified healthcare professional when needed"))
                         }
                     }
                     
                     Divider()
                     
                     Group {
-                        Text("Privacy & Data Protection")
+                        Text(String(localized: "Privacy & Data Protection"))
                             .font(.title2.bold())
                         
-                        Text("RepCompanion values your privacy and handles personal data in accordance with applicable data protection legislation, including GDPR.")
+                        Text(String(localized: "RepCompanion values your privacy and handles personal data in accordance with applicable data protection legislation, including GDPR."))
                         
-                        Text("What information we collect:")
+                        Text(String(localized: "What information we collect:"))
                         VStack(alignment: .leading, spacing: 8) {
-                            BulletItem(text: "Basic profile information (e.g. age, gender, height, weight)")
-                            BulletItem(text: "Information about training goals, level and preferences")
-                            BulletItem(text: "Usage data about how the app features are used")
+                            BulletItem(text: String(localized: "Basic profile information (e.g. age, gender, height, weight)"))
+                            BulletItem(text: String(localized: "Information about training goals, level and preferences"))
+                            BulletItem(text: String(localized: "Usage data about how the app features are used"))
                         }
                         
-                        Text("Advertising and affiliate links:")
-                        Text("RepCompanion contains ads and partnerships with third-party companies. This means the app may show advertising, offers, or links to products and services.")
+                        Text(String(localized: "Advertising and affiliate links:"))
+                        Text(String(localized: "RepCompanion contains ads and partnerships with third-party companies. This means the app may show advertising, offers, or links to products and services."))
                     }
                 }
                 .padding()
             }
-            .navigationTitle("Terms & Privacy")
+            .navigationTitle(String(localized: "Terms & Privacy"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
+                    Button(String(localized: "Done")) { dismiss() }
                 }
             }
         }

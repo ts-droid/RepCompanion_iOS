@@ -25,20 +25,20 @@ struct EquipmentCameraView: View {
                             VStack {
                                 Spacer()
                                 if isRecognizing {
-                                    ProgressView("Recognizing equipment...")
+                                    ProgressView(String(localized: "Recognizing equipment..."))
                                         .padding()
                                         .background(Color.black.opacity(0.7))
                                         .cornerRadius(12)
                                 } else if !recognizedEquipment.isEmpty {
                                     VStack(alignment: .leading, spacing: 8) {
-                                        Text("Identified equipment:")
+                                        Text(String(localized: "Identified equipment:"))
                                             .font(.headline)
                                             .foregroundColor(.white)
                                         ForEach(recognizedEquipment, id: \.self) { equipment in
                                             Text("• \(equipment)")
                                                 .foregroundColor(.white)
                                         }
-                                        Button("Add") {
+                                        Button(String(localized: "Add")) {
                                             onEquipmentDetected(recognizedEquipment)
                                             dismiss()
                                         }
@@ -73,25 +73,25 @@ struct EquipmentCameraView: View {
                         )
                 }
             }
-            .navigationTitle("Scan equipment")
+            .navigationTitle(String(localized: "Scan equipment"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Avbryt") {
+                    Button(String(localized: "Cancel")) {
                         dismiss()
                     }
                 }
                 if capturedImage != nil {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Redo") {
+                        Button(String(localized: "Redo")) {
                             capturedImage = nil
                             recognizedEquipment = []
                         }
                     }
                 }
             }
-            .alert("Error", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") {
+            .alert(String(localized: "Error"), isPresented: .constant(errorMessage != nil)) {
+                Button(String(localized: "OK")) {
                     errorMessage = nil
                 }
             } message: {
@@ -122,7 +122,7 @@ struct EquipmentCameraView: View {
             do {
                 // Convert image to base64
                 guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                    throw NSError(domain: "Camera", code: 1, userInfo: [NSLocalizedDescriptionKey: "Kunde inte konvertera bild"])
+                    throw NSError(domain: "Camera", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not convert image")])
                 }
                 let base64String = imageData.base64EncodedString()
                 

@@ -132,9 +132,9 @@ struct ActivityDetailView: View {
             // Large Activity Circle
             VStack(spacing: 16) {
                 StatusCard(
-                    title: "AKTIVITET",
+                    title: String(localized: "ACTIVITY"),
                     value: "\(activityPercent)%",
-                    subtitle: "of goal",
+                    subtitle: String(localized: "of goal"),
                     color: .activityBlue,
                     progress: Double(activityPercent) / 100.0,
                     icon: "waveform.path.ecg",
@@ -149,7 +149,7 @@ struct ActivityDetailView: View {
             // Activity Specifications
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Total activity:")
+                    Text(String(localized: "Total activity:"))
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -161,7 +161,7 @@ struct ActivityDetailView: View {
                 
                 if let workoutProgress = workoutProgress {
                     HStack {
-                        Text("Workout:")
+                        Text(String(localized: "Workout:"))
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                         Spacer()
@@ -173,7 +173,7 @@ struct ActivityDetailView: View {
                 } else if todayTemplate != nil || useTestData {
                     // Show 0% if it's a training day but no progress yet, or show test data
                     HStack {
-                        Text("Workout:")
+                        Text(String(localized: "Workout:"))
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                         Spacer()
@@ -191,7 +191,7 @@ struct ActivityDetailView: View {
             
             // Activity Details Card
             VStack(alignment: .leading, spacing: 16) {
-                Text("AKTIVITETSDETALJER")
+                Text(String(localized: "ACTIVITY DETAILS"))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
@@ -207,7 +207,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "figure.walk")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Steps today")
+                            Text(String(localized: "Steps today"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -217,7 +217,7 @@ struct ActivityDetailView: View {
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
-                            Text("av \(stepGoal.formatted())")
+                            Text(String(format: String(localized: "of %@"), stepGoal.formatted()))
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -230,7 +230,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "clock")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Training heart rate")
+                            Text(String(localized: "Training heart rate"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -247,7 +247,7 @@ struct ActivityDetailView: View {
                         }
                     }
                     
-                    Text("Requires Apple Watch for workout")
+                    Text(String(localized: "Requires Apple Watch for workout"))
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -259,7 +259,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "flame.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Active calories")
+                            Text(String(localized: "Active calories"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -276,7 +276,7 @@ struct ActivityDetailView: View {
                         }
                     }
                     
-                    Text("Requires Apple Watch for activity")
+                    Text(String(localized: "Requires Apple Watch for activity"))
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -288,7 +288,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "figure.run")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Distance")
+                            Text(String(localized: "Distance"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -306,7 +306,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "stairs")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Stairs")
+                            Text(String(localized: "Stairs"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -324,7 +324,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "dumbbell.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Sessions this week")
+                            Text(String(localized: "Sessions this week"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

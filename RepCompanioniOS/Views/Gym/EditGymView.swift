@@ -48,8 +48,8 @@ struct EditGymView: View {
     
     var body: some View {
         mainContent
-            .alert("Create program for this gym?", isPresented: $showAdaptationAlert) {
-                Button("Yes, based on my program") {
+            .alert(String(localized: "Create program for this gym?"), isPresented: $showAdaptationAlert) {
+                Button(String(localized: "Yes, based on my program")) {
                     if let targetId = createdGymId {
                         Task {
                             try? await ProgramAdaptationService.shared.adaptProgram(
@@ -62,11 +62,11 @@ struct EditGymView: View {
                         }
                     }
                 }
-                Button("No, skip") {
+                Button(String(localized: "No, skip")) {
                     dismiss()
                 }
             } message: {
-                Text("Do you want to create a training setup for this gym based on your current program? Exercises will be adapted to available equipment.")
+                Text(String(localized: "Do you want to create a training setup for this gym based on your current program? Exercises will be adapted to available equipment."))
             }
     }
     
@@ -93,7 +93,7 @@ struct EditGymView: View {
                     if isActive {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                            Text("Active gym")
+                            Text(String(localized: "Active gym"))
                                 .fontWeight(.bold)
                             Spacer()
                         }
@@ -109,7 +109,7 @@ struct EditGymView: View {
                         }) {
                             HStack {
                                 Image(systemName: "hand.tap.fill")
-                                Text("Select as active gym")
+                                Text(String(localized: "Select as active gym"))
                                     .fontWeight(.semibold)
                                 Spacer()
                             }
@@ -119,13 +119,13 @@ struct EditGymView: View {
                 }
             }
 
-            Section(header: Text("Gym Information")) {
-                    TextField("Gym Name (e.g. My Gym)", text: $name)
+            Section(header: Text(String(localized: "Gym Information"))) {
+                    TextField(String(localized: "Gym Name (e.g. My Gym)"), text: $name)
                         .focused($focusedField, equals: .name)
                     
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            TextField("Address (Optional)", text: $location)
+                            TextField(String(localized: "Address (Optional)"), text: $location)
                                 .focused($focusedField, equals: .location)
                                 .onChange(of: location) { _, newValue in
                                     locationService.searchQuery = newValue
@@ -164,17 +164,17 @@ struct EditGymView: View {
                         }
                     }
                     
-                    Toggle("Public gym", isOn: $isPublic)
+                    Toggle(String(localized: "Public gym"), isOn: $isPublic)
                         .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
                     
                     if !isPublic {
-                        Text("Private gyms are saved only for you.")
+                        Text(String(localized: "Private gyms are saved only for you."))
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
                 }
                 
-                Section(header: Text("Find nearby")) {
+                Section(header: Text(String(localized: "Find nearby"))) {
                     Button(action: {
                         locationService.searchNearbyGyms()
                         showNearbyGyms = true
@@ -185,7 +185,7 @@ struct EditGymView: View {
                                 ProgressView()
                                     .padding(.leading, 8)
                             } else {
-                                Text("Search gyms nearby")
+                                Text(String(localized: "Search gyms nearby"))
                             }
                         }
                     }
@@ -229,7 +229,7 @@ struct EditGymView: View {
                     }
                 }
                 
-                Section(header: Text("Utrustning")) {
+                Section(header: Text(String(localized: "Equipment"))) {
                     NavigationLink(destination: EquipmentSelectionView(
                         selectedEquipmentIds: $selectedEquipmentIds,
                         colorScheme: colorScheme,
@@ -237,9 +237,9 @@ struct EditGymView: View {
                     )) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Select equipment")
+                                Text(String(localized: "Select equipment"))
                                     .fontWeight(.medium)
-                                Text("\(selectedEquipmentIds.count) valda")
+                                Text(String(format: String(localized: "%lld selected"), selectedEquipmentIds.count))
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -251,24 +251,24 @@ struct EditGymView: View {
                     }
                     
                     if selectedEquipmentIds.isEmpty {
-                        Text("No equipment selected. This gym will only support bodyweight exercises.")
+                        Text(String(localized: "No equipment selected. This gym will only support bodyweight exercises."))
                             .font(.caption)
                             .foregroundColor(.orange)
                             .padding(.vertical, 4)
                 }
             }
         }
-        .navigationTitle(isEditing ? name : "Nytt gym")
+        .navigationTitle(isEditing ? name : String(localized: "New gym"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Avbryt") {
+                Button(String(localized: "Back")) {
                     dismiss()
                 }
             }
             
             ToolbarItem(placement: .confirmationAction) {
-                Button("Spara") {
+                Button(String(localized: "Save")) {
                     saveGym()
                 }
                 .disabled(name.isEmpty)

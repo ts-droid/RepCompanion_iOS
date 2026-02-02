@@ -6,24 +6,7 @@ class APIService {
     static let shared = APIService()
 
     // Backend server URL
-    // IMPORTANT: Use 127.0.0.1 instead of localhost to force IPv4
-    // iOS Simulator sometimes resolves localhost to IPv6 (::1) which causes connection issues
-    // For physical device, use your Mac's IP address (Local) or Production URL (Cloud)
-    private let useCloud = true // ALWAYS TRUE FOR ALPHA
-    private let productionURL = "https://repcompanionserver-production.up.railway.app" // FINAL RAILWAY URL
-
-    #if targetEnvironment(simulator)
-    // Simulator: Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 issues
-    lazy var baseURL: String = {
-        return "http://127.0.0.1:5002"
-    }()
-    #else
-    // Physical device needs Mac's IP address or Cloud URL
-    // Current Mac IP: 192.168.68.82 (auto-detected)
-    lazy var baseURL: String = {
-        return useCloud ? productionURL : "http://192.168.68.82:5002"
-    }()
-    #endif
+    let baseURL = "https://repcompanionserver-production.up.railway.app"
 
     // MARK: - Reusable URLSession instances (singleton pattern for connection pooling)
 

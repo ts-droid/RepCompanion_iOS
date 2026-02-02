@@ -28,11 +28,11 @@ struct GymListView: View {
                             .font(.system(size: 48))
                             .foregroundColor(.gray.opacity(0.3))
                         
-                        Text("No gyms")
+                        Text(String(localized: "No gyms"))
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                         
-                        Text("Add your first gym to get started.")
+                        Text(String(localized: "Add your first gym to get started."))
                             .font(.subheadline)
                             .foregroundColor(Color.textSecondary(for: colorScheme))
                             .multilineTextAlignment(.center)
@@ -66,13 +66,13 @@ struct GymListView: View {
                                     gymService.deleteGym(gym: gym, modelContext: modelContext)
                                 }
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label(String(localized: "Delete"), systemImage: "trash")
                             }
                             
                             Button {
                                 gymToEdit = gym
                             } label: {
-                                Label("Edit", systemImage: "pencil")
+                                Label(String(localized: "Edit"), systemImage: "pencil")
                             }
                             .tint(.blue)
                         }
@@ -82,7 +82,7 @@ struct GymListView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle("My Gyms")
+        .navigationTitle(String(localized: "My Gyms"))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { showingAddGym = true }) {

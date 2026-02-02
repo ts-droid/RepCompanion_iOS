@@ -96,9 +96,9 @@ struct HomeView: View {
                     VStack(spacing: 24) {
                         // Header / Segmented Control
                         HStack(spacing: 12) {
-                            FilterButton(title: "Kombinerad", isSelected: selectedTab == 0, colorScheme: colorScheme) { selectedTab = 0 }
-                            FilterButton(title: "Activity", icon: "waveform.path.ecg", isSelected: selectedTab == 1, colorScheme: colorScheme) { selectedTab = 1 }
-                            FilterButton(title: "Recovery", icon: "heart", isSelected: selectedTab == 2, colorScheme: colorScheme) { selectedTab = 2 }
+                            FilterButton(title: String(localized: "Combined"), isSelected: selectedTab == 0, colorScheme: colorScheme) { selectedTab = 0 }
+                            FilterButton(title: String(localized: "Activity"), icon: "waveform.path.ecg", isSelected: selectedTab == 1, colorScheme: colorScheme) { selectedTab = 1 }
+                            FilterButton(title: String(localized: "Recovery"), icon: "heart", isSelected: selectedTab == 2, colorScheme: colorScheme) { selectedTab = 2 }
                         }
                         .padding(.horizontal)
                         
@@ -147,9 +147,9 @@ struct HomeView: View {
                             // Combined view - show both cards with inner rings
                             HStack(spacing: 16) {
                                 StatusCard(
-                                    title: "AKTIVITET",
+                                    title: String(localized: "ACTIVITY"),
                                     value: "\(activityPercent)%",
-                                    subtitle: "of goal",
+                                    subtitle: String(localized: "of goal"),
                                     color: .activityBlue,
                                     progress: Double(activityPercent) / 100.0,
                                     icon: "waveform.path.ecg",
@@ -158,9 +158,9 @@ struct HomeView: View {
                                     innerColor: .orange
                                 )
                                 StatusCard(
-                                    title: "RECOVERY",
+                                    title: String(localized: "RECOVERY"),
                                     value: "\(recoveryPercent)%",
-                                    subtitle: "optimal",
+                                    subtitle: String(localized: "optimal"),
                                     color: .recoveryPurple,
                                     progress: Double(recoveryPercent) / 100.0,
                                     icon: "heart",
@@ -234,16 +234,16 @@ struct HomeView: View {
             }
 
             .navigationBarHidden(true)
-            .alert("Start session", isPresented: $showStartConfirmation) {
-                Button("Yes, let's go!") {
+            .alert(String(localized: "Start session"), isPresented: $showStartConfirmation) {
+                Button(String(localized: "Yes, let's go!")) {
                     confirmStartWorkout()
                 }
-                Button("Avbryt", role: .cancel) {}
+                Button(String(localized: "Cancel"), role: .cancel) {}
             } message: {
                 if let template = templateToStart {
-                    Text("Vill du starta \(getFullDayName(template.dayOfWeek))s pass idag?")
+                    Text(String(localized: "Do you want to start \(getFullDayName(template.dayOfWeek))'s session today?"))
                 } else {
-                    Text("Do you want to start today's session?")
+                    Text(String(localized: "Do you want to start today's session?"))
                 }
             }
             .onAppear {
@@ -299,13 +299,13 @@ struct HomeView: View {
     
     private func getFloatingButtonText() -> String {
         if isGeneratingProgram {
-            return "Genererar..."
+            return String(localized: "Generating...")
         } else if activeWorkoutSession != nil {
-            return "Continue session"
+            return String(localized: "Continue session")
         } else if programTemplates.isEmpty {
-            return "Generera program"
+            return String(localized: "Generate program")
         } else {
-            return "Start session"
+            return String(localized: "Start session")
         }
     }
     
@@ -578,13 +578,31 @@ struct HomeView: View {
     
     private func getDayName(_ dayOfWeek: Int?) -> String {
         guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
+        let days = [
+            "",
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         return days[dayOfWeek]
     }
     
     private func getFullDayName(_ dayOfWeek: Int?) -> String {
-        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "next" }
-        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
+        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return String(localized: "next") }
+        let days = [
+            "",
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         return days[dayOfWeek]
     }
     
