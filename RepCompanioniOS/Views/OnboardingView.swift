@@ -2831,8 +2831,21 @@ struct OnboardingView: View {
                     }
                     
                     if response.success {
-                        print("[Onboarding] ✅ Success! Passing response to finalize...")
-                        finalizeOnboarding(response: response)
+                        if let jobId = response.program?.jobId, let userId = authService.currentUserId {
+                            print("[Onboarding] 🚀 Background generation started with jobId: \(jobId)")
+                            await MainActor.run {
+                                generationJobId = jobId
+                            }
+                            await pollGenerationStatus(jobId: jobId, userId: userId)
+                            finalizeOnboarding()
+                        } else if response.hasProgram == true || (response.templatesCreated ?? 0) > 0 {
+                            print("[Onboarding] ✅ Immediate success! Passing response to finalize...")
+                            finalizeOnboarding(response: response)
+                        } else {
+                            // Fallback to finalize if no jobId but success (should not happen in V4)
+                            print("[Onboarding] ⚠️ Success but no program or jobId. Finalizing anyway...")
+                            finalizeOnboarding(response: response)
+                        }
                     } else {
                         await MainActor.run {
                             generationError = String(localized: "Program generation failed.")
@@ -2858,8 +2871,17 @@ struct OnboardingView: View {
         Task {
             print("[Onboarding] 🕒 Waiting for background generation to complete...")
             var attempts = 0
+            let userId = authService.currentUserId
+            
             // Wait up to 5 minutes (300 attempts * 1s) to match API timeout
             while !programGenerationComplete && attempts < 300 {
+                if let jobId = await MainActor.run({ generationJobId }), let userId = userId {
+                    // If we have a jobId, we should be polling it
+                    await pollGenerationStatus(jobId: jobId, userId: userId)
+                    // If pollGenerationStatus finishes (either success or fail), it will update programGenerationComplete
+                    if programGenerationComplete { break }
+                }
+                
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 attempts += 1
                 
@@ -2874,9 +2896,6 @@ struct OnboardingView: View {
                     finalizeOnboarding()
                 } else {
                     print("[Onboarding] ❌ Generation wait timed out after 300s (5 minutes)")
-                    // If we timed out waiting, but the task is technically still running in background,
-                    // we might want to check status explicitly or just show error.
-                    // For now, assume it failed or got stuck.
                     generationError = String(localized: "Program generation took too long. Please try again.")
                     showGenerationErrorAlert = true
                     isGeneratingProgram = false
