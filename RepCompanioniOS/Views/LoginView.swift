@@ -30,11 +30,11 @@ struct LoginView: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     VStack(spacing: 8) {
-                        Text("Välkommen!")
+                        Text("login.welcome", tableName: "Localizable")
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundColor(Color(hex: "1A237E"))
-                        
-                        Text("Din träningskompanjon")
+
+                        Text("login.tagline", tableName: "Localizable")
                             .font(.headline)
                             .foregroundColor(Color(hex: "546E7A"))
                     }
@@ -49,7 +49,7 @@ struct LoginView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 24, height: 24)
-                                Text("Fortsätt med Google")
+                                Text("login.continue_with_google", tableName: "Localizable")
                                     .font(.system(size: 19, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
@@ -61,7 +61,7 @@ struct LoginView: View {
                         }
                         .disabled(!GoogleSignInService.shared.isAvailable)
                         .opacity(GoogleSignInService.shared.isAvailable ? 1.0 : 0.6)
-                        
+
                         // Apple Button
                         SignInWithAppleButton(
                             onRequest: { request in
@@ -76,14 +76,15 @@ struct LoginView: View {
                         .frame(maxWidth: 375) // Avoid layout constraint conflicts (max width is 375 for this button)
                         .clipShape(Capsule())
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                        
+
                         // Magic Link / Email Flow
                         Button(action: { showEmailSignUp = true }) {
-                            HStack {
+                            HStack(spacing: 12) {
                                 Image(systemName: "link")
-                                Text("Logga in med Magic Link")
+                                    .font(.system(size: 19, weight: .semibold))
+                                Text("login.sign_in_with_magic_link", tableName: "Localizable")
+                                    .font(.system(size: 19, weight: .semibold))
                             }
-                            .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
                             .background(
@@ -97,7 +98,7 @@ struct LoginView: View {
                             .cornerRadius(28)
                             .shadow(color: Color(hex: "43A047").opacity(0.3), radius: 10, x: 0, y: 5)
                         }
-                        
+
                         // Already have an account? - Removed in favor of single Magic Link flow
                     }
                     .padding(.horizontal, 32)
@@ -106,14 +107,14 @@ struct LoginView: View {
                     
                     // Terms Footer
                     VStack(spacing: 4) {
-                        Text("Genom att fortsätta går du med på")
+                        Text("login.terms_agreement", tableName: "Localizable")
                             .font(.caption)
                             .foregroundColor(Color(hex: "546E7A"))
-                        
+
                         HStack(spacing: 4) {
-                            Button("Villkor") { /* Show Terms */ }
+                            Button(String(localized: "login.terms", table: "Localizable")) { /* Show Terms */ }
                             Text("&")
-                            Button("Sekretesspolicy") { /* Show Privacy */ }
+                            Button(String(localized: "login.privacy_policy", table: "Localizable")) { /* Show Privacy */ }
                         }
                         .font(.caption.bold())
                         .foregroundColor(Color(hex: "00ACC1"))
@@ -278,11 +279,11 @@ struct MagicLinkLoginView: View {
                 VStack(spacing: 24) {
                     if !linkSent {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Ange din e-post")
+                            Text("magic_link.enter_email", tableName: "Localizable")
                                 .font(.headline)
                                 .foregroundColor(Color(hex: "1A237E"))
-                            
-                            TextField("din@epost.se", text: $email)
+
+                            TextField(String(localized: "magic_link.email_placeholder", table: "Localizable"), text: $email)
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .foregroundColor(Color(hex: "1A237E")) // Dark text color
                                 .accentColor(Color(hex: "43A047")) // Green cursor
@@ -294,13 +295,13 @@ struct MagicLinkLoginView: View {
                                 .autocapitalization(.none)
                                 .autocorrectionDisabled()
                         }
-                        
-                        Text("Vi skickar en länk till din e-post som loggar in dig direkt. Inget lösenord behövs!")
+
+                        Text("magic_link.description", tableName: "Localizable")
                             .font(.subheadline)
                             .foregroundColor(Color(hex: "546E7A"))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                        
+
                         Button(action: {
                             onSendLink { success in
                                 withAnimation {
@@ -312,7 +313,7 @@ struct MagicLinkLoginView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                Text("Skicka Magic Link")
+                                Text("magic_link.send_button", tableName: "Localizable")
                             }
                         }
                         .font(.headline)
@@ -327,16 +328,16 @@ struct MagicLinkLoginView: View {
                             Image(systemName: "envelope.badge.shield.half.filled")
                                 .font(.system(size: 80))
                                 .foregroundColor(Color(hex: "43A047"))
-                            
-                            Text("Kolla din e-post!")
+
+                            Text("magic_link.check_email", tableName: "Localizable")
                                 .font(.title2.bold())
                                 .foregroundColor(Color(hex: "1A237E"))
-                            
-                            Text("Vi har skickat en inloggningslänk till **\(email)**. Klicka på länken i mejlet för att logga in.")
+
+                            Text("magic_link.email_sent_message \(email)", tableName: "Localizable")
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(hex: "546E7A"))
-                            
-                            Button("Stäng") {
+
+                            Button(String(localized: "common.close", table: "Localizable")) {
                                 dismiss()
                             }
                             .font(.headline)
@@ -344,16 +345,16 @@ struct MagicLinkLoginView: View {
                         }
                         .padding()
                     }
-                    
+
                     Spacer()
                 }
                 .padding(32)
             }
-            .navigationTitle("Logga in")
+            .navigationTitle(Text("magic_link.title", tableName: "Localizable"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Avbryt") {
+                    Button(String(localized: "common.cancel", table: "Localizable")) {
                         dismiss()
                     }
                 }
