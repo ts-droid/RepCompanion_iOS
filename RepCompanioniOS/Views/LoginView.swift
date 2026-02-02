@@ -13,34 +13,34 @@ struct LoginView: View {
     @State private var name = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
-    
+
     var body: some View {
         NavigationView {
             ZStack {
                 BrandBackground()
-                
+
                 VStack(spacing: 24) {
                     Spacer()
-                    
+
                     // Logo and Branding
                     Image("AppLogo")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 140, height: 140)
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    
+
                     VStack(spacing: 8) {
-                        Text("login.welcome", tableName: "Localizable")
+                        Text("Welcome!")
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundColor(Color(hex: "1A237E"))
 
-                        Text("login.tagline", tableName: "Localizable")
+                        Text("Your training companion")
                             .font(.headline)
                             .foregroundColor(Color(hex: "546E7A"))
                     }
-                    
+
                     Spacer()
-                    
+
                     // Authentication Options
                     VStack(spacing: 16) {
                         Button(action: { signInWithGoogle() }) {
@@ -49,7 +49,7 @@ struct LoginView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 24, height: 24)
-                                Text("login.continue_with_google", tableName: "Localizable")
+                                Text("Continue with Google")
                                     .font(.system(size: 19, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
@@ -82,7 +82,7 @@ struct LoginView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "link")
                                     .font(.system(size: 19, weight: .semibold))
-                                Text("login.sign_in_with_magic_link", tableName: "Localizable")
+                                Text("Sign in with Magic Link")
                                     .font(.system(size: 19, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
@@ -102,19 +102,19 @@ struct LoginView: View {
                         // Already have an account? - Removed in favor of single Magic Link flow
                     }
                     .padding(.horizontal, 32)
-                    
+
                     Spacer()
-                    
+
                     // Terms Footer
                     VStack(spacing: 4) {
-                        Text("login.terms_agreement", tableName: "Localizable")
+                        Text("By continuing you agree to")
                             .font(.caption)
                             .foregroundColor(Color(hex: "546E7A"))
 
                         HStack(spacing: 4) {
-                            Button(String(localized: "login.terms", table: "Localizable")) { /* Show Terms */ }
+                            Button("Terms") { /* Show Terms */ }
                             Text("&")
-                            Button(String(localized: "login.privacy_policy", table: "Localizable")) { /* Show Privacy */ }
+                            Button("Privacy Policy") { /* Show Privacy */ }
                         }
                         .font(.caption.bold())
                         .foregroundColor(Color(hex: "00ACC1"))
@@ -131,7 +131,7 @@ struct LoginView: View {
                     onSendLink: { completion in sendMagicLink(completion: completion) }
                 )
             }
-            .alert("Fel", isPresented: .constant(errorMessage != nil)) {
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
                 Button("OK") {
                     errorMessage = nil
                 }
@@ -142,9 +142,9 @@ struct LoginView: View {
             }
         }
     }
-    
+
     // MARK: - Authentication Handlers
-    
+
     private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
@@ -156,7 +156,7 @@ struct LoginView: View {
                         if let authError = error as? AuthError {
                             errorMessage = authError.localizedDescription
                         } else {
-                            errorMessage = "Kunde inte logga in med Apple: \(error.localizedDescription)"
+                            errorMessage = String(localized: "Could not sign in with Apple: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -169,37 +169,37 @@ struct LoginView: View {
                     // User canceled - don't show error
                     return
                 case .failed:
-                    errorMessage = "Inloggning misslyckades. Försök igen."
+                    errorMessage = String(localized: "Sign in failed. Please try again.")
                 case .invalidResponse:
-                    errorMessage = "Ogiltigt svar från Apple. Försök igen."
+                    errorMessage = String(localized: "Invalid response from Apple. Please try again.")
                 case .notHandled:
-                    errorMessage = "Inloggning kunde inte hanteras. Försök igen."
+                    errorMessage = String(localized: "Sign in could not be handled. Please try again.")
                 case .unknown:
-                    errorMessage = "Ett okänt fel uppstod. Försök igen."
+                    errorMessage = String(localized: "An unknown error occurred. Please try again.")
                 default:
-                    errorMessage = "Ett oväntat fel uppstod med Apple Sign-In (\(authError.code.rawValue))."
+                    errorMessage = String(localized: "An unexpected error occurred with Apple Sign-In (\(authError.code.rawValue)).")
                 }
             } else {
-                errorMessage = "Kunde inte logga in med Apple: \(error.localizedDescription)"
+                errorMessage = String(localized: "Could not sign in with Apple: \(error.localizedDescription)")
             }
         }
     }
-    
+
     private func signInWithGoogle() {
         let googleService = GoogleSignInService.shared
-        
+
         guard googleService.isAvailable else {
-            errorMessage = "Google Sign-In är inte konfigurerad ännu. Använd Apple Sign-In eller e-post för nu."
+            errorMessage = String(localized: "Google Sign-In is not configured yet. Use Apple Sign-In or email for now.")
             return
         }
-        
+
         // Get the root view controller to present Google Sign-In
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
-            errorMessage = "Kunde inte hitta view controller för Google Sign-In"
+            errorMessage = String(localized: "Could not find view controller for Google Sign-In")
             return
         }
-        
+
         Task {
             do {
                 let (idToken, accessToken) = try await googleService.signIn(presentingViewController: rootViewController)
@@ -214,20 +214,20 @@ struct LoginView: View {
                     if let urlError = error as? URLError {
                         switch urlError.code {
                         case .notConnectedToInternet:
-                            errorMessage = "Ingen internetanslutning. Kontrollera din uppkoppling."
+                            errorMessage = String(localized: "No internet connection. Check your connection.")
                         case .timedOut:
-                            errorMessage = "Servern svarade inte. Försök igen."
+                            errorMessage = String(localized: "Server did not respond. Please try again.")
                         case .cannotConnectToHost, .cannotFindHost:
-                            errorMessage = "Kunde inte ansluta till servern. Försök igen senare."
+                            errorMessage = String(localized: "Could not connect to server. Please try again later.")
                         case .networkConnectionLost:
-                            errorMessage = "Nätverksanslutningen avbröts. Försök igen."
+                            errorMessage = String(localized: "Network connection lost. Please try again.")
                         default:
-                            errorMessage = "Nätverksfel. Kontrollera din anslutning och försök igen."
+                            errorMessage = String(localized: "Network error. Check your connection and try again.")
                         }
                     } else if let googleError = error as? GoogleSignInError {
                         errorMessage = googleError.localizedDescription
                     } else {
-                        errorMessage = "Kunde inte logga in med Google: \(error.localizedDescription)"
+                        errorMessage = String(localized: "Could not sign in with Google: \(error.localizedDescription)")
                     }
                 }
             }
@@ -236,11 +236,11 @@ struct LoginView: View {
 
     private func sendMagicLink(completion: @escaping (Bool) -> Void) {
         guard !email.isEmpty else {
-            errorMessage = "Vänligen fyll i din e-post"
+            errorMessage = String(localized: "Please enter your email")
             completion(false)
             return
         }
-        
+
         isLoading = true
         Task {
             do {
@@ -252,7 +252,7 @@ struct LoginView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = "Kunde inte skicka länk: \(error.localizedDescription)"
+                    errorMessage = String(localized: "Could not send link: \(error.localizedDescription)")
                     completion(false)
                 }
             }
@@ -270,20 +270,20 @@ struct MagicLinkLoginView: View {
     @Binding var errorMessage: String?
     @State private var linkSent = false
     let onSendLink: (@escaping (Bool) -> Void) -> Void
-    
+
     var body: some View {
         NavigationView {
             ZStack {
                 BrandBackground()
-                
+
                 VStack(spacing: 24) {
                     if !linkSent {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("magic_link.enter_email", tableName: "Localizable")
+                            Text("Enter your email")
                                 .font(.headline)
                                 .foregroundColor(Color(hex: "1A237E"))
 
-                            TextField(String(localized: "magic_link.email_placeholder", table: "Localizable"), text: $email)
+                            TextField("your@email.com", text: $email)
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .foregroundColor(Color(hex: "1A237E")) // Dark text color
                                 .accentColor(Color(hex: "43A047")) // Green cursor
@@ -296,7 +296,7 @@ struct MagicLinkLoginView: View {
                                 .autocorrectionDisabled()
                         }
 
-                        Text("magic_link.description", tableName: "Localizable")
+                        Text("We'll send a link to your email that logs you in directly. No password needed!")
                             .font(.subheadline)
                             .foregroundColor(Color(hex: "546E7A"))
                             .multilineTextAlignment(.center)
@@ -313,7 +313,7 @@ struct MagicLinkLoginView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                Text("magic_link.send_button", tableName: "Localizable")
+                                Text("Send Magic Link")
                             }
                         }
                         .font(.headline)
@@ -329,15 +329,15 @@ struct MagicLinkLoginView: View {
                                 .font(.system(size: 80))
                                 .foregroundColor(Color(hex: "43A047"))
 
-                            Text("magic_link.check_email", tableName: "Localizable")
+                            Text("Check your email!")
                                 .font(.title2.bold())
                                 .foregroundColor(Color(hex: "1A237E"))
 
-                            Text("magic_link.email_sent_message \(email)", tableName: "Localizable")
+                            Text("We've sent a login link to **\(email)**. Click the link in the email to log in.")
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(hex: "546E7A"))
 
-                            Button(String(localized: "common.close", table: "Localizable")) {
+                            Button("Close") {
                                 dismiss()
                             }
                             .font(.headline)
@@ -350,11 +350,11 @@ struct MagicLinkLoginView: View {
                 }
                 .padding(32)
             }
-            .navigationTitle(Text("magic_link.title", tableName: "Localizable"))
+            .navigationTitle("Sign in")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(String(localized: "common.cancel", table: "Localizable")) {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
@@ -368,4 +368,3 @@ struct MagicLinkLoginView: View {
         }
     }
 }
-
