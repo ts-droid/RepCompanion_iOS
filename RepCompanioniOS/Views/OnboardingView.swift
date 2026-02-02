@@ -2834,7 +2834,7 @@ struct OnboardingView: View {
                         if let jobId = response.program?.jobId, let userId = authService.currentUserId {
                             print("[Onboarding] 🚀 Background generation started with jobId: \(jobId)")
                             await MainActor.run {
-                                generationJobId = jobId
+                                self.generationJobId = jobId
                             }
                             await pollGenerationStatus(jobId: jobId, userId: userId)
                             finalizeOnboarding()
@@ -2875,7 +2875,9 @@ struct OnboardingView: View {
             
             // Wait up to 5 minutes (300 attempts * 1s) to match API timeout
             while !programGenerationComplete && attempts < 300 {
-                if let jobId = await MainActor.run({ generationJobId }), let userId = userId {
+                let currentJobId = await MainActor.run { self.generationJobId }
+                
+                if let jobId = currentJobId, let userId = userId {
                     // If we have a jobId, we should be polling it
                     await pollGenerationStatus(jobId: jobId, userId: userId)
                     // If pollGenerationStatus finishes (either success or fail), it will update programGenerationComplete

@@ -11,11 +11,11 @@ struct GenerationProgressView: View {
     @State private var animateIcon = false
     @State private var animateSparkles = false
     
-    private let buildingSteps: [(text: String, icon: String)] = [
-        (text: String(localized: "Analyzing your goals..."), icon: "target"),
-        (text: String(localized: "Choosing exercises..."), icon: "dumbbell.fill"),
-        (text: String(localized: "Optimizing schedule..."), icon: "calendar"),
-        (text: String(localized: "Building your workout program..."), icon: "sparkles")
+    private let buildingSteps: [(text: LocalizedStringKey, icon: String)] = [
+        (text: "Analyzing your goals...", icon: "target"),
+        (text: "Choosing exercises...", icon: "dumbbell.fill"),
+        (text: "Optimizing schedule...", icon: "calendar"),
+        (text: "Building your workout program...", icon: "sparkles")
     ]
     
     var body: some View {
@@ -142,7 +142,7 @@ struct GenerationProgressView: View {
         }
     }
     
-    private var currentStep: (text: String, icon: String) {
+    private var currentStep: (text: LocalizedStringKey, icon: String) {
         buildingSteps[stepIndex]
     }
 }
