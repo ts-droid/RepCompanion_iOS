@@ -22,11 +22,11 @@ struct WelcomeView: View {
                             .padding(.top, 40)
                         
                         VStack(spacing: 12) {
-                            Text("Maximera din träning!")
+                            Text("Maximize your workout!")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(Color(hex: "1A237E"))
                             
-                            Text("RepCompanion är ett enkelt och smart verktyg som hjälper dig att sätta ihop ett träningsupplägg som passar just dina mål och din vardag.")
+                            Text("RepCompanion is a simple and smart tool that helps you put together a training setup that fits your goals and daily life.")
                                 .font(.body)
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(hex: "546E7A"))
@@ -39,16 +39,16 @@ struct WelcomeView: View {
                                 icon: "list.clipboard.fill",
                                 iconBg: Color(hex: "E0F2F1"),
                                 iconColor: Color(hex: "00897B"),
-                                title: "Personliga träningsprogram",
-                                subtitle: "Skräddarsy ditt schema baserat på dina mål och behov."
+                                title: "Personal training programs",
+                                subtitle: "Customize your schedule based on your goals and needs."
                             )
                             
                             FeatureCard(
                                 icon: "lightbulb.fill",
                                 iconBg: Color(hex: "FFF9C4"),
                                 iconColor: Color(hex: "FBC02D"),
-                                title: "Tips & råd på vägen",
-                                subtitle: "Få experttips och motivation för att hålla dig på rätt spår."
+                                title: "Tips & advice along the way",
+                                subtitle: "Get expert tips and motivation to keep you on track."
                             )
                             
                             FeatureCard(
@@ -56,13 +56,13 @@ struct WelcomeView: View {
                                 iconBg: Color(hex: "E1F5FE"),
                                 iconColor: Color(hex: "0288D1"),
                                 title: "Exklusiva erbjudanden",
-                                subtitle: "Ta del av rabatter på träningsutrustning och kosttillskott."
+                                subtitle: "Get discounts on training equipment and supplements."
                             )
                         }
                         .padding(.horizontal, 24)
                         
                         // Description expansion
-                        Text("Oavsett om du vill gå ner i vikt, rehabilitera en skada eller träna för ishockey, hjälper vi dig med rätt fokus.")
+                        Text("Whether you want to lose weight, rehabilitate an injury, or train for ice hockey, we help you with the right focus.")
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(hex: "78909C"))
@@ -76,7 +76,7 @@ struct WelcomeView: View {
                 VStack(spacing: 16) {
                     // Consent Checkbox
                     Toggle(isOn: $hasConsented) {
-                        Text("Jag godkänner våra Villkor & Sekretesspolicy för att ta emot skräddarsydda erbjudanden från våra samarbetspartners samt träningsrelaterad marknadsföring.")
+                        Text("I agree to our Terms & Privacy Policy to receive tailored offers from our partners and fitness-related marketing.")
                             .font(.caption)
                             .foregroundColor(Color(hex: "546E7A"))
                     }
@@ -85,7 +85,7 @@ struct WelcomeView: View {
                     
                     HStack(spacing: 16) {
                         Button(action: { /* Do nothing or dismiss */ }) {
-                            Text("Avböj")
+                            Text("Decline")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
@@ -100,7 +100,7 @@ struct WelcomeView: View {
                                 welcomeAccepted = true
                             }
                         }) {
-                            Text("Fortsätt")
+                            Text("Continue")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
@@ -198,18 +198,18 @@ struct LegalDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Group {
-                        Text("Användarvillkor – RepCompanion")
+                        Text("Terms of Use – RepCompanion")
                             .font(.title2.bold())
                         
-                        Text("Genom att skapa ett konto eller använda RepCompanion godkänner du dessa villkor.")
+                        Text("By creating an account or using RepCompanion, you agree to these terms.")
                         
-                        Text("RepCompanion är en tränings- och planeringsapp som tillhandahåller generell information, vägledning och förslag kring träning och fysisk aktivitet. Innehållet i appen är avsedd för informations- och inspirationssyfte och utgör inte medicinsk rådgivning eller professionell behandling.")
+                        Text("RepCompanion is a training and planning app that provides general information, guidance, and suggestions about training and physical activity. The content in the app is intended for information and inspiration purposes and does not constitute medical advice or professional treatment.")
                         
-                        Text("Du ansvarar själv för att:")
+                        Text("You are responsible for:")
                         VStack(alignment: .leading, spacing: 8) {
-                            BulletItem(text: "Bedöma om föreslagen träning är lämplig för dig")
-                            BulletItem(text: "Träna på ett säkert sätt")
-                            BulletItem(text: "Vid behov rådgöra med läkare, fysioterapeut eller annan kvalificerad vårdpersonal")
+                            BulletItem(text: "Assess whether suggested training is suitable for you")
+                            BulletItem(text: "Train safely")
+                            BulletItem(text: "Consult with a doctor, physiotherapist or other qualified healthcare professional when needed")
                         }
                     }
                     
@@ -219,17 +219,17 @@ struct LegalDetailView: View {
                         Text("Sekretess & Dataskydd")
                             .font(.title2.bold())
                         
-                        Text("RepCompanion värnar om din integritet och hanterar personuppgifter i enlighet med gällande dataskyddslagstiftning, inklusive GDPR.")
+                        Text("RepCompanion values your privacy and handles personal data in accordance with applicable data protection legislation, including GDPR.")
                         
                         Text("Vilken information vi samlar in:")
                         VStack(alignment: .leading, spacing: 8) {
-                            BulletItem(text: "Grundläggande profilinformation (t.ex. ålder, kön, längd, vikt)")
-                            BulletItem(text: "Uppgifter om träningsmål, träningsnivå och preferenser")
-                            BulletItem(text: "Användningsdata som rör hur appens funktioner används")
+                            BulletItem(text: "Basic profile information (e.g. age, gender, height, weight)")
+                            BulletItem(text: "Information about training goals, level and preferences")
+                            BulletItem(text: "Usage data about how the app features are used")
                         }
                         
-                        Text("Reklam och affiliate-länkar:")
-                        Text("RepCompanion innehåller annonser och samarbeten med tredjepartsföretag. Detta innebär att appen kan visa reklam, erbjudanden eller länkar till produkter och tjänster.")
+                        Text("Advertising and affiliate links:")
+                        Text("RepCompanion contains ads and partnerships with third-party companies. This means the app may show advertising, offers, or links to products and services.")
                     }
                 }
                 .padding()
@@ -238,7 +238,7 @@ struct LegalDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Klar") { dismiss() }
+                    Button("Done") { dismiss() }
                 }
             }
         }

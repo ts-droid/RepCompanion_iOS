@@ -134,7 +134,7 @@ struct ActivityDetailView: View {
                 StatusCard(
                     title: "AKTIVITET",
                     value: "\(activityPercent)%",
-                    subtitle: "av mål",
+                    subtitle: "of goal",
                     color: .activityBlue,
                     progress: Double(activityPercent) / 100.0,
                     icon: "waveform.path.ecg",
@@ -149,7 +149,7 @@ struct ActivityDetailView: View {
             // Activity Specifications
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Total aktivitet:")
+                    Text("Total activity:")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -161,7 +161,7 @@ struct ActivityDetailView: View {
                 
                 if let workoutProgress = workoutProgress {
                     HStack {
-                        Text("Träningspass:")
+                        Text("Workout:")
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                         Spacer()
@@ -173,7 +173,7 @@ struct ActivityDetailView: View {
                 } else if todayTemplate != nil || useTestData {
                     // Show 0% if it's a training day but no progress yet, or show test data
                     HStack {
-                        Text("Träningspass:")
+                        Text("Workout:")
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                         Spacer()
@@ -230,7 +230,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "clock")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Träningspuls")
+                            Text("Training heart rate")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -247,7 +247,7 @@ struct ActivityDetailView: View {
                         }
                     }
                     
-                    Text("Kräver Apple Watch för träning")
+                    Text("Requires Apple Watch for workout")
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -259,7 +259,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "flame.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Aktiva kalorier")
+                            Text("Active calories")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -276,7 +276,7 @@ struct ActivityDetailView: View {
                         }
                     }
                     
-                    Text("Kräver Apple Watch för aktivitet")
+                    Text("Requires Apple Watch for activity")
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -324,7 +324,7 @@ struct ActivityDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "dumbbell.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Pass denna vecka")
+                            Text("Sessions this week")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

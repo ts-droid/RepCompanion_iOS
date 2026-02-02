@@ -16,11 +16,11 @@ struct StatisticsView: View {
                         // Header
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("Träningsstatistik")
+                                Text("Training statistics")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                Text("Övervaka din utveckling över tid")
+                                Text("Monitor your progress over time")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                             }
@@ -35,7 +35,7 @@ struct StatisticsView: View {
                                     icon: "calendar",
                                     title: "Totala Sessioner",
                                     value: "\(StatsCalculator.shared.totalSessions(modelContext: modelContext))",
-                                    subtitle: "Genomförda träningspass",
+                                    subtitle: "Completed workouts",
                                     colorScheme: colorScheme
                                 )
                             }
@@ -52,9 +52,9 @@ struct StatisticsView: View {
                             NavigationLink(destination: ExercisePBsView()) {
                                 ClickableStatCard(
                                     icon: "dumbbell.fill",
-                                    title: "Unika Övningar",
+                                    title: "Unique Exercises",
                                     value: "\(StatsCalculator.shared.uniqueExercises(modelContext: modelContext))",
-                                    subtitle: "Olika träningsövningar",
+                                    subtitle: "Various training exercises",
                                     colorScheme: colorScheme
                                 )
                             }
@@ -64,25 +64,25 @@ struct StatisticsView: View {
                                 icon: "clock",
                                 title: "Snitt Pass",
                                 value: StatsCalculator.shared.formattedAverageDuration(modelContext: modelContext),
-                                subtitle: "Per träningspass",
+                                subtitle: "Per workout",
                                 colorScheme: colorScheme
                             )
                         }
                         .padding(.horizontal)
                         
                         // Weekly Sessions Chart
-                        ChartCard(title: "Veckovisa Sessioner", subtitle: "Dina träningspass per vecka över tid", colorScheme: colorScheme) {
+                        ChartCard(title: "Veckovisa Sessioner", subtitle: "Your workouts per week over time", colorScheme: colorScheme) {
                             WeeklySessionsChart(data: StatsCalculator.shared.getWeeklySessionCounts(modelContext: modelContext))
                         }
                         
                         // Top Exercises Chart
-                        ChartCard(title: "Toppövningar", subtitle: "Dina mest tränade övningar efter volym", colorScheme: colorScheme) {
+                        ChartCard(title: "Top exercises", subtitle: "Your most trained exercises by volume", colorScheme: colorScheme) {
                             TopExercisesChart(data: StatsCalculator.shared.getTopExercises(modelContext: modelContext))
                         }
                         
                         // Muscle Distribution Chart
                         NavigationLink(destination: MuscleBalanceView()) {
-                            ChartCard(title: "Muskelfördelning", subtitle: "Fördelning av set per muskelgrupp", colorScheme: colorScheme) {
+                            ChartCard(title: "Muscle distribution", subtitle: "Distribution of sets per muscle group", colorScheme: colorScheme) {
                                 ExerciseDistributionChart(data: StatsCalculator.shared.getMuscleDistribution(modelContext: modelContext))
                             }
                         }
@@ -105,7 +105,7 @@ struct StatisticsView: View {
                             .padding(.horizontal)
                             
                             StrengthChartCard(title: "Squat", current: "70 kg max", average: "38.0 kg snitt", colorScheme: colorScheme)
-                            StrengthChartCard(title: "Bänkpress", current: "70 kg max", average: "60.0 kg snitt", colorScheme: colorScheme)
+                            StrengthChartCard(title: "Bench press", current: "70 kg max", average: "60.0 kg snitt", colorScheme: colorScheme)
                         }
                         
                         // Health Trends
@@ -114,10 +114,10 @@ struct StatisticsView: View {
                                 Image(systemName: "heart.text.square.fill")
                                     .foregroundColor(.red)
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Hälsotrender")
+                                    Text("Health trends")
                                         .font(.headline)
                                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                    Text("Se dina hälsomätvärden över tid")
+                                    Text("View your health metrics over time")
                                         .font(.caption)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 }
@@ -133,14 +133,14 @@ struct StatisticsView: View {
                         
                         // History Section
                         VStack(alignment: .leading) {
-                            Text("Träningshistorik")
+                            Text("Training history")
                                 .font(.title3)                                .fontWeight(.bold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 .padding(.horizontal)
                             
                             let history = StatsCalculator.shared.getWorkoutHistory(modelContext: modelContext).prefix(5)
                             if history.isEmpty {
-                                Text("Ingen historik än")
+                                Text("No history yet")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .padding()
@@ -150,7 +150,7 @@ struct StatisticsView: View {
                                         title: item.name,
                                         date: item.date.formatted(date: .abbreviated, time: .omitted),
                                         time: "\(item.duration) min",
-                                        status: item.status == "completed" ? "Slutfört" : "Avbrutet",
+                                        status: item.status == "completed" ? "Completed" : "Avbrutet",
                                         isCompleted: item.status == "completed",
                                         colorScheme: colorScheme
                                     )

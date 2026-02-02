@@ -54,7 +54,7 @@ struct ExerciseListView: View {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
-                        TextField("Sök övningar...", text: $searchText)
+                        TextField("Search exercises...", text: $searchText)
                             .textFieldStyle(PlainTextFieldStyle())
                     }
                     .padding()
@@ -97,7 +97,7 @@ struct ExerciseListView: View {
                         Image(systemName: "figure.strengthtraining.traditional")
                             .font(.system(size: 60))
                             .foregroundColor(.gray)
-                        Text("Inga övningar hittades")
+                        Text("No exercises found")
                             .font(.headline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                     }
@@ -114,7 +114,7 @@ struct ExerciseListView: View {
                 }
             }
             .background(Color.appBackground(for: colorScheme))
-            .navigationTitle("Övningar")
+            .navigationTitle("Exercises")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: syncCatalog) {
@@ -125,7 +125,7 @@ struct ExerciseListView: View {
             .alert("Synkning", isPresented: $showSyncAlert) {
                 Button("OK") { }
             } message: {
-                Text(isLoading ? "Synkar övningskatalog..." : "Synkning slutförd")
+                Text(isLoading ? "Syncing exercise catalog..." : "Sync completed")
             }
         }
     }

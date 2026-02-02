@@ -48,8 +48,8 @@ struct EditGymView: View {
     
     var body: some View {
         mainContent
-            .alert("Skapa program för gymmet?", isPresented: $showAdaptationAlert) {
-                Button("Ja, baserat på mitt program") {
+            .alert("Create program for this gym?", isPresented: $showAdaptationAlert) {
+                Button("Yes, based on my program") {
                     if let targetId = createdGymId {
                         Task {
                             try? await ProgramAdaptationService.shared.adaptProgram(
@@ -62,11 +62,11 @@ struct EditGymView: View {
                         }
                     }
                 }
-                Button("Nej, hoppa över") {
+                Button("No, skip") {
                     dismiss()
                 }
             } message: {
-                Text("Vill du skapa ett träningsupplägg för detta gym baserat på ditt nuvarande program? Övningarna anpassas efter tillgänglig utrustning.")
+                Text("Do you want to create a training setup for this gym based on your current program? Exercises will be adapted to available equipment.")
             }
     }
     
@@ -93,7 +93,7 @@ struct EditGymView: View {
                     if isActive {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
-                            Text("Aktivt gym")
+                            Text("Active gym")
                                 .fontWeight(.bold)
                             Spacer()
                         }
@@ -109,7 +109,7 @@ struct EditGymView: View {
                         }) {
                             HStack {
                                 Image(systemName: "hand.tap.fill")
-                                Text("Välj som aktivt gym")
+                                Text("Select as active gym")
                                     .fontWeight(.semibold)
                                 Spacer()
                             }
@@ -120,12 +120,12 @@ struct EditGymView: View {
             }
 
             Section(header: Text("Gym Information")) {
-                    TextField("Gym Namn (t.ex. Mitt Gym)", text: $name)
+                    TextField("Gym Name (e.g. My Gym)", text: $name)
                         .focused($focusedField, equals: .name)
                     
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            TextField("Adress (Valfritt)", text: $location)
+                            TextField("Address (Optional)", text: $location)
                                 .focused($focusedField, equals: .location)
                                 .onChange(of: location) { _, newValue in
                                     locationService.searchQuery = newValue
@@ -164,17 +164,17 @@ struct EditGymView: View {
                         }
                     }
                     
-                    Toggle("Publikt gym", isOn: $isPublic)
+                    Toggle("Public gym", isOn: $isPublic)
                         .tint(Color.themePrimaryColor(theme: selectedTheme, colorScheme: colorScheme))
                     
                     if !isPublic {
-                        Text("Privata gym sparas endast för dig.")
+                        Text("Private gyms are saved only for you.")
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
                 }
                 
-                Section(header: Text("Hitta i närheten")) {
+                Section(header: Text("Find nearby")) {
                     Button(action: {
                         locationService.searchNearbyGyms()
                         showNearbyGyms = true
@@ -185,7 +185,7 @@ struct EditGymView: View {
                                 ProgressView()
                                     .padding(.leading, 8)
                             } else {
-                                Text("Sök gym i närheten")
+                                Text("Search gyms nearby")
                             }
                         }
                     }
@@ -237,7 +237,7 @@ struct EditGymView: View {
                     )) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Välj utrustning")
+                                Text("Select equipment")
                                     .fontWeight(.medium)
                                 Text("\(selectedEquipmentIds.count) valda")
                                     .font(.caption)
@@ -251,7 +251,7 @@ struct EditGymView: View {
                     }
                     
                     if selectedEquipmentIds.isEmpty {
-                        Text("Ingen utrustning vald. Detta gym kommer endast att stödja kroppsviktsövningar.")
+                        Text("No equipment selected. This gym will only support bodyweight exercises.")
                             .font(.caption)
                             .foregroundColor(.orange)
                             .padding(.vertical, 4)

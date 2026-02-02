@@ -28,11 +28,11 @@ struct GymListView: View {
                             .font(.system(size: 48))
                             .foregroundColor(.gray.opacity(0.3))
                         
-                        Text("Inga gym")
+                        Text("No gyms")
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                         
-                        Text("Lägg till ditt första gym för att komma igång.")
+                        Text("Add your first gym to get started.")
                             .font(.subheadline)
                             .foregroundColor(Color.textSecondary(for: colorScheme))
                             .multilineTextAlignment(.center)
@@ -82,7 +82,7 @@ struct GymListView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle("Mina Gym")
+        .navigationTitle("My Gyms")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { showingAddGym = true }) {

@@ -46,11 +46,11 @@ struct ExerciseDetailView: View {
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                     
                     InfoRow(label: "Kategori", value: exercise.category)
-                    InfoRow(label: "Svårighetsgrad", value: exercise.difficulty.capitalized)
-                    InfoRow(label: "Typ", value: exercise.isCompound ? "Sammansatt" : "Isolerad")
+                    InfoRow(label: "Difficulty level", value: exercise.difficulty.capitalized)
+                    InfoRow(label: "Type", value: exercise.isCompound ? "Sammansatt" : "Isolerad")
                     
                     if let pattern = exercise.movementPattern {
-                        InfoRow(label: "Rörelsemönster", value: pattern)
+                        InfoRow(label: "Movement patterns", value: pattern)
                     }
                 }
                 .padding()
@@ -59,20 +59,20 @@ struct ExerciseDetailView: View {
                 
                 // Muscles
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Muskelgrupper")
+                    Text("Muscle groups")
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                     
                     VStack(alignment: .leading, spacing: 8) {
                         if !exercise.primaryMuscles.isEmpty {
-                            Text("Primära")
+                            Text("Primary")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             TagView(tags: exercise.primaryMuscles, colorScheme: colorScheme)
                         }
                         
                         if !exercise.secondaryMuscles.isEmpty {
-                            Text("Sekundära")
+                            Text("Secondary")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             TagView(tags: exercise.secondaryMuscles, colorScheme: colorScheme)
@@ -100,7 +100,7 @@ struct ExerciseDetailView: View {
                 // Description
                 if let description = exercise.exerciseDescription {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Beskrivning")
+                        Text("Description")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         

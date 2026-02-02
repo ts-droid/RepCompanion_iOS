@@ -180,7 +180,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "target")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Träningsmål")
+                                Text("Training goals")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -204,7 +204,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "circle.lefthalf.filled")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Färgschema")
+                                Text("Color scheme")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -230,14 +230,14 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "paintpalette")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Välj Tema")
+                                Text("Select Theme")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
                             }
                             .padding(.horizontal)
                             
-                            Text("Anpassa appens utseende med ditt favoritfärgschema")
+                            Text("Customize the app appearance with your favorite color scheme")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                 .padding(.horizontal)
@@ -257,7 +257,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "heart.text.square")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Hälsointegration")
+                                Text("Health integration")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -265,7 +265,7 @@ struct ProfileView: View {
                             .padding(.horizontal)
                             
                             VStack(spacing: 12) {
-                                Text("Synka automatiskt träningsdata, steg, sömn och återhämtning från dina hälsoplattformar.")
+                                Text("Automatically sync workout data, steps, sleep and recovery from your health platforms.")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                 
@@ -276,7 +276,7 @@ struct ProfileView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: healthKitService.isAuthorized ? "heart.fill" : "heart")
-                                        Text(healthKitService.isAuthorized ? "Hälsodata ansluten" : "Anslut hälsodata")
+                                        Text(healthKitService.isAuthorized ? "Health data connected" : "Connect health data")
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -297,7 +297,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "mappin.circle")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Aktivt Gym")
+                                Text("Active Gym")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -327,11 +327,11 @@ struct ProfileView: View {
                                         }
                                         
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text("Inget gym valt")
+                                            Text("No gym selected")
                                                 .font(.subheadline)
                                                 .fontWeight(.bold)
                                                 .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                            Text("Välj ett gym för att komma igång")
+                                            Text("Select a gym to get started")
                                                 .font(.caption2)
                                                 .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                         }
@@ -357,7 +357,7 @@ struct ProfileView: View {
                             NavigationLink(destination: GymListView()) {
                                 HStack {
                                     Image(systemName: "dumbbell.fill")
-                                    Text("Mina Gym")
+                                    Text("My Gyms")
                                     Spacer()
                                 }
                                 .padding()

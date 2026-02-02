@@ -90,7 +90,7 @@ class ProgramAdaptationService: ObservableObject {
                             targetWeight: calculateAdaptedWeight(sourceWeight: sourceEx.targetWeight, sourceEx: sourceEx, targetEx: alternative),
                             requiredEquipment: alternative.requiredEquipment,
                             muscles: alternative.primaryMuscles,
-                            notes: "Anpassad från \(sourceEx.exerciseName)"
+                            notes: "Adapted from \(sourceEx.exerciseName)"
                         )
                         newEx.template = newTemplate
                         modelContext.insert(newEx)

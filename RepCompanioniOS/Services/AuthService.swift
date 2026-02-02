@@ -240,7 +240,7 @@ enum AuthError: LocalizedError {
         case .authenticationFailed:
             return "Autentisering misslyckades"
         case .networkError:
-            return "Nätverksfel. Kontrollera din anslutning."
+            return "Network error. Check your connection."
         }
     }
 }

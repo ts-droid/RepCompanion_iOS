@@ -22,8 +22,8 @@ class SocialService: ObservableObject {
     ) async throws {
         let progress = ProgressShare(
             type: .workout,
-            title: "Jag har slutfört: \(workoutName)",
-            description: "\(exercises) övningar • \(Int(duration / 60)) min • \(Int(totalVolume)) kg total volym",
+            title: "I have completed: \(workoutName)",
+            description: "\(exercises) exercises • \(Int(duration / 60)) min • \(Int(totalVolume)) kg total volume",
             metrics: [
                 "duration": duration,
                 "exercises": Double(exercises),

@@ -234,7 +234,7 @@ class StatsCalculator {
             
             return WorkoutHistoryItem(
                 id: session.id,
-                name: session.sessionName ?? "Träningspass",
+                name: session.sessionName ?? "Workout",
                 date: session.startedAt,
                 duration: duration,
                 totalReps: totalReps,

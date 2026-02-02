@@ -48,13 +48,13 @@ struct WorkoutListView: View {
     
     private func getDayName(_ dayOfWeek: Int?) -> String {
         guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Mån", "Tis", "Ons", "Tors", "Fre", "Lör", "Sön"]
+        let days = ["", "Mon", "Tis", "Ons", "Tors", "Fre", "Sat", "Sun"]
         return days[dayOfWeek]
     }
     
     private func getFullDayName(_ dayOfWeek: Int?) -> String {
-        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "nästa" }
-        let days = ["", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "next" }
+        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         return days[dayOfWeek]
     }
     
@@ -147,7 +147,7 @@ struct WorkoutListView: View {
                 VStack(alignment: .leading) {
                     // Header
                     HStack {
-                        Text("Träningsprogram")
+                        Text("Training program")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -167,10 +167,10 @@ struct WorkoutListView: View {
                                     Image(systemName: "dumbbell.fill")
                                         .font(.system(size: 50))
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("Inga träningsprogram")
+                                    Text("No training programs")
                                         .font(.headline)
                                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                    Text("Generera ett träningsprogram för att komma igång")
+                                    Text("Generate a training program to get started")
                                         .font(.subheadline)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                         .multilineTextAlignment(.center)
@@ -216,7 +216,7 @@ struct WorkoutListView: View {
                 // Floating Action Button
                 if !sortedTemplates.isEmpty {
                     Button(action: prepareStartWorkout) {
-                        Text("Starta pass")
+                        Text("Start session")
                             .font(.headline)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
@@ -230,8 +230,8 @@ struct WorkoutListView: View {
                 }
             }
             .navigationBarHidden(true)
-            .alert("Starta pass", isPresented: $showStartConfirmation) {
-                Button("Ja, kör!") {
+            .alert("Start session", isPresented: $showStartConfirmation) {
+                Button("Yes, let's go!") {
                     confirmStartWorkout()
                 }
                 Button("Avbryt", role: .cancel) {}
@@ -239,7 +239,7 @@ struct WorkoutListView: View {
                 if let template = templateToStart {
                     Text("Vill du starta \(getFullDayName(template.dayOfWeek))s pass idag?")
                 } else {
-                    Text("Vill du starta passet idag?")
+                    Text("Do you want to start today's session?")
                 }
             }
             .sheet(item: $selectedTemplate) { template in
@@ -286,7 +286,7 @@ struct ProgramTemplateCard: View {
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                     
                     if isNext {
-                        Text("Nästa")
+                        Text("Next")
                             .font(.caption2)
                             .fontWeight(.bold)
                             .padding(.horizontal, 6)
@@ -312,7 +312,7 @@ struct ProgramTemplateCard: View {
                         Text("•")
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                     }
-                    Text("\(exerciseCount) övningar")
+                    Text("\(exerciseCount) exercises")
                     if let duration = template.estimatedDurationMinutes {
                         Text("•")
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
@@ -325,7 +325,7 @@ struct ProgramTemplateCard: View {
             
             Spacer()
             
-            Button("Visa") {
+            Button("Show") {
                 onView()
             }
             .font(.subheadline)

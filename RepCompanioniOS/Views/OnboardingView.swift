@@ -556,11 +556,11 @@ struct OnboardingView: View {
                 LevelOption(
                     title: String(localized: "Beginner"),
                     description: String(localized: "New to training or returning after a long break"),
-                    isSelected: trainingLevel == "nybörjare", // Keeping current internal value for now but standardizing title/desc
+                    isSelected: trainingLevel == "beginner", // Keeping current internal value for now but standardizing title/desc
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
                     action: { 
-                        trainingLevel = "nybörjare"
+                        trainingLevel = "beginner"
                         calculatePresetGoals()
                     }
                 )
@@ -1198,7 +1198,7 @@ struct OnboardingView: View {
                 calculatePresetGoals()
             }
             
-            // 1RM calculation should already be started when user clicked "Fortsätt" on Personal Info step
+            // 1RM calculation should already be started when user clicked "Continue" on Personal Info step
             // Values should be ready by the time user reaches 1RM step
             if oneRmCalculated {
                 print("[Onboarding] ✅ 1RM values already calculated and ready")
@@ -1689,8 +1689,8 @@ struct OnboardingView: View {
                 }
             }
         }
-        .alert("Gym ej verifierat", isPresented: $showUnverifiedGymAlert) {
-            Button("Välj annat gym", role: .cancel) {
+        .alert("Gym not verified", isPresented: $showUnverifiedGymAlert) {
+            Button("Select another gym", role: .cancel) {
                 pendingUnverifiedGym = nil
             }
             Button("Registrera utrustning") {
@@ -1710,7 +1710,7 @@ struct OnboardingView: View {
                 }
             }
         } message: {
-            Text("Detta gym har än så länge inte verifierat utrustningen, därav är det inte valbart i gymlistan. Om du befinner dig på gymmet kan du lägga till det som nytt gym, men då måste du välja vilken utrustning som finns tillgänglig.")
+            Text("This gym has not yet verified its equipment, therefore it is not selectable in the gym list. If you are at the gym, you can add it as a new gym, but you will need to select what equipment is available.")
         }
         .onAppear {
              locationService.requestPermission()
@@ -2332,7 +2332,7 @@ struct OnboardingView: View {
             endurance = 40
             hypertrophy = 20
             cardio = 10
-        case "better_health", "bättre_hälsa":
+        case "better_health", "better_health":
             endurance = 35
             cardio = 35
             strength = 20
@@ -2419,7 +2419,7 @@ struct OnboardingView: View {
             hypertrophy = 30
             endurance = 25
             cardio = 15
-        case "mobility", "bli_rörligare":
+        case "mobility", "become_more_flexible":
             // Focus on mobility, flexibility, and injury prevention
             strength = 25
             hypertrophy = 20
@@ -2440,7 +2440,7 @@ struct OnboardingView: View {
         let levelForCalc = trainingLevel.isEmpty ? "van" : trainingLevel
         
         switch levelForCalc.lowercased() {
-        case "beginner", "nybörjare":
+        case "beginner", "beginner":
             // For "build_muscle", keep higher strength/hypertrophy even for beginners
             if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
                 // Smaller adjustment for muscle building - still prioritize strength/hypertrophy
@@ -2573,7 +2573,7 @@ struct OnboardingView: View {
         
         let userWeight = Double(bodyWeight ?? 75)
         let isMale = (sex == "male" || sex == "man" || sex.isEmpty)
-        let isBeginner = (trainingLevel == "beginner" || trainingLevel == "nybörjare" || trainingLevel.isEmpty)
+        let isBeginner = (trainingLevel == "beginner" || trainingLevel == "beginner" || trainingLevel.isEmpty)
         
         // Multipliers based on sex and experience (very rough estimates)
         let benchMultiplier = isMale ? (isBeginner ? 0.6 : 0.9) : (isBeginner ? 0.4 : 0.6)

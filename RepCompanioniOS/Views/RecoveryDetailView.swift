@@ -103,7 +103,7 @@ struct RecoveryDetailView: View {
             // Large Recovery Circle
             VStack(spacing: 16) {
                 StatusCard(
-                    title: "ÅTERHÄMTNING",
+                    title: "RECOVERY",
                     value: "\(recoveryPercent)%",
                     subtitle: "optimal",
                     color: .recoveryPurple,
@@ -120,7 +120,7 @@ struct RecoveryDetailView: View {
             // Recovery Specifications
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Total återhämtning:")
+                    Text("Total recovery:")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -131,7 +131,7 @@ struct RecoveryDetailView: View {
                 }
                 
                 HStack {
-                    Text("Sömn:")
+                    Text("Sleep:")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -155,7 +155,7 @@ struct RecoveryDetailView: View {
             
             // Recovery Details Card
             VStack(alignment: .leading, spacing: 16) {
-                Text("ÅTERHÄMTNINGSDETALJER")
+                Text("RECOVERY DETAILS")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
@@ -171,7 +171,7 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "moon.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Sömn (senaste natten)")
+                            Text("Sleep (last night)")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -206,7 +206,7 @@ struct RecoveryDetailView: View {
                         }
                     }
                     
-                    Text("Kräver Apple Watch för HRV")
+                    Text("Requires Apple Watch for HRV")
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -235,7 +235,7 @@ struct RecoveryDetailView: View {
                         }
                     }
                     
-                    Text("Kräver Apple Watch för vilopuls")
+                    Text("Requires Apple Watch for resting heart rate")
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -288,7 +288,7 @@ struct RecoveryDetailView: View {
                         }
                     }
                     
-                    Text("Kräver Apple Watch för kondition")
+                    Text("Requires Apple Watch for fitness")
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)

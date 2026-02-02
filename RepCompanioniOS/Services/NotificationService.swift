@@ -61,12 +61,12 @@ class NotificationService: NSObject, ObservableObject {
         // Add action buttons
         let startAction = UNNotificationAction(
             identifier: "START_WORKOUT",
-            title: "Starta pass",
+            title: "Start session",
             options: .foreground
         )
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE",
-            title: "Påminn om 30 min",
+            title: "Remind me in 30 min",
             options: []
         )
         
@@ -132,7 +132,7 @@ class NotificationService: NSObject, ObservableObject {
         // Cancel existing reminders
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         
-        let weekdays = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        let weekdays = ["Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         
         for day in workoutDays {
             let weekday = weekdays[day - 1]
@@ -145,8 +145,8 @@ class NotificationService: NSObject, ObservableObject {
             dateComponents.minute = 0
             
             scheduleWorkoutReminder(
-                title: "Dags att träna! 💪",
-                body: "Glöm inte ditt träningspass idag (\(weekday))",
+                title: "Time to train! 💪",
+                body: "Don't forget your workout today (\(weekday))",
                 date: Calendar.current.date(from: dateComponents) ?? Date(),
                 identifier: identifier
             )

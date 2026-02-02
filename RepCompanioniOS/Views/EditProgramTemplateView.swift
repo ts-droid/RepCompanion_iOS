@@ -43,7 +43,7 @@ struct EditProgramTemplateView: View {
                             }
                             
                             HStack {
-                                Text("Beräknad träningstid")
+                                Text("Estimated workout time")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 Spacer()
@@ -98,7 +98,7 @@ struct EditProgramTemplateView: View {
                         }) {
                             HStack {
                                 Image(systemName: "plus.circle.fill")
-                                Text("Lägg till övning")
+                                Text("Add exercise")
                             }
                             .font(.headline)
                             .foregroundColor(.white)
@@ -119,7 +119,7 @@ struct EditProgramTemplateView: View {
                     }) {
                         HStack {
                             Image(systemName: "play.circle.fill")
-                            Text("Starta pass")
+                            Text("Start session")
                         }
                         .font(.headline)
                         .fontWeight(.bold)
@@ -133,7 +133,7 @@ struct EditProgramTemplateView: View {
                     Button(action: {
                         saveChanges()
                     }) {
-                        Text("Spara ändringar")
+                        Text("Save changes")
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                             .frame(maxWidth: .infinity)
@@ -150,7 +150,7 @@ struct EditProgramTemplateView: View {
                 .padding()
                 .background(Color.appBackground(for: colorScheme))
             }
-            .navigationTitle("Redigera pass")
+            .navigationTitle("Edit session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -239,7 +239,7 @@ struct EditProgramTemplateView: View {
     
     private func getDayName(_ dayOfWeek: Int) -> String {
         guard dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         return days[dayOfWeek]
     }
 }
@@ -409,7 +409,7 @@ struct AddExerciseView: View {
                 if selectedExercise == nil {
                     // Exercise selection
                     VStack(spacing: 16) {
-                        TextField("Sök övning", text: $searchText)
+                        TextField("Search exercise", text: $searchText)
                             .textFieldStyle(.roundedBorder)
                             .padding()
                         
@@ -438,7 +438,7 @@ struct AddExerciseView: View {
                         
                         VStack(spacing: 16) {
                             Stepper("Set: \(sets)", value: $sets, in: 1...10)
-                            TextField("Reps (t.ex. 8-12)", text: $reps)
+                            TextField("Reps (e.g. 8-12)", text: $reps)
                                 .textFieldStyle(.roundedBorder)
                             TextField("Vikt (kg)", value: $weight, format: .number)
                                 .textFieldStyle(.roundedBorder)
@@ -446,7 +446,7 @@ struct AddExerciseView: View {
                         }
                         .padding()
                         
-                        Button("Lägg till") {
+                        Button("Add") {
                             let exerciseKey = selectedExercise!.id
                             let allMuscles = selectedExercise!.primaryMuscles + selectedExercise!.secondaryMuscles
                             let newExercise = ProgramTemplateExercise(
@@ -468,7 +468,7 @@ struct AddExerciseView: View {
                     }
                 }
             }
-            .navigationTitle("Lägg till övning")
+            .navigationTitle("Add exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

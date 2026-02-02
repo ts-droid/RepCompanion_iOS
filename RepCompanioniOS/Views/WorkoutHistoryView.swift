@@ -21,10 +21,10 @@ struct WorkoutHistoryView: View {
                             Image(systemName: "calendar.badge.clock")
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
-                            Text("Ingen träningshistorik än")
+                            Text("No training history yet")
                                 .font(.headline)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
-                            Text("Genomför ditt första pass för att se historik här")
+                            Text("Complete your first session to see history here")
                                 .font(.caption)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                                 .multilineTextAlignment(.center)
@@ -40,7 +40,7 @@ struct WorkoutHistoryView: View {
                 .padding(.top)
             }
         }
-        .navigationTitle("Träningshistorik")
+        .navigationTitle("Training history")
         .navigationBarTitleDisplayMode(.large)
     }
 }

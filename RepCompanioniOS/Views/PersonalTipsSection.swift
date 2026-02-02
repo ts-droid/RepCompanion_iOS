@@ -61,15 +61,15 @@ struct PersonalTipsSection: View {
     private func getIcon(for category: String) -> String {
         switch category.lowercased() {
         case "nutrition", "kost": return "apple.logo"
-        case "recovery", "återhämtning": return "moon.fill"
+        case "recovery", "recovery": return "moon.fill"
         case "cardio", "kondition": return "figure.run"
         case "periodization", "periodisering": return "calendar"
-        case "mixed_training", "blandad träning": return "figure.strengthtraining.traditional"
+        case "mixed_training", "mixed training": return "figure.strengthtraining.traditional"
         case "strength", "styrka", "build_muscle", "bygga_muskler": return "figure.strengthtraining.traditional"
         case "volume", "volym": return "scalemass.fill"
         case "lose_weight", "weight_loss", "viktminskning": return "percent"
         case "rehabilitation", "rehab", "rehabilitering": return "bandage.fill"
-        case "mobility", "mobilitet", "bli_rörligare": return "figure.flexibility"
+        case "mobility", "mobilitet", "become_more_flexible": return "figure.flexibility"
         default: return "lightbulb.fill"
         }
     }
@@ -77,14 +77,14 @@ struct PersonalTipsSection: View {
     private func getColor(for category: String) -> Color {
         switch category.lowercased() {
         case "nutrition", "kost": return .nutritionGreen
-        case "recovery", "återhämtning": return .recoveryPurple
+        case "recovery", "recovery": return .recoveryPurple
         case "cardio", "kondition": return .red
         case "periodization", "periodisering": return .blue
-        case "mixed_training", "blandad träning": return .accentBlue
+        case "mixed_training", "mixed training": return .accentBlue
         case "strength", "styrka", "build_muscle", "bygga_muskler", "volume", "volym": return .orange
         case "lose_weight", "weight_loss", "viktminskning": return .green
         case "rehabilitation", "rehab", "rehabilitering": return .teal
-        case "mobility", "mobilitet", "bli_rörligare": return .purple
+        case "mobility", "mobilitet", "become_more_flexible": return .purple
         default: return .accentBlue
         }
     }

@@ -8,7 +8,7 @@ struct LogisticsSelectionView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            Text("Träningsfrekvens")
+            Text("Training frequency")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -27,7 +27,7 @@ struct LogisticsSelectionView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Passlängd: \(sessionDuration) minuter")
+                    Text("Session length: \(sessionDuration) minutes")
                         .font(.headline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                     Slider(value: Binding(

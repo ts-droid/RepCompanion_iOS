@@ -27,7 +27,7 @@ struct ExerciseProgressionView: View {
                     VStack(spacing: 16) {
                         HStack(spacing: 20) {
                             StatBox(
-                                title: "Max vikt",
+                                title: "Max weight",
                                 value: "\(stats.maxWeight?.formattedWeight ?? "0") kg",
                                 colorScheme: colorScheme
                             )
@@ -67,16 +67,16 @@ struct ExerciseProgressionView: View {
                 // Progression Chart
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text("Viktprogression")
+                        Text("Weight progression")
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
                         Spacer()
                         
                         Picker("Period", selection: $selectedDays) {
-                            Text("7 dagar").tag(7)
-                            Text("30 dagar").tag(30)
-                            Text("90 dagar").tag(90)
+                            Text("7 days").tag(7)
+                            Text("30 days").tag(30)
+                            Text("90 days").tag(90)
                         }
                         .pickerStyle(.segmented)
                         .frame(width: 200)
@@ -88,10 +88,10 @@ struct ExerciseProgressionView: View {
                             Image(systemName: "chart.line.uptrend.xyaxis")
                                 .font(.system(size: 60))
                                 .foregroundColor(.gray)
-                            Text("Ingen data ännu")
+                            Text("No data yet")
                                 .font(.headline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Logga övningar för att se progression")
+                            Text("Log exercises to see progression")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }

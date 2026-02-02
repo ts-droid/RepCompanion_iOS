@@ -21,10 +21,10 @@ struct ExercisePBsView: View {
                             Image(systemName: "trophy")
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
-                            Text("Inga personbästa än")
+                            Text("No personal bests yet")
                                 .font(.headline)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
-                            Text("Logga övningar för att se dina PBs här")
+                            Text("Log exercises to see your PBs here")
                                 .font(.caption)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                                 .multilineTextAlignment(.center)
@@ -40,7 +40,7 @@ struct ExercisePBsView: View {
                 .padding(.top)
             }
         }
-        .navigationTitle("Personbästa")
+        .navigationTitle("Personal best")
         .navigationBarTitleDisplayMode(.large)
     }
 }
@@ -74,7 +74,7 @@ struct ExercisePBRow: View {
                         .font(.title3.bold())
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                 }
-                Text("Max vikt")
+                Text("Max weight")
                     .font(.caption2)
                     .foregroundColor(Color.textSecondary(for: colorScheme))
             }

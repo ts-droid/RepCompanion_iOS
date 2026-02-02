@@ -97,8 +97,8 @@ struct HomeView: View {
                         // Header / Segmented Control
                         HStack(spacing: 12) {
                             FilterButton(title: "Kombinerad", isSelected: selectedTab == 0, colorScheme: colorScheme) { selectedTab = 0 }
-                            FilterButton(title: "Aktivitet", icon: "waveform.path.ecg", isSelected: selectedTab == 1, colorScheme: colorScheme) { selectedTab = 1 }
-                            FilterButton(title: "Återhämtning", icon: "heart", isSelected: selectedTab == 2, colorScheme: colorScheme) { selectedTab = 2 }
+                            FilterButton(title: "Activity", icon: "waveform.path.ecg", isSelected: selectedTab == 1, colorScheme: colorScheme) { selectedTab = 1 }
+                            FilterButton(title: "Recovery", icon: "heart", isSelected: selectedTab == 2, colorScheme: colorScheme) { selectedTab = 2 }
                         }
                         .padding(.horizontal)
                         
@@ -106,8 +106,8 @@ struct HomeView: View {
                         if let activeSession = activeWorkoutSession {
                             // Resume active session
                             CTACard(
-                                title: "Fortsätt ditt pass",
-                                subtitle: activeSession.sessionName ?? "Träningspass",
+                                title: "Continue your session",
+                                subtitle: activeSession.sessionName ?? "Workout",
                                 icon: "play.circle.fill",
                                 color: Color.primaryColor(for: colorScheme),
                                 colorScheme: colorScheme,
@@ -119,8 +119,8 @@ struct HomeView: View {
                         } else if programTemplates.isEmpty {
                             // Generate program
                             CTACard(
-                                title: "Kom igång",
-                                subtitle: "Generera ditt personliga träningsprogram",
+                                title: "Get started",
+                                subtitle: "Generate your personalized training program",
                                 icon: "sparkles",
                                 color: Color.primaryColor(for: colorScheme),
                                 isLoading: isGeneratingProgram,
@@ -128,12 +128,12 @@ struct HomeView: View {
                                 action: generateProgram
                             )
                         } else if let todayTemplate = todayTemplate {
-                            // Only show "Dags att träna!" card if there's a workout planned for today
+                            // Only show "Time to train!" card if there's a workout planned for today
                             let dayName = getDayName(todayTemplate.dayOfWeek)
                             let dayPrefix = dayName.isEmpty ? "" : "\(dayName) • "
                             CTACard(
-                                title: "Dags att träna!",
-                                subtitle: "\(dayPrefix)\(todayTemplate.muscleFocus ?? todayTemplate.templateName) • \(getExerciseCount(for: todayTemplate)) övningar",
+                                title: "Time to train!",
+                                subtitle: "\(dayPrefix)\(todayTemplate.muscleFocus ?? todayTemplate.templateName) • \(getExerciseCount(for: todayTemplate)) exercises",
                                 icon: "sparkles",
                                 color: Color.primaryColor(for: colorScheme),
                                 colorScheme: colorScheme,
@@ -149,7 +149,7 @@ struct HomeView: View {
                                 StatusCard(
                                     title: "AKTIVITET",
                                     value: "\(activityPercent)%",
-                                    subtitle: "av mål",
+                                    subtitle: "of goal",
                                     color: .activityBlue,
                                     progress: Double(activityPercent) / 100.0,
                                     icon: "waveform.path.ecg",
@@ -158,7 +158,7 @@ struct HomeView: View {
                                     innerColor: .orange
                                 )
                                 StatusCard(
-                                    title: "ÅTERHÄMTNING",
+                                    title: "RECOVERY",
                                     value: "\(recoveryPercent)%",
                                     subtitle: "optimal",
                                     color: .recoveryPurple,
@@ -193,7 +193,7 @@ struct HomeView: View {
                         Button(action: {
                             WatchConnectivityManager.shared.forceSync()
                         }) {
-                            Text("Synka till Watch (Debug)")
+                            Text("Sync to Watch (Debug)")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                                 .padding()
@@ -234,8 +234,8 @@ struct HomeView: View {
             }
 
             .navigationBarHidden(true)
-            .alert("Starta pass", isPresented: $showStartConfirmation) {
-                Button("Ja, kör!") {
+            .alert("Start session", isPresented: $showStartConfirmation) {
+                Button("Yes, let's go!") {
                     confirmStartWorkout()
                 }
                 Button("Avbryt", role: .cancel) {}
@@ -243,7 +243,7 @@ struct HomeView: View {
                 if let template = templateToStart {
                     Text("Vill du starta \(getFullDayName(template.dayOfWeek))s pass idag?")
                 } else {
-                    Text("Vill du starta passet idag?")
+                    Text("Do you want to start today's session?")
                 }
             }
             .onAppear {
@@ -301,11 +301,11 @@ struct HomeView: View {
         if isGeneratingProgram {
             return "Genererar..."
         } else if activeWorkoutSession != nil {
-            return "Fortsätt pass"
+            return "Continue session"
         } else if programTemplates.isEmpty {
             return "Generera program"
         } else {
-            return "Starta pass"
+            return "Start session"
         }
     }
     
@@ -578,13 +578,13 @@ struct HomeView: View {
     
     private func getDayName(_ dayOfWeek: Int?) -> String {
         guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         return days[dayOfWeek]
     }
     
     private func getFullDayName(_ dayOfWeek: Int?) -> String {
-        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "nästa" }
-        let days = ["", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "next" }
+        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         return days[dayOfWeek]
     }
     

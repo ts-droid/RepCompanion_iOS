@@ -25,7 +25,7 @@ struct EquipmentCameraView: View {
                             VStack {
                                 Spacer()
                                 if isRecognizing {
-                                    ProgressView("Känner igen utrustning...")
+                                    ProgressView("Recognizing equipment...")
                                         .padding()
                                         .background(Color.black.opacity(0.7))
                                         .cornerRadius(12)
@@ -38,7 +38,7 @@ struct EquipmentCameraView: View {
                                             Text("• \(equipment)")
                                                 .foregroundColor(.white)
                                         }
-                                        Button("Lägg till") {
+                                        Button("Add") {
                                             onEquipmentDetected(recognizedEquipment)
                                             dismiss()
                                         }
@@ -135,7 +135,7 @@ struct EquipmentCameraView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Kunde inte känna igen utrustning: \(error.localizedDescription)"
+                    errorMessage = "Could not recognize equipment: \(error.localizedDescription)"
                     isRecognizing = false
                 }
             }

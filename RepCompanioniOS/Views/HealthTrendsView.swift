@@ -21,8 +21,8 @@ struct HealthTrendsView: View {
     private let metrics = [
         ("steps", "Steg", "figure.walk"),
         ("calories_burned", "Kalorier", "flame.fill"),
-        ("sleep_duration_minutes", "Sömn", "moon.fill"),
-        ("heart_rate_avg", "Hjärtfrekvens", "heart.fill")
+        ("sleep_duration_minutes", "Sleep", "moon.fill"),
+        ("heart_rate_avg", "Heart rate", "heart.fill")
     ]
     
     private var trend: HealthTrend {
@@ -64,14 +64,14 @@ struct HealthTrendsView: View {
                             colorScheme: colorScheme
                         )
                         SummaryCard(
-                            title: "Snitt sömn",
+                            title: "Average sleep",
                             value: String(format: "%.1f h", weeklySummary.avgSleepHours),
                             icon: "moon.fill",
                             color: .purple,
                             colorScheme: colorScheme
                         )
                         SummaryCard(
-                            title: "Aktiva dagar",
+                            title: "Active days",
                             value: "\(weeklySummary.activeDays)",
                             icon: "calendar",
                             color: .green,
@@ -83,7 +83,7 @@ struct HealthTrendsView: View {
                 
                 // Metric Selector
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Välj mätvärde")
+                    Text("Select metric")
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                         .padding(.horizontal)
@@ -153,9 +153,9 @@ struct HealthTrendsView: View {
                         Spacer()
                         
                         Picker("Period", selection: $selectedDays) {
-                            Text("7 dagar").tag(7)
-                            Text("30 dagar").tag(30)
-                            Text("90 dagar").tag(90)
+                            Text("7 days").tag(7)
+                            Text("30 days").tag(30)
+                            Text("90 days").tag(90)
                         }
                         .pickerStyle(.segmented)
                         .frame(width: 200)
@@ -179,7 +179,7 @@ struct HealthTrendsView: View {
                         } else {
                             Image(systemName: "arrow.clockwise")
                         }
-                        Text("Synka hälsodata")
+                        Text("Sync health data")
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -193,7 +193,7 @@ struct HealthTrendsView: View {
             .padding(.vertical)
         }
         .background(Color.appBackground(for: colorScheme))
-        .navigationTitle("Hälsotrender")
+        .navigationTitle("Health trends")
         .navigationBarTitleDisplayMode(.large)
     }
     
@@ -317,10 +317,10 @@ struct HealthChartView: View {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 60))
                     .foregroundColor(.gray)
-                Text("Ingen data ännu")
+                Text("No data yet")
                     .font(.headline)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
-                Text("Synka med HealthKit för att se data")
+                Text("Sync with HealthKit to see data")
                     .font(.subheadline)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
             }
@@ -331,14 +331,14 @@ struct HealthChartView: View {
                 ForEach(metrics, id: \.id) { metric in
                     LineMark(
                         x: .value("Datum", metric.date, unit: .day),
-                        y: .value("Värde", metric.value)
+                        y: .value("Value", metric.value)
                     )
                     .foregroundStyle(Color.accentBlue)
                     .interpolationMethod(.catmullRom)
                     
                     AreaMark(
                         x: .value("Datum", metric.date, unit: .day),
-                        y: .value("Värde", metric.value)
+                        y: .value("Value", metric.value)
                     )
                     .foregroundStyle(
                         LinearGradient(

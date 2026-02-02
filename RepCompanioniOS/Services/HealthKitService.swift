@@ -766,11 +766,11 @@ enum HealthKitError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "HealthKit är inte tillgängligt på denna enhet"
+            return "HealthKit is not available on this device"
         case .invalidType:
             return "Ogiltig HealthKit-typ"
         case .authorizationDenied:
-            return "Åtkomst till hälsodata nekad"
+            return "Access to health data denied"
         }
     }
 }

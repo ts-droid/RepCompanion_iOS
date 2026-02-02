@@ -130,8 +130,8 @@ class AppleIntelligenceService {
             if let deadlift = values.deadlift { info += "Deadlift: \(deadlift)kg, " }
             if let ohp = values.ohp { info += "OHP: \(ohp)kg, " }
             if let latpull = values.latpull { info += "Lat Pull: \(latpull)kg" }
-            return info.isEmpty ? "Inga 1RM-värden" : String(info.dropLast(2))
-        } ?? "Inga 1RM-värden"
+            return info.isEmpty ? "No 1RM values" : String(info.dropLast(2))
+        } ?? "No 1RM values"
         
         return """
         Skapa ett personligt träningsprogram med följande specifikationer:
@@ -172,9 +172,9 @@ enum AppleIntelligenceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "Apple Intelligence är inte tillgängligt på denna enhet"
+            return "Apple Intelligence is not available on this device"
         case .apiNotAvailable:
-            return "Apple Intelligence API är inte tillgängligt ännu"
+            return "Apple Intelligence API is not available yet"
         case .generationFailed(let reason):
             return "Programgenerering misslyckades: \(reason)"
         }

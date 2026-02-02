@@ -27,23 +27,23 @@ struct SettingsView: View {
         NavigationView {
             List {
                 // HealthKit Integration
-                Section("Hälsodata") {
+                Section("Health data") {
                     HStack {
                         Image(systemName: "heart.text.square.fill")
                             .foregroundColor(.red)
                         Text("Apple Health")
                         Spacer()
                         if healthKitService.isAuthorized {
-                            Text("Aktiverad")
+                            Text("Activated")
                                 .foregroundColor(.green)
                         } else {
-                            Text("Inaktiverad")
+                            Text("Deactivated")
                                 .foregroundColor(.gray)
                         }
                     }
                     
                     if !healthKitService.isAuthorized {
-                        Button("Aktivera HealthKit") {
+                        Button("Activate HealthKit") {
                             Task {
                                 do {
                                     try await healthKitService.requestAuthorization()
@@ -54,7 +54,7 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button("Synka hälsodata") {
+                    Button("Sync health data") {
                         Task {
                             isSyncing = true
                             do {
@@ -76,16 +76,16 @@ struct SettingsView: View {
                         Text("Push-notifikationer")
                         Spacer()
                         if notificationService.authorizationStatus == .authorized {
-                            Text("Aktiverad")
+                            Text("Activated")
                                 .foregroundColor(.green)
                         } else {
-                            Text("Inaktiverad")
+                            Text("Deactivated")
                                 .foregroundColor(.gray)
                         }
                     }
                     
                     if notificationService.authorizationStatus != .authorized {
-                        Button("Aktivera notifikationer") {
+                        Button("Activate notifications") {
                             Task {
                                 do {
                                     try await notificationService.requestAuthorization()
@@ -107,7 +107,7 @@ struct SettingsView: View {
                         if cloudKitService.isAvailable {
                             switch cloudKitService.syncStatus {
                             case .idle:
-                                Text("Väntar")
+                                Text("Waiting")
                                     .foregroundColor(.gray)
                             case .syncing:
                                 ProgressView()
@@ -119,13 +119,13 @@ struct SettingsView: View {
                                     .foregroundColor(.red)
                             }
                         } else {
-                            Text("Ej tillgänglig")
+                            Text("Not available")
                                 .foregroundColor(.orange)
                         }
                     }
                     
                     if !cloudKitService.isAvailable {
-                        Text("CloudKit entitlement saknas. Kontakta utvecklaren.")
+                        Text("CloudKit entitlement missing. Contact developer.")
                             .font(.caption)
                             .foregroundColor(.orange)
                     } else if cloudKitService.lastSyncDate != nil {
@@ -144,11 +144,11 @@ struct SettingsView: View {
                 }
                 
                 // Exercise Catalog
-                Section("Övningskatalog") {
+                Section("Exercise catalog") {
                     HStack {
                         Image(systemName: "list.bullet.rectangle")
                             .foregroundColor(.blue)
-                        Text("Övningar")
+                        Text("Exercises")
                         Spacer()
                         if ExerciseCatalogService.shared.lastSyncDate != nil {
                             Text("Synkad")
@@ -164,11 +164,11 @@ struct SettingsView: View {
                     NavigationLink(destination: ExerciseListView()) {
                         HStack {
                             Image(systemName: "magnifyingglass")
-                            Text("Bläddra övningar")
+                            Text("Browse exercises")
                         }
                     }
                     
-                    Button("Synka övningskatalog") {
+                    Button("Sync exercise catalog") {
                         Task {
                             // TODO: Pass modelContext
                             // try await ExerciseCatalogService.shared.syncExercises(modelContext: modelContext)
@@ -196,7 +196,7 @@ struct SettingsView: View {
                 }
                 
                 // Program Management
-                Section("Programhantering") {
+                Section("Program management") {
                     Button(role: .none) {
                         showResetPassAlert = true
                     } label: {
@@ -204,8 +204,8 @@ struct SettingsView: View {
                             Image(systemName: "arrow.counterclockwise")
                                 .foregroundColor(.blue)
                             VStack(alignment: .leading) {
-                                Text("Börja om på Pass 1")
-                                Text("Nollställ räknaren för ditt nuvarande program.")
+                                Text("Reset to Session 1")
+                                Text("Reset the counter for your current program.")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -219,8 +219,8 @@ struct SettingsView: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .foregroundColor(.red)
                             VStack(alignment: .leading) {
-                                Text("Återställ allt")
-                                Text("Ta bort alla program och gym för att börja om helt.")
+                                Text("Reset all")
+                                Text("Delete all programs and gyms to start over completely.")
                                     .font(.caption)
                                     .foregroundColor(.red.opacity(0.8))
                             }
@@ -237,7 +237,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "shield.checkered")
                                     .foregroundColor(.red)
-                                Text("Godkänn övningar & utrustning")
+                                Text("Approve exercises & equipment")
                             }
                         }
                     }
@@ -257,40 +257,40 @@ struct SettingsView: View {
                 }
                 #endif
             }
-            .navigationTitle("Inställningar")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Klar") {
+                    Button("Done") {
                         dismiss()
                     }
                 }
             }
-            .alert("Börja om på Pass 1?", isPresented: $showResetPassAlert) {
+            .alert("Reset to Session 1?", isPresented: $showResetPassAlert) {
                 Button("Avbryt", role: .cancel) { }
-                Button("Nollställ", role: .destructive) {
+                Button("Reset", role: .destructive) {
                     resetCurrentPass()
                 }
             } message: {
-                Text("Detta kommer att sätta din räknare till Pass 1. Dina befintliga träningsprogram raderas inte.")
+                Text("This will reset your counter to Session 1. Your existing training programs will not be deleted.")
             }
-            .alert("Radera allt och börja om?", isPresented: $showResetOnboardingAlert) {
+            .alert("Delete everything and start over?", isPresented: $showResetOnboardingAlert) {
                 Button("Avbryt", role: .cancel) { }
-                Button("Återställ", role: .destructive) {
+                Button("Reset", role: .destructive) {
                     resetOnboarding()
                 }
             } message: {
-                Text("Detta kommer att återställa onboarding och du kommer att behöva gå igenom onboarding igen.")
+                Text("This will reset onboarding and you will need to go through onboarding again.")
             }
             .alert("HealthKit-fel", isPresented: $showHealthKitAlert) {
                 Button("OK") { }
             } message: {
-                Text("Kunde inte aktivera HealthKit. Kontrollera att appen har behörighet i Inställningar.")
+                Text("Could not activate HealthKit. Check that the app has permission in Settings.")
             }
             .alert("Notifikationsfel", isPresented: $showNotificationAlert) {
                 Button("OK") { }
             } message: {
-                Text("Kunde inte aktivera notifikationer. Kontrollera att appen har behörighet i Inställningar.")
+                Text("Could not activate notifications. Check that the app has permission in Settings.")
             }
         }
     }

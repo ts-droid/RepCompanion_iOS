@@ -81,12 +81,12 @@ struct WorkoutCompletionView: View {
                             .padding(.top, 40)
                             
                             VStack(spacing: 8) {
-                                Text("Bra jobbat!")
+                                Text("Great job!")
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 
-                                Text("Du har genomfört hela ditt träningspass!")
+                                Text("You have completed your entire workout!")
                                     .font(.headline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
@@ -101,12 +101,12 @@ struct WorkoutCompletionView: View {
                                 .padding(.top, 40)
                             
                             VStack(spacing: 8) {
-                                Text("Pass avslutat")
+                                Text("Session completed")
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 
-                                Text("Här är en sammanfattning av det du hann med.")
+                                Text("Here is a summary of what you accomplished.")
                                     .font(.headline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
@@ -130,7 +130,7 @@ struct WorkoutCompletionView: View {
                             SummaryStatCard(
                                 icon: "dumbbell.fill",
                                 value: "\(stats.exerciseCount)",
-                                label: "övningar",
+                                label: "exercises",
                                 colorScheme: colorScheme
                             )
                             SummaryStatCard(
@@ -158,7 +158,7 @@ struct WorkoutCompletionView: View {
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
-                        TextField("Hur kändes passet? Något att komma ihåg till nästa gång?", text: $notes, axis: .vertical)
+                        TextField("How did the session feel? Anything to remember for next time?", text: $notes, axis: .vertical)
                             .lineLimit(3...6)
                             .padding(12)
                             .background(Color.appBackground(for: colorScheme))
@@ -171,7 +171,7 @@ struct WorkoutCompletionView: View {
                             .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) {
                                     Spacer()
-                                    Button("Klar") {
+                                    Button("Done") {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     }
                                 }
@@ -184,7 +184,7 @@ struct WorkoutCompletionView: View {
                     
                     // Finalize Button
                     Button(action: finalizeSession) {
-                        Text("Slutför träningspass")
+                        Text("Complete workout")
                             .font(.headline)
                             .fontWeight(.bold)
                             .foregroundColor(.white)

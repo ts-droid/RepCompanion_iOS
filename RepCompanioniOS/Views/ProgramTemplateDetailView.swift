@@ -91,7 +91,7 @@ struct ProgramTemplateDetailView: View {
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 }
                                 
-                                Label("\(exercises.count) övningar", systemImage: "dumbbell.fill")
+                                Label("\(exercises.count) exercises", systemImage: "dumbbell.fill")
                                     .font(.caption)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                             }
@@ -104,7 +104,7 @@ struct ProgramTemplateDetailView: View {
                         // Warm-up Section (New)
                         if let warmup = template.warmupDescription, !warmup.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
-                                Label("Uppvärmning", systemImage: "flame.fill")
+                                Label("Warm-up", systemImage: "flame.fill")
                                     .font(.headline)
                                     .foregroundStyle(Color.orange)
                                 
@@ -121,7 +121,7 @@ struct ProgramTemplateDetailView: View {
                         
                         // Exercises List
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Övningar")
+                            Text("Exercises")
                                 .font(.headline)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
                             
@@ -130,10 +130,10 @@ struct ProgramTemplateDetailView: View {
                                     Image(systemName: "dumbbell.fill")
                                         .font(.system(size: 40))
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("Inga övningar")
+                                    Text("No exercises")
                                         .font(.subheadline)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("Detta pass har inga övningar ännu")
+                                    Text("This session has no exercises yet")
                                         .font(.caption)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                                 }
@@ -161,7 +161,7 @@ struct ProgramTemplateDetailView: View {
                 // Floating Action Button
                 if !exercises.isEmpty {
                     Button(action: startWorkout) {
-                        Text("Starta pass")
+                        Text("Start session")
                             .font(.headline)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
@@ -174,11 +174,11 @@ struct ProgramTemplateDetailView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("Passdetaljer")
+            .navigationTitle("Session details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Stäng") {
+                    Button("Close") {
                         dismiss()
                     }
                 }
@@ -193,8 +193,8 @@ struct ProgramTemplateDetailView: View {
                     ActiveWorkoutView(session: session, template: template)
                 }
             }
-            .alert("Starta pass", isPresented: $showStartConfirmation) {
-                Button("Ja, kör!") {
+            .alert("Start session", isPresented: $showStartConfirmation) {
+                Button("Yes, let's go!") {
                     confirmStartWorkout()
                 }
                 Button("Avbryt", role: .cancel) {}
@@ -205,7 +205,7 @@ struct ProgramTemplateDetailView: View {
     }
     
     private func getDayName(_ dayOfWeek: Int) -> String {
-        let days = ["", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
+        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
         return days[safe: dayOfWeek] ?? ""
     }
 }
@@ -386,7 +386,7 @@ struct FallbackThumbnailView: View {
                     .font(.title2)
                     .foregroundStyle(Color.gray.opacity(0.5))
                 if isSearch {
-                    Text("Sök video")
+                    Text("Search video")
                         .font(.system(size: 8))
                         .foregroundStyle(Color.gray.opacity(0.7))
                 }

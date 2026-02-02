@@ -119,11 +119,11 @@ enum GoogleSignInError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConfigured:
-            return "Google Sign-In är inte konfigurerad. Lägg till GoogleSignIn SDK och GoogleService-Info.plist."
+            return "Google Sign-In is not configured. Add GoogleSignIn SDK and GoogleService-Info.plist."
         case .invalidViewController:
-            return "Ogiltig view controller"
+            return "Invalid view controller"
         case .missingIdToken:
-            return "ID-token saknas från Google"
+            return "ID token missing from Google"
         case .signInFailed(let error):
             return "Google-inloggning misslyckades: \(error.localizedDescription)"
         }

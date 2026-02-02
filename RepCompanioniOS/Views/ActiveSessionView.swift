@@ -10,7 +10,7 @@ struct ActiveSessionView: View {
             // Header
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Pågående Pass")
+                    Text("Ongoing Session")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text("00:00") // Placeholder for timer
@@ -30,7 +30,7 @@ struct ActiveSessionView: View {
             
             // Exercise List (Placeholder)
             List {
-                Section(header: Text("Bänkpress")) {
+                Section(header: Text("Bench press")) {
                     HStack {
                         Text("Set 1")
                         Spacer()

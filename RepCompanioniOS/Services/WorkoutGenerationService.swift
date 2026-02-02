@@ -146,31 +146,31 @@ class WorkoutGenerationService: ObservableObject {
         // Map motivation type to main goal (labels used for AI prompt context)
         let goalMap: [String: String] = [
             "fitness": "Generell fitness",
-            "lose_weight": "Viktminskning och hälsa",
-            "weight_loss": "Viktminskning och hälsa",
-            "viktminskning": "Viktminskning och hälsa",
+            "lose_weight": "Weight loss and health",
+            "weight_loss": "Weight loss and health",
+            "viktminskning": "Weight loss and health",
             "rehabilitation": "Rehabilitering",
             "rehabilitering": "Rehabilitering",
-            "better_health": "Hälsa och livsstil",
-            "bättre_hälsa": "Hälsa och livsstil",
-            "hälsa_livsstil": "Hälsa och livsstil",
-            "build_muscle": "Muskelökning och hypertrofi",
-            "bygga_muskler": "Muskelökning och hypertrofi",
-            "hypertrofi": "Muskelökning och hypertrofi",
-            "mobility": "Rörlighet och flexibilitet",
-            "bli_rörligare": "Rörlighet och flexibilitet",
+            "better_health": "Health and lifestyle",
+            "better_health": "Health and lifestyle",
+            "health_lifestyle": "Health and lifestyle",
+            "build_muscle": "Muscle growth and hypertrophy",
+            "bygga_muskler": "Muscle growth and hypertrophy",
+            "hypertrofi": "Muscle growth and hypertrophy",
+            "mobility": "Mobility and flexibility",
+            "become_more_flexible": "Mobility and flexibility",
             "sport": "Sportprestation",
-            "hälsa": "Generell fitness",
-            "styrka": "Muskelökning",
-            "estetik": "Muskelökning"
+            "health": "Generell fitness",
+            "styrka": "Muscle growth",
+            "estetik": "Muscle growth"
         ]
         let motivationType = profile.motivationType ?? profile.trainingGoals ?? "fitness"
         let mainGoal = goalMap[motivationType.lowercased()] ?? "Generell fitness"
         
         // Map training level
         let levelMap: [String: String] = [
-            "beginner": "Nybörjare",
-            "nybörjare": "Nybörjare",
+            "beginner": "Beginner",
+            "beginner": "Beginner",
             "intermediate": "Van",
             "van": "Van",
             "advanced": "Mycket van",
@@ -330,7 +330,7 @@ class WorkoutGenerationService: ObservableObject {
                         exerciseName: "Dynamic Warm-up",
                         sets: 1,
                         repsOrDuration: "5-10 min",
-                        notes: "Förbered kroppen för träning"
+                        notes: "Prepare your body for training"
                     )
                 ],
                 mainWork: mainWork,
@@ -338,7 +338,7 @@ class WorkoutGenerationService: ObservableObject {
                     WorkoutProgram.WeeklySession.CooldownExercise(
                         exerciseName: "Static Stretching",
                         durationOrReps: "5 min",
-                        notes: "Stretcha tränade muskelgrupper"
+                        notes: "Stretch trained muscle groups"
                     )
                 ]
             )
@@ -392,7 +392,7 @@ class WorkoutGenerationService: ObservableObject {
                         exerciseName: "Dynamic Warm-up",
                         sets: 1,
                         repsOrDuration: "5-10 min",
-                        notes: "Förbered kroppen för träning"
+                        notes: "Prepare your body for training"
                     )
                 ],
                 mainWork: createMainExercises(for: sessionNumber, input: input),
@@ -400,7 +400,7 @@ class WorkoutGenerationService: ObservableObject {
                     WorkoutProgram.WeeklySession.CooldownExercise(
                         exerciseName: "Static Stretching",
                         durationOrReps: "5 min",
-                        notes: "Stretcha tränade muskelgrupper"
+                        notes: "Stretch trained muscle groups"
                     )
                 ]
             )
@@ -476,10 +476,10 @@ class WorkoutGenerationService: ObservableObject {
                     restSeconds: 90,
                     tempo: "2-1-2-1",
                     suggestedWeightKg: calculateStartingWeight(exercise: "bench", input: input),
-                    suggestedWeightNotes: "Börja konservativt",
+                    suggestedWeightNotes: "Start conservatively",
                     targetMuscles: ["Chest", "Shoulders", "Triceps"],
                     requiredEquipment: ["Barbell", "Bench"],
-                    techniqueCues: ["Håll skulderbladen ihop", "Kontrollerad rörelse"]
+                    techniqueCues: ["Keep shoulder blades together", "Controlled movement"]
                 ),
                 WorkoutProgram.WeeklySession.MainExercise(
                     exerciseName: "Overhead Press",
@@ -488,10 +488,10 @@ class WorkoutGenerationService: ObservableObject {
                     restSeconds: 90,
                     tempo: "2-1-2-1",
                     suggestedWeightKg: calculateStartingWeight(exercise: "ohp", input: input),
-                    suggestedWeightNotes: "Fokus på teknik",
+                    suggestedWeightNotes: "Focus on technique",
                     targetMuscles: ["Shoulders", "Triceps", "Core"],
                     requiredEquipment: ["Barbell"],
-                    techniqueCues: ["Spänn core", "Press rakt upp"]
+                    techniqueCues: ["Brace your core", "Press rakt upp"]
                 )
             ]
         case 2: // Legs
@@ -506,7 +506,7 @@ class WorkoutGenerationService: ObservableObject {
                     suggestedWeightNotes: "Djup position",
                     targetMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
                     requiredEquipment: ["Barbell"],
-                    techniqueCues: ["Knäna följer tårna", "Håll ryggen rak"]
+                    techniqueCues: ["Knees follow toes", "Keep your back straight"]
                 )
             ]
         default: // Upper Pull
@@ -518,10 +518,10 @@ class WorkoutGenerationService: ObservableObject {
                     restSeconds: 90,
                     tempo: "2-1-2-1",
                     suggestedWeightKg: calculateStartingWeight(exercise: "row", input: input),
-                    suggestedWeightNotes: "Känn i ryggen",
+                    suggestedWeightNotes: "Feel it in your back",
                     targetMuscles: ["Lats", "Rhomboids", "Biceps"],
                     requiredEquipment: ["Barbell"],
-                    techniqueCues: ["Dra till magen", "Spänn skulderbladen"]
+                    techniqueCues: ["Dra till magen", "Brace shoulder blades"]
                 )
             ]
         }

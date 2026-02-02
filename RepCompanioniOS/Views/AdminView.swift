@@ -27,10 +27,10 @@ struct AdminView: View {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 60))
                         .foregroundColor(.red)
-                    Text("Åtkomst nekad")
+                    Text("Access denied")
                         .font(.title2)
                         .fontWeight(.bold)
-                    Text("Endast utvecklare har tillgång till denna vy.")
+                    Text("Only developers have access to this view.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -40,8 +40,8 @@ struct AdminView: View {
             } else {
                 VStack(spacing: 0) {
                     // Tab selector
-                    Picker("Typ", selection: $selectedTab) {
-                        Text("Övningar").tag(0)
+                    Picker("Type", selection: $selectedTab) {
+                        Text("Exercises").tag(0)
                         Text("Utrustning").tag(1)
                     }
                     .pickerStyle(.segmented)
@@ -64,7 +64,7 @@ struct AdminView: View {
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
-                            Button("Försök igen") {
+                            Button("Try again") {
                                 loadPendingItems()
                             }
                             .buttonStyle(.borderedProminent)
@@ -92,7 +92,7 @@ struct AdminView: View {
                     loadPendingItems()
                 }
                 .alert("Avvisa", isPresented: $showRejectDialog) {
-                    TextField("Anledning (valfritt)", text: $rejectReason)
+                    TextField("Reason (optional)", text: $rejectReason)
                     Button("Avbryt", role: .cancel) {
                         rejectReason = ""
                         selectedItemId = nil
@@ -103,7 +103,7 @@ struct AdminView: View {
                         }
                     }
                 } message: {
-                    Text("Vill du avvisa detta objekt? Du kan ange en anledning.")
+                    Text("Do you want to reject this item? You can provide a reason.")
                 }
             }
         }
@@ -116,9 +116,9 @@ struct AdminView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 50))
                         .foregroundColor(.green)
-                    Text("Inga väntande övningar")
+                    Text("No pending exercises")
                         .font(.headline)
-                    Text("Alla övningar har granskats.")
+                    Text("All exercises have been reviewed.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -145,9 +145,9 @@ struct AdminView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 50))
                         .foregroundColor(.green)
-                    Text("Ingen väntande utrustning")
+                    Text("No pending equipment")
                         .font(.headline)
-                    Text("All utrustning har granskats.")
+                    Text("All equipment has been reviewed.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -332,7 +332,7 @@ struct AdminExerciseCard: View {
                 Button {
                     onApprove()
                 } label: {
-                    Label("Godkänn", systemImage: "checkmark.circle.fill")
+                    Label("Approve", systemImage: "checkmark.circle.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -400,7 +400,7 @@ struct AdminEquipmentCard: View {
                 Button {
                     onApprove()
                 } label: {
-                    Label("Godkänn", systemImage: "checkmark.circle.fill")
+                    Label("Approve", systemImage: "checkmark.circle.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)

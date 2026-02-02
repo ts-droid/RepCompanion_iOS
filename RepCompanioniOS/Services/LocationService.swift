@@ -122,7 +122,7 @@ class LocationService: NSObject, ObservableObject {
                     let distance = location.distance(from: gymLocation)
                     
                     return NearbyGym(
-                        name: item.name ?? "Okänt gym",
+                        name: item.name ?? "Unknown gym",
                         address: item.placemark.title, 
                         latitude: gymLocation.coordinate.latitude,
                         longitude: gymLocation.coordinate.longitude,

@@ -63,7 +63,7 @@ struct ExerciseStatsListView: View {
         }
         .listStyle(PlainListStyle())
         .background(Color.appBackground(for: colorScheme))
-        .navigationTitle("Övningsstatistik")
+        .navigationTitle("Exercise statistics")
         .navigationBarTitleDisplayMode(.large)
     }
 }

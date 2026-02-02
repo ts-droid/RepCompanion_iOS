@@ -13,18 +13,18 @@ struct MuscleBalanceView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 if isLoading {
-                    ProgressView("Analyserar ditt program...")
+                    ProgressView("Analyzing your program...")
                         .frame(maxWidth: .infinity, minHeight: 200)
                 } else if let errorMessage = errorMessage {
-                    ContentUnavailableView("Gick inte att hämta analys", systemImage: "exclamationmark.triangle", description: Text(errorMessage))
+                    ContentUnavailableView("Could not fetch analysis", systemImage: "exclamationmark.triangle", description: Text(errorMessage))
                 } else if let analysis = analysis {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Muskelbalans")
+                        Text("Muscle balance")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                         
-                        Text("Fördelning av set baserat på dina programmallar.")
+                        Text("Distribution of sets based on your program templates.")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
@@ -49,7 +49,7 @@ struct MuscleBalanceView: View {
                                     .fontWeight(.semibold)
                             }
                             
-                            Text("Ditt program har lägst fokus på **\(under.muscleGroup.lowercased())**. Överväg att lägga till en övning för denna muskelgrupp för en mer balanserad fysik.")
+                            Text("Your program has the least focus on **\(under.muscleGroup.lowercased())**. Consider adding an exercise for this muscle group for a more balanced physique.")
                                 .font(.subheadline)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                         }
@@ -63,7 +63,7 @@ struct MuscleBalanceView: View {
             }
             .padding(.vertical)
         }
-        .navigationTitle("Analys")
+        .navigationTitle("Analysis")
         .task {
             await loadAnalysis()
         }

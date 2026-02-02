@@ -299,21 +299,21 @@ struct ActiveWorkoutView: View {
                 dismiss()
             }
         }
-        .alert("Uppdatera återstående set?", isPresented: $showApplyToAllDialog) {
+        .alert("Update remaining sets?", isPresented: $showApplyToAllDialog) {
             Button("Ja, uppdatera alla") {
                 applyToRemainingSets()
                 completeSetActual()
             }
-            Button("Nej, bara detta set") {
+            Button("No, just this set") {
                 // Ensure next set uses original target, not the modified values from this set
                 forceUseTargetForNextSet = true
                 completeSetActual()
             }
         } message: {
-            Text("Vill du tillämpa dessa värden på alla återstående set för denna övning i detta pass?")
+            Text("Do you want to apply these values to all remaining sets for this exercise in this session?")
         }
-        .alert("Hantera träningspass", isPresented: $showCompleteDialog) {
-            Button("Pausa & Stäng", role: .none) { 
+        .alert("Manage workouts", isPresented: $showCompleteDialog) {
+            Button("Pause & Close", role: .none) { 
                 // Just dismiss the view, keeping the session active
                 dismiss() 
             }
@@ -322,7 +322,7 @@ struct ActiveWorkoutView: View {
             }
             Button("Avbryt", role: .cancel) { }
         } message: {
-            Text("Vill du pausa passet för att fortsätta senare, eller avsluta det helt?")
+            Text("Do you want to pause the session to continue later, or end it completely?")
         }
         .fullScreenCover(isPresented: $showingCompletion) {
             WorkoutCompletionView(
@@ -429,7 +429,7 @@ struct ActiveWorkoutView: View {
         
         try? modelContext.save()
         
-        toastMessage = "Återstående set uppdaterade"
+        toastMessage = "Remaining sets updated"
         withAnimation {
             showToast = true
         }
@@ -449,7 +449,7 @@ struct ActiveWorkoutView: View {
                     .font(.system(size: 60))
                     .foregroundColor(.accentBlue)
                 
-                Text("Dags för uppvärmning!")
+                Text("Time for warm-up!")
                     .font(.title2.bold())
                     .foregroundColor(Color.textPrimary(for: colorScheme))
             }
@@ -463,7 +463,7 @@ struct ActiveWorkoutView: View {
             }
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("UTRUSTNING SOM BEHÖVS")
+                Text("EQUIPMENT NEEDED")
                     .font(.caption.bold())
                     .foregroundColor(Color.textSecondary(for: colorScheme))
                 
@@ -493,7 +493,7 @@ struct ActiveWorkoutView: View {
             Spacer()
             
             Button(action: { showingWarmup = false }) {
-                Text("Börja träna")
+                Text("Start training")
                     .font(.headline.bold())
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -513,7 +513,7 @@ struct ActiveWorkoutView: View {
         if exercises.isEmpty && (template != nil || session.templateId != nil) {
             VStack {
                 ProgressView()
-                Text("Laddar övningar...")
+                Text("Loading exercises...")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.top)
@@ -560,14 +560,14 @@ struct ActiveWorkoutView: View {
                             #endif
                         }
                         
-                        Text("Övning \(currentExerciseIndex + 1) av \(exercises.count)")
+                        Text("Exercise \(currentExerciseIndex + 1) of \(exercises.count)")
                             .font(.subheadline)
                             .foregroundColor(Color.textSecondary(for: colorScheme))
                         
                         Button(action: skipExercise) {
                             HStack {
                                 Image(systemName: "chevron.right.2")
-                                Text("Hoppa till nästa övning")
+                                Text("Skip to next exercise")
                             }
                             .font(.subheadline.bold())
                             .frame(maxWidth: .infinity)
@@ -587,7 +587,7 @@ struct ActiveWorkoutView: View {
                     VStack(alignment: .leading, spacing: 15) {
                         HStack {
                             Image(systemName: "target")
-                            Text("Mål")
+                            Text("Goal")
                                 .font(.headline)
                         }
                         .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -595,7 +595,7 @@ struct ActiveWorkoutView: View {
                         Divider().background(Color.textPrimary(for: colorScheme).opacity(0.1))
                         
                         HStack {
-                            Text("Repetitioner")
+                            Text("Repetitions")
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                             Spacer()
                             Text(exercise.targetReps)
@@ -603,7 +603,7 @@ struct ActiveWorkoutView: View {
                         }
                         
                         HStack {
-                            Text("AI-förslag")
+                            Text("AI suggestions")
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                             Spacer()
                             Text("\(String(format: "%.1f", exercise.targetWeight ?? 0))kg")
@@ -666,7 +666,7 @@ struct ActiveWorkoutView: View {
                         
                         HStack(spacing: 12) {
                             Button(action: completeSet) {
-                                Text("Set avklarat")
+                                Text("Set completed")
                                     .font(.headline.bold())
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -701,10 +701,10 @@ struct ActiveWorkoutView: View {
     @ViewBuilder
     private func RestLoadingView() -> some View {
         VStack(spacing: 30) {
-            Text("Bra jobbat!")
+            Text("Great job!")
                 .font(.title.bold())
                 .foregroundColor(Color.textPrimary(for: colorScheme))
-            Text("Vila innan nästa set")
+            Text("Rest before next set")
                 .foregroundColor(Color.textSecondary(for: colorScheme))
             
             ZStack {
@@ -718,7 +718,7 @@ struct ActiveWorkoutView: View {
                     Text(timeString(from: restTimeRemaining))
                         .font(.system(size: 60, weight: .bold, design: .rounded))
                         .foregroundColor(Color.textPrimary(for: colorScheme))
-                    Text("sekunder kvar")
+                    Text("seconds remaining")
                         .font(.caption)
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                 }
@@ -727,7 +727,7 @@ struct ActiveWorkoutView: View {
             Button(action: handleSkipRest) {
                 HStack {
                     Image(systemName: "forward.end.fill")
-                    Text("Hoppa över")
+                    Text("Skip")
                 }
                 .font(.headline.bold())
                 .padding(.horizontal, 30)
@@ -748,9 +748,9 @@ struct ActiveWorkoutView: View {
             Image(systemName: "dumbbell.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.gray)
-            Text("Inga övningar hittades")
+            Text("No exercises found")
                 .font(.headline)
-            Text("Detta pass verkar inte ha några övningar. Avsluta passet och prova att synka om.")
+            Text("This session appears to have no exercises. End the session and try syncing again.")
                 .multilineTextAlignment(.center)
                 .font(.subheadline)
                 .foregroundColor(.textSecondary)

@@ -465,7 +465,7 @@ struct TrainingAdjustmentView: View {
             endurance = 40
             hypertrophy = 20
             cardio = 10
-        case "better_health", "bättre_hälsa":
+        case "better_health", "better_health":
             endurance = 35
             cardio = 35
             strength = 20
@@ -531,7 +531,7 @@ struct TrainingAdjustmentView: View {
             hypertrophy = 30
             endurance = 25
             cardio = 15
-        case "mobility", "bli_rörligare":
+        case "mobility", "become_more_flexible":
             // Focus on mobility, flexibility, and injury prevention
             strength = 25
             hypertrophy = 20
@@ -547,7 +547,7 @@ struct TrainingAdjustmentView: View {
         
         // Adjust based on training level
         switch trainingLevel.lowercased() {
-        case "beginner", "nybörjare":
+        case "beginner", "beginner":
             // For muscle building, keep higher strength/hypertrophy even for beginners
             if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
                 // Smaller adjustment for muscle building - still prioritize strength/hypertrophy

@@ -152,13 +152,13 @@ class TrainingTipService: ObservableObject {
             return ["nutrition", "recovery", "periodization", "strength", "volume"]
         case "lose_weight", "weight_loss", "viktminskning":
             return ["nutrition", "cardio"]
-        case "better_health", "bättre_hälsa":
+        case "better_health", "better_health":
             return ["cardio", "recovery", "nutrition"]
         case "rehabilitation", "rehabilitering":
             return ["recovery", "rehabilitation", "mobility"]
         case "sport":
             return ["cardio", "periodization", "athleticism"]
-        case "mobility", "bli_rörligare":
+        case "mobility", "become_more_flexible":
             return ["mobility", "recovery", "stretching"]
         default:
             return ["mixed_training"]
@@ -233,7 +233,7 @@ class TrainingTipService: ObservableObject {
         guard let level = level?.lowercased() else { return "intermediate" }
         
         switch level {
-        case "beginner", "nybörjare": return "beginner"
+        case "beginner", "beginner": return "beginner"
         case "intermediate", "van": return "intermediate"
         case "advanced", "mycket_van", "avancerad": return "advanced"
         case "elite", "elit": return "elite"

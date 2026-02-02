@@ -502,7 +502,7 @@ class APIService {
                 
                 // If status is 401, provide specific message
                 if httpResponse.statusCode == 401 {
-                    throw NSError(domain: "APIService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Du är inte inloggad. Vänligen logga in igen."])
+                    throw NSError(domain: "APIService", code: 401, userInfo: [NSLocalizedDescriptionKey: "You are not logged in. Please log in again."])
                 }
                 
                 throw APIError.httpError(httpResponse.statusCode)
@@ -1084,7 +1084,7 @@ class APIService {
         }
     }
     
-    /// Reset user profile values to defaults on server (for debug "Återställ onboarding" function)
+    /// Reset user profile values to defaults on server (for debug "Reset onboarding" function)
     func resetProfile() async throws {
         let url = URL(string: "\(baseURL)/api/profile/reset")!
         var request = URLRequest(url: url)
@@ -2569,17 +2569,17 @@ enum APIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Ogiltigt svar från servern"
+            return "Invalid server response"
         case .unauthorized:
-            return "Du är inte inloggad"
+            return "You are not logged in"
         case .httpError(let code):
             return "HTTP-fel: \(code)"
         case .rateLimited(let message):
             return message
         case .decodingError:
-            return "Kunde inte tolka svaret från servern"
+            return "Could not parse server response"
         case .networkError(let message):
-            return "Nätverksfel: \(message). Kontrollera din internetanslutning och att servern körs."
+            return "Network error: \(message). Check your internet connection and that the server is running."
         case .unknown(let message):
             return message
         }
