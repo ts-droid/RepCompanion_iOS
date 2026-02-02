@@ -10,9 +10,10 @@ class OfflineSyncService: ObservableObject {
     @Published var isOnline = true
     @Published var pendingSyncCount = 0
     @Published var isSyncing = false
-    
+
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
+    private let syncLock = NSLock()  // Thread-safe sync state management
     private var cancellables = Set<AnyCancellable>()
     
     // Queue keys
@@ -110,12 +111,16 @@ class OfflineSyncService: ObservableObject {
     
     /// Sync all pending items when network is available
     func syncPendingItems() async {
+        // Thread-safe check-and-set to prevent race conditions
+        syncLock.lock()
         guard isOnline, !isSyncing else {
+            syncLock.unlock()
             print("[OfflineSync] Cannot sync - offline or already syncing")
             return
         }
-        
         isSyncing = true
+        syncLock.unlock()
+
         defer { isSyncing = false }
         
         print("[OfflineSync] Starting sync of pending items...")

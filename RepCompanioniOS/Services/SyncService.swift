@@ -119,64 +119,99 @@ class SyncService: ObservableObject {
             // Don't throw error - allow calling code to continue polling
             return
         }
-        
-        // NUCLEAR OPTION: Delete existing templates for the CURRENT gym to ensure fresh sync
-        // We fetch the current gym ID from the profile
+
+        // Get current gym ID from profile
         let profileDescriptor = FetchDescriptor<UserProfile>(predicate: #Predicate { $0.userId == userId })
         let profile = try? modelContext.fetch(profileDescriptor).first
         let activeGymId = profile?.selectedGymId
-        
-        print("[SYNC] 🗑️ Deleting existing templates for gym \(activeGymId ?? "None") to ensure fresh sync...")
+
+        // SAFE UPSERT: Fetch existing templates BEFORE making any changes
         let descriptor = FetchDescriptor<ProgramTemplate>(
             predicate: #Predicate { $0.userId == userId && $0.gymId == activeGymId }
         )
         let existingTemplates = try modelContext.fetch(descriptor)
-        
+
+        // Create lookup maps for efficient upsert
+        let newTemplateIds = Set(templatesData.map { $0.id })
+        var existingTemplateMap: [String: ProgramTemplate] = [:]
         for template in existingTemplates {
-            modelContext.delete(template)
+            existingTemplateMap[template.id.uuidString] = template
         }
-        try modelContext.save()
-        // Create fresh templates from server data
-        for templateData in templatesData {
-            print("[SYNC] 📝 Creating template: \(templateData.templateName) with \((templateData.exercises ?? []).count) exercises")
-            
-            // Create new template
-            let template = createTemplate(from: templateData, userId: userId)
-            template.gymId = activeGymId
-            modelContext.insert(template)
-            
-            // Add exercises with STRICT deduplication
-            var templateExercises: [ProgramTemplateExercise] = []
-            var insertedDescriptions = Set<String>()
-            
-            for exerciseData in templateData.exercises ?? [] {
-                let uniqueKey = "\(exerciseData.exerciseName.lowercased())-\(exerciseData.orderIndex)"
-                
-                if !insertedDescriptions.contains(uniqueKey) {
-                    let exercise = createTemplateExercise(from: exerciseData, template: template)
-                    exercise.gymId = activeGymId
-                    modelContext.insert(exercise)
-                    templateExercises.append(exercise)
-                    insertedDescriptions.insert(uniqueKey)
-                } else {
-                    print("[SYNC] ⚠️ Skipping duplicate exercise insertion: \(exerciseData.exerciseName)")
-                }
+
+        print("[SYNC] 🔄 Starting safe upsert: \(existingTemplates.count) existing, \(templatesData.count) from API")
+
+        // Step 1: Delete templates that no longer exist on server (safe - data is gone from server anyway)
+        for template in existingTemplates {
+            if !newTemplateIds.contains(template.id.uuidString) {
+                print("[SYNC] 🗑️ Removing obsolete template: \(template.templateName)")
+                modelContext.delete(template)
             }
-            
-            // Explicitly link exercises to template
-            template.exercises = templateExercises
         }
-        
+
+        // Step 2: Upsert - update existing or create new
+        for templateData in templatesData {
+            if let existingTemplate = existingTemplateMap[templateData.id] {
+                // UPDATE existing template
+                print("[SYNC] 📝 Updating existing template: \(templateData.templateName)")
+                updateTemplate(existingTemplate, with: templateData)
+
+                // Update exercises - remove old ones for this template and add new
+                for exercise in existingTemplate.exercises {
+                    modelContext.delete(exercise)
+                }
+
+                var templateExercises: [ProgramTemplateExercise] = []
+                var insertedDescriptions = Set<String>()
+
+                for exerciseData in templateData.exercises ?? [] {
+                    let uniqueKey = "\(exerciseData.exerciseName.lowercased())-\(exerciseData.orderIndex)"
+
+                    if !insertedDescriptions.contains(uniqueKey) {
+                        let exercise = createTemplateExercise(from: exerciseData, template: existingTemplate)
+                        exercise.gymId = activeGymId
+                        modelContext.insert(exercise)
+                        templateExercises.append(exercise)
+                        insertedDescriptions.insert(uniqueKey)
+                    }
+                }
+                existingTemplate.exercises = templateExercises
+
+            } else {
+                // CREATE new template
+                print("[SYNC] ➕ Creating new template: \(templateData.templateName)")
+                let template = createTemplate(from: templateData, userId: userId)
+                template.gymId = activeGymId
+                modelContext.insert(template)
+
+                var templateExercises: [ProgramTemplateExercise] = []
+                var insertedDescriptions = Set<String>()
+
+                for exerciseData in templateData.exercises ?? [] {
+                    let uniqueKey = "\(exerciseData.exerciseName.lowercased())-\(exerciseData.orderIndex)"
+
+                    if !insertedDescriptions.contains(uniqueKey) {
+                        let exercise = createTemplateExercise(from: exerciseData, template: template)
+                        exercise.gymId = activeGymId
+                        modelContext.insert(exercise)
+                        templateExercises.append(exercise)
+                        insertedDescriptions.insert(uniqueKey)
+                    }
+                }
+                template.exercises = templateExercises
+            }
+        }
+
+        // Step 3: Save all changes in one transaction
         do {
             try modelContext.save()
-            print("[SYNC] ✅ Successfully saved \(templatesData.count) templates to local database")
-            
+            print("[SYNC] ✅ Successfully synced \(templatesData.count) templates to local database")
+
             // Verify templates were saved
             let verifyDescriptor = FetchDescriptor<ProgramTemplate>(
-                predicate: #Predicate { $0.userId == userId }
+                predicate: #Predicate { $0.userId == userId && $0.gymId == activeGymId }
             )
             let savedTemplates = try modelContext.fetch(verifyDescriptor)
-            print("[SYNC] ✅ Verification: \(savedTemplates.count) templates now in local database")
+            print("[SYNC] ✅ Verification: \(savedTemplates.count) templates now in local database for current gym")
         } catch {
             print("[SYNC] ❌ Error saving templates to database: \(error.localizedDescription)")
             throw error
@@ -371,11 +406,6 @@ class SyncService: ObservableObject {
     }
     
     private func createTemplate(from data: ProgramTemplateResponse, userId: String) -> ProgramTemplate {
-        // #region agent log
-        let _ = try? FileHandle(forWritingTo: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log")).seekToEndOfFile()
-        let logData = "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\",\"location\":\"SyncService.swift:369\",\"message\":\"Creating template from response\",\"data\":{\"dataId\":\"\(data.id)\",\"templateName\":\"\(data.templateName)\"},\"timestamp\":\(Int(Date().timeIntervalSince1970 * 1000))}\n".data(using: .utf8)!
-        try? logData.write(to: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log"), options: .atomic)
-        // #endregion
         // Use server ID if available, otherwise generate new UUID
         let templateId = UUID(uuidString: data.id) ?? UUID()
         let template = ProgramTemplate(

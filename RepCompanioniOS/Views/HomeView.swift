@@ -27,79 +27,64 @@ struct HomeView: View {
     
     @State private var workoutProgress: Double? = nil // Progress for today's workout
     @State private var sleepScore: Double? = nil // Sleep score for recovery
-    
+
+    // Cached computed values to avoid recalculation on every render
+    @State private var cachedActiveSession: WorkoutSession?
+    @State private var cachedTodayTemplate: ProgramTemplate?
+    @State private var cachedNextTemplate: ProgramTemplate?
+
     private var currentProfile: UserProfile? {
         userProfiles.first
     }
-    
+
+    // Use cached values in body - computed only when data changes
     private var activeWorkoutSession: WorkoutSession? {
-        let active = workoutSessions.first { $0.status == "active" || $0.status == "pending" }
-        print("[DEBUG HomeView] Computing activeWorkoutSession. Total sessions: \(workoutSessions.count), active found: \(active != nil)")
-        if let first = workoutSessions.first {
-            print("[DEBUG HomeView] First session in list: \(first.id.uuidString), status: \(first.status)")
-        }
-        return active
+        cachedActiveSession
     }
-    
-    // Get template for today (only if there's a planned workout today)
+
     private var todayTemplate: ProgramTemplate? {
-        let calendar = Calendar.current
-        let today = Date()
-        let weekday = calendar.component(.weekday, from: today)
-        // Calendar.weekday: 1 = Sunday, 2 = Monday, ..., 7 = Saturday
-        // Our dayOfWeek: 1 = Monday, 2 = Tuesday, ..., 7 = Sunday
-        let dayOfWeek: Int
-        if weekday == 1 { // Sunday
-            dayOfWeek = 7
-        } else {
-            dayOfWeek = weekday - 1
-        }
-        
-        
-        // Only return template if it matches today's weekday AND current gym
-        let activeGymId = currentProfile?.selectedGymId
-        return programTemplates.first(where: { 
-            $0.dayOfWeek == dayOfWeek && $0.gymId == activeGymId
-        })
+        cachedTodayTemplate
     }
-    
+
+    private var nextTemplate: ProgramTemplate? {
+        cachedNextTemplate
+    }
+
     private func getExerciseCount(for template: ProgramTemplate) -> Int {
         template.exercises.count
     }
-    
-    // Get next upcoming template (for bottom button when no workout today)
-    private var nextTemplate: ProgramTemplate? {
-        let calendar = Calendar.current
-        let today = Date()
-        let weekday = calendar.component(.weekday, from: today)
-        // Calendar.weekday: 1 = Sunday, 2 = Monday, ..., 7 = Saturday
-        // Our dayOfWeek: 1 = Monday, 2 = Tuesday, ..., 7 = Sunday
-        let dayOfWeek: Int
-        if weekday == 1 { // Sunday
-            dayOfWeek = 7
-        } else {
-            dayOfWeek = weekday - 1
-        }
-        
-        // If there's a template for today, return it
+
+    // MARK: - Cache Update Functions
+
+    /// Converts Calendar weekday (1=Sunday) to ISO weekday (1=Monday, 7=Sunday)
+    private func isoWeekday(from date: Date = Date()) -> Int {
+        let weekday = Calendar.current.component(.weekday, from: date)
+        return weekday == 1 ? 7 : weekday - 1
+    }
+
+    private func updateCachedValues() {
+        // Update active session
+        cachedActiveSession = workoutSessions.first { $0.status == "active" || $0.status == "pending" }
+
+        // Update today's template
+        let dayOfWeek = isoWeekday()
         let activeGymId = currentProfile?.selectedGymId
-        if let todayTemplate = programTemplates.first(where: { 
+
+        cachedTodayTemplate = programTemplates.first {
             $0.dayOfWeek == dayOfWeek && $0.gymId == activeGymId
-        }) {
-            return todayTemplate
         }
-        
-        // If no template for today, find the next upcoming template for THIS gym
-        let sortedTemplates = programTemplates.filter { $0.dayOfWeek != nil && $0.gymId == activeGymId }
-            .sorted { ($0.dayOfWeek ?? 0) < ($1.dayOfWeek ?? 0) }
-        
-        // Find next template after today
-        if let nextTemplate = sortedTemplates.first(where: { ($0.dayOfWeek ?? 0) > dayOfWeek }) {
-            return nextTemplate
+
+        // Update next template
+        if let today = cachedTodayTemplate {
+            cachedNextTemplate = today
+        } else {
+            let sortedTemplates = programTemplates
+                .filter { $0.dayOfWeek != nil && $0.gymId == activeGymId }
+                .sorted { ($0.dayOfWeek ?? 0) < ($1.dayOfWeek ?? 0) }
+
+            cachedNextTemplate = sortedTemplates.first { ($0.dayOfWeek ?? 0) > dayOfWeek }
+                ?? sortedTemplates.first
         }
-        
-        // If no template after today, return first template (next week)
-        return sortedTemplates.first
     }
     
     var body: some View {
@@ -262,11 +247,9 @@ struct HomeView: View {
                 }
             }
             .onAppear {
-                print("[DEBUG HomeView] onAppear. workoutSessions count: \(workoutSessions.count)")
-                for session in workoutSessions {
-                    print("[DEBUG HomeView] Session: \(session.id.uuidString), Status: \(session.status), Started: \(session.startedAt)")
-                }
-                
+                // Update cached values on appear
+                updateCachedValues()
+
                 if useTestData {
                     // Set dummy data for testing
                     activityPercent = 65
@@ -280,8 +263,12 @@ struct HomeView: View {
                 }
             }
             .onChange(of: workoutSessions.count) { _, _ in
+                updateCachedValues()
                 updateActivityAndRecovery()
                 updateWorkoutProgress()
+            }
+            .onChange(of: programTemplates.count) { _, _ in
+                updateCachedValues()
             }
             .onChange(of: exerciseLogs.count) { _, _ in
                 updateWorkoutProgress()
@@ -362,47 +349,55 @@ struct HomeView: View {
     
     private func calculateActivityFromData() async -> Int {
         guard let profile = currentProfile else { return 0 }
-        
+
         let now = Date()
         let calendar = Calendar.current
         let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.start ?? now
         let startOfDay = calendar.startOfDay(for: now)
-        
+
         // 1. Workout sessions (40% weight)
         let completedThisWeek = workoutSessions.filter { session in
             guard let completedAt = session.completedAt else { return false }
             return completedAt >= startOfWeek && session.status == "completed"
         }.count
-        
+
         let targetSessions = profile.sessionsPerWeek
         let workoutScore = min((completedThisWeek * 100) / max(targetSessions, 1), 100)
-        
-        // 2. HealthKit data (60% weight)
+
+        // 2. HealthKit data (60% weight) - fetch all in parallel
+        let stepGoal = 10000
+        let calorieGoal = 500
+        let activeMinutesGoal = 30
+
+        // Launch all HealthKit requests concurrently
+        async let stepsTask = HealthKitService.shared.getStepsCount(for: startOfDay, to: now)
+        async let caloriesTask = HealthKitService.shared.getActiveEnergyBurned(for: startOfDay, to: now)
+        async let minutesTask = HealthKitService.shared.getActiveMinutes(for: startOfDay, to: now)
+
+        // Wait for all results in parallel
+        let (steps, calories, minutes) = await (
+            try? stepsTask,
+            try? caloriesTask,
+            try? minutesTask
+        )
+
         var healthKitScore = 0
-        
-        do {
-            // Get today's steps
-            let stepGoal = 10000 // Default goal
-            if let steps = try? await HealthKitService.shared.getStepsCount(for: startOfDay, to: now) {
-                let stepsPercent = min((steps * 100) / stepGoal, 100)
-                healthKitScore += stepsPercent / 3 // 33% of health score
-            }
-            
-            // Get today's active calories
-            let calorieGoal = 500 // Default goal
-            if let calories = try? await HealthKitService.shared.getActiveEnergyBurned(for: startOfDay, to: now) {
-                let caloriesPercent = min((Int(calories) * 100) / calorieGoal, 100)
-                healthKitScore += caloriesPercent / 3 // 33% of health score
-            }
-            
-            // Get today's active minutes
-            let activeMinutesGoal = 30 // Default goal
-            if let activeMinutes = try? await HealthKitService.shared.getActiveMinutes(for: startOfDay, to: now) {
-                let minutesPercent = min((activeMinutes * 100) / activeMinutesGoal, 100)
-                healthKitScore += minutesPercent / 3 // 33% of health score
-            }
+
+        if let steps = steps {
+            let stepsPercent = min((steps * 100) / stepGoal, 100)
+            healthKitScore += stepsPercent / 3 // 33% of health score
         }
-        
+
+        if let calories = calories {
+            let caloriesPercent = min((Int(calories) * 100) / calorieGoal, 100)
+            healthKitScore += caloriesPercent / 3 // 33% of health score
+        }
+
+        if let minutes = minutes {
+            let minutesPercent = min((minutes * 100) / activeMinutesGoal, 100)
+            healthKitScore += minutesPercent / 3 // 33% of health score
+        }
+
         // Combine: 40% workouts + 60% HealthKit
         let combinedScore = (workoutScore * 40 + healthKitScore * 60) / 100
         return min(combinedScore, 100)

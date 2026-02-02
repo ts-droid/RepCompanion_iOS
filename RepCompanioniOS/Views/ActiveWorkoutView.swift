@@ -228,6 +228,7 @@ struct ActiveWorkoutView: View {
         .onDisappear {
             print("[DEBUG ActiveWorkoutView] onDisappear")
             timer?.invalidate()
+            timer = nil  // Release timer reference to prevent memory leak
             
             // Accumulate time if session is still active
             if session.status == "active" {
@@ -251,6 +252,7 @@ struct ActiveWorkoutView: View {
                 startTimer()
             } else {
                 timer?.invalidate()
+                timer = nil  // Release timer reference
             }
         }
         .onChange(of: scenePhase) { _, newPhase in

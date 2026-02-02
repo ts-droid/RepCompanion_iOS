@@ -1,17 +1,17 @@
 import Foundation
 
 /// API Service for communicating with the backend server
-@MainActor
+/// Note: Removed @MainActor to prevent blocking UI thread during network calls
 class APIService {
     static let shared = APIService()
-    
+
     // Backend server URL
     // IMPORTANT: Use 127.0.0.1 instead of localhost to force IPv4
     // iOS Simulator sometimes resolves localhost to IPv6 (::1) which causes connection issues
     // For physical device, use your Mac's IP address (Local) or Production URL (Cloud)
     private let useCloud = true // ALWAYS TRUE FOR ALPHA
     private let productionURL = "https://repcompanionserver-production.up.railway.app" // FINAL RAILWAY URL
-    
+
     #if targetEnvironment(simulator)
     // Simulator: Use 127.0.0.1 (IPv4) instead of localhost to avoid IPv6 issues
     lazy var baseURL: String = {
@@ -24,7 +24,37 @@ class APIService {
         return useCloud ? productionURL : "http://192.168.68.82:5002"
     }()
     #endif
-    
+
+    // MARK: - Reusable URLSession instances (singleton pattern for connection pooling)
+
+    /// Long timeout session for AI generation operations (5 minutes)
+    private lazy var longTimeoutSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 300.0
+        config.timeoutIntervalForResource = 600.0
+        return URLSession(configuration: config)
+    }()
+
+    /// Standard session with caching for frequently accessed data
+    private lazy var cachedSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.urlCache = URLCache(
+            memoryCapacity: 10_000_000,   // 10 MB memory cache
+            diskCapacity: 50_000_000       // 50 MB disk cache
+        )
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        config.timeoutIntervalForRequest = 30.0
+        return URLSession(configuration: config)
+    }()
+
+    /// Medium timeout session for 1RM suggestions and similar operations (30 seconds)
+    private lazy var mediumTimeoutSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30.0
+        config.timeoutIntervalForResource = 60.0
+        return URLSession(configuration: config)
+    }()
+
     // Log baseURL on initialization to verify configuration
     init() {
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -425,12 +455,7 @@ class APIService {
         print("[APIService] 🌐 Request URL: \(url.absoluteString)")
         print("[APIService] 📋 Base URL: \(baseURL)")
         
-        // Create custom URLSessionConfiguration with extended timeout for AI generation
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 300.0 // 5 minutes for AI generation
-        config.timeoutIntervalForResource = 300.0 // 5 minutes total
-        let session = URLSession(configuration: config)
-        
+        // Use singleton long timeout session for AI generation (5 minutes)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -462,8 +487,8 @@ class APIService {
         }
         
         do {
-            let (data, response) = try await session.data(for: request)
-            
+            let (data, response) = try await longTimeoutSession.data(for: request)
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.invalidResponse
             }
@@ -530,7 +555,7 @@ class APIService {
                         retryRequest.httpBody = try JSONEncoder().encode(body)
                         retryRequest.timeoutInterval = 300.0
                         
-                        let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                        let (retryData, retryResponse) = try await longTimeoutSession.data(for: retryRequest)
                         if let retryHttpResponse = retryResponse as? HTTPURLResponse,
                            (200...299).contains(retryHttpResponse.statusCode) {
                             let decoder = JSONDecoder()
@@ -697,14 +722,9 @@ class APIService {
             print("[APIService] ⚠️  Continuing with request anyway...")
         }
         
-        // Create custom URLSessionConfiguration with extended timeout for V3 AI analysis
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30.0 // 30 seconds for V3 AI analysis
-        config.timeoutIntervalForResource = 30.0 // 30 seconds total
-        let session = URLSession(configuration: config)
-        
+        // Use singleton medium timeout session for 1RM suggestions (30 seconds)
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await mediumTimeoutSession.data(for: request)
             let duration = Date().timeIntervalSince(startTime)
             
             print("[APIService] ⏱️  Request completed in \(String(format: "%.2f", duration)) seconds")
@@ -775,7 +795,7 @@ class APIService {
                         retryRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
                         retryRequest.timeoutInterval = 30.0
                         
-                        let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                        let (retryData, retryResponse) = try await longTimeoutSession.data(for: retryRequest)
                         if let retryHttpResponse = retryResponse as? HTTPURLResponse,
                            (200...299).contains(retryHttpResponse.statusCode) {
                             return try JSONDecoder().decode(SuggestedOneRmResponse.self, from: retryData)
