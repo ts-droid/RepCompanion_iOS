@@ -9,6 +9,7 @@ final class ProgramTemplate {
     var templateName: String
     var muscleFocus: String?
     var dayOfWeek: Int? // 1=Monday, 7=Sunday
+    var weekNumber: Int? // 1, 2, 3, 4 etc.
     var estimatedDurationMinutes: Int?
     var warmupDescription: String? // New field for warm-up suggestions
     @Relationship(deleteRule: .cascade, inverse: \ProgramTemplateExercise.template) 
@@ -23,6 +24,7 @@ final class ProgramTemplate {
         templateName: String,
         muscleFocus: String? = nil,
         dayOfWeek: Int? = nil,
+        weekNumber: Int? = nil,
         estimatedDurationMinutes: Int? = nil,
         warmupDescription: String? = nil,
         exercises: [ProgramTemplateExercise] = []
@@ -33,6 +35,7 @@ final class ProgramTemplate {
         self.templateName = templateName
         self.muscleFocus = muscleFocus
         self.dayOfWeek = dayOfWeek
+        self.weekNumber = weekNumber
         self.estimatedDurationMinutes = estimatedDurationMinutes
         self.warmupDescription = warmupDescription
         self.exercises = exercises

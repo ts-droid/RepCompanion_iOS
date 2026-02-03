@@ -2362,6 +2362,7 @@ struct ProgramTemplateResponse: Decodable {
     let templateName: String
     let muscleFocus: String?
     let dayOfWeek: Int?
+    let weekNumber: Int?
     let estimatedDurationMinutes: Int?
     
     // Exercises can be at root or wrapped in 'exercises' property of top-level object
@@ -2373,6 +2374,7 @@ struct ProgramTemplateResponse: Decodable {
         case templateName
         case muscleFocus
         case dayOfWeek
+        case weekNumber
         case estimatedDurationMinutes
         case exercises
         case template // New format wrapper
@@ -2384,6 +2386,7 @@ struct ProgramTemplateResponse: Decodable {
         case templateName
         case muscleFocus
         case dayOfWeek
+        case weekNumber
         case estimatedDurationMinutes
     }
 
@@ -2396,6 +2399,7 @@ struct ProgramTemplateResponse: Decodable {
             templateName = try templateContainer.decode(String.self, forKey: .templateName)
             muscleFocus = try? templateContainer.decode(String.self, forKey: .muscleFocus)
             dayOfWeek = try? templateContainer.decode(Int.self, forKey: .dayOfWeek)
+            weekNumber = try? templateContainer.decode(Int.self, forKey: .weekNumber)
             estimatedDurationMinutes = try? templateContainer.decode(Int.self, forKey: .estimatedDurationMinutes)
             
             // Exercises are at the root level of the response object in the new format
@@ -2407,17 +2411,19 @@ struct ProgramTemplateResponse: Decodable {
             templateName = try container.decode(String.self, forKey: .templateName)
             muscleFocus = try? container.decode(String.self, forKey: .muscleFocus)
             dayOfWeek = try? container.decode(Int.self, forKey: .dayOfWeek)
+            weekNumber = try? container.decode(Int.self, forKey: .weekNumber)
             estimatedDurationMinutes = try? container.decode(Int.self, forKey: .estimatedDurationMinutes)
             exercises = try? container.decode([ProgramTemplateExerciseResponse].self, forKey: .exercises)
         }
     }
     
     // Add memberwise initializer manually since we defined a custom init(from:)
-    init(id: String, templateName: String, muscleFocus: String?, dayOfWeek: Int?, estimatedDurationMinutes: Int?, exercises: [ProgramTemplateExerciseResponse]?) {
+    init(id: String, templateName: String, muscleFocus: String?, dayOfWeek: Int?, weekNumber: Int?, estimatedDurationMinutes: Int?, exercises: [ProgramTemplateExerciseResponse]?) {
         self.id = id
         self.templateName = templateName
         self.muscleFocus = muscleFocus
         self.dayOfWeek = dayOfWeek
+        self.weekNumber = weekNumber
         self.estimatedDurationMinutes = estimatedDurationMinutes
         self.exercises = exercises
     }

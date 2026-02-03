@@ -29,6 +29,13 @@ struct WorkoutListView: View {
         return programTemplates
             .filter { $0.gymId == activeGymId } // Filter by gym
             .sorted { template1, template2 in
+                // Sort by week first, then day
+                let w1 = template1.weekNumber ?? 1
+                let w2 = template2.weekNumber ?? 1
+                if w1 != w2 {
+                    return w1 < w2
+                }
+                
                 let day1 = template1.dayOfWeek ?? 0
                 let day2 = template2.dayOfWeek ?? 0
                 if day1 != day2 {
@@ -36,6 +43,21 @@ struct WorkoutListView: View {
                 }
                 return template1.templateName < template2.templateName
             }
+    }
+    
+    private var groupedTemplates: [(week: Int?, templates: [ProgramTemplate])] {
+        let sorted = sortedTemplates
+        
+        // Group while preserving order (since sortedTemplates is already sorted by week)
+        var result: [(week: Int?, templates: [ProgramTemplate])] = []
+        for template in sorted {
+            if let lastGroup = result.last, lastGroup.week == template.weekNumber {
+                result[result.count - 1].templates.append(template)
+            } else {
+                result.append((week: template.weekNumber, templates: [template]))
+            }
+        }
+        return result
     }
     
     private var currentPassNumber: Int {
@@ -196,18 +218,48 @@ struct WorkoutListView: View {
                                 .padding()
                                 .padding(.top, 50)
                             } else {
-                                ForEach(sortedTemplates, id: \.id) { template in
-                                    ProgramTemplateCard(
-                                        template: template,
-                                        exerciseCount: getExerciseCount(for: template),
-                                        isNext: isNextTemplate(template),
-                                        dayName: getDayName(template.dayOfWeek),
-                                        colorScheme: colorScheme,
-                                        onView: {
-                                            selectedTemplate = template
-                                            showTemplateDetail = true
+                                ForEach(groupedTemplates, id: \.week) { group in
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        if let week = group.week {
+                                            HStack(spacing: 12) {
+                                                Text("WEEK \(week)")
+                                                    .font(.system(size: 12, weight: .black))
+                                                    .foregroundStyle(Color.accentColor)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 4)
+                                                    .background(Color.accentColor.opacity(0.1))
+                                                    .cornerRadius(4)
+                                                
+                                                Rectangle()
+                                                    .fill(LinearGradient(colors: [Color.accentColor.opacity(0.3), Color.clear], startPoint: .leading, endPoint: .trailing))
+                                                    .frame(height: 1)
+                                            }
+                                            .padding(.horizontal)
+                                            .padding(.top, 16)
+                                            .padding(.bottom, 4)
+                                        } else if groupedTemplates.indices.count > 1 {
+                                            Text(String(localized: "SESSIONS"))
+                                                .font(.system(size: 12, weight: .black))
+                                                .foregroundStyle(Color.textSecondary(for: colorScheme))
+                                                .padding(.horizontal)
+                                                .padding(.top, 16)
+                                                .padding(.bottom, 4)
                                         }
-                                    )
+                                        
+                                        ForEach(group.templates, id: \.id) { template in
+                                            ProgramTemplateCard(
+                                                template: template,
+                                                exerciseCount: getExerciseCount(for: template),
+                                                isNext: isNextTemplate(template),
+                                                dayName: getDayName(template.dayOfWeek),
+                                                colorScheme: colorScheme,
+                                                onView: {
+                                                    selectedTemplate = template
+                                                    showTemplateDetail = true
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

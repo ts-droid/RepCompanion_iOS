@@ -432,6 +432,7 @@ class SyncService: ObservableObject {
             templateName: data.templateName,
             muscleFocus: data.muscleFocus,
             dayOfWeek: data.dayOfWeek,
+            weekNumber: data.weekNumber,
             estimatedDurationMinutes: data.estimatedDurationMinutes
         )
         return template
@@ -441,6 +442,7 @@ class SyncService: ObservableObject {
         template.templateName = data.templateName
         template.muscleFocus = data.muscleFocus
         template.dayOfWeek = data.dayOfWeek
+        template.weekNumber = data.weekNumber
         template.estimatedDurationMinutes = data.estimatedDurationMinutes
     }
     

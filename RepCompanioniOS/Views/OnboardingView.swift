@@ -2881,7 +2881,8 @@ struct OnboardingView: View {
                     // If we have a jobId, we should be polling it
                     await pollGenerationStatus(jobId: jobId, userId: userId)
                     // If pollGenerationStatus finishes (either success or fail), it will update programGenerationComplete
-                    if programGenerationComplete { break }
+                    let hasError = await MainActor.run { generationError != nil }
+                    if programGenerationComplete || hasError { break }
                 }
                 
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
@@ -3056,6 +3057,7 @@ struct OnboardingView: View {
                     }
                     
                     await MainActor.run {
+                        programGenerationComplete = true
                         isGeneratingProgram = false
                         showGenerationProgress = false
                         dismiss()

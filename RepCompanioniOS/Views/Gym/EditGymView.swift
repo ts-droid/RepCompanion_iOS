@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct EditGymView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,6 +24,7 @@ struct EditGymView: View {
     @State private var showAdaptationAlert = false
     @State private var createdGymId: String?
     @State private var sourceGymId: String?
+    @State private var showLocationSettingsAlert = false
     
     @Query private var userProfiles: [UserProfile]
     @Query private var allTemplates: [ProgramTemplate]
@@ -67,6 +69,16 @@ struct EditGymView: View {
                 }
             } message: {
                 Text(String(localized: "Do you want to create a training setup for this gym based on your current program? Exercises will be adapted to available equipment."))
+            }
+            .alert(String(localized: "Location Access Disabled"), isPresented: $showLocationSettingsAlert) {
+                Button(String(localized: "Open Settings")) {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button(String(localized: "Cancel"), role: .cancel) {}
+            } message: {
+                Text(String(localized: "Location services are required to find nearby gyms. Please enable them in Settings."))
             }
     }
     
@@ -176,8 +188,12 @@ struct EditGymView: View {
                 
                 Section(header: Text(String(localized: "Find nearby"))) {
                     Button(action: {
-                        locationService.searchNearbyGyms()
-                        showNearbyGyms = true
+                        if locationService.authorizationStatus == .denied || locationService.authorizationStatus == .restricted {
+                            showLocationSettingsAlert = true
+                        } else {
+                            locationService.searchNearbyGyms()
+                            showNearbyGyms = true
+                        }
                     }) {
                         HStack {
                             Image(systemName: "location.fill")
@@ -226,6 +242,11 @@ struct EditGymView: View {
                                 }
                             }
                         }
+                    } else if showNearbyGyms && !locationService.isSearching {
+                        Text(String(localized: "No gyms found near you."))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 8)
                     }
                 }
                 

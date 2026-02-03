@@ -1461,6 +1461,9 @@
         }
       }
     },
+    "Content" : {
+
+    },
     "Continue" : {
       "localizations" : {
         "sv" : {
@@ -2121,6 +2124,9 @@
           }
         }
       }
+    },
+    "Edit Prompt" : {
+
     },
     "Edit session" : {
       "localizations" : {
@@ -3224,6 +3230,9 @@
         }
       }
     },
+    "ID: %@" : {
+
+    },
     "Identified equipment:" : {
       "localizations" : {
         "sv" : {
@@ -3622,6 +3631,12 @@
           }
         }
       }
+    },
+    "Location Access Disabled" : {
+
+    },
+    "Location services are required to find nearby gyms. Please enable them in Settings." : {
+
     },
     "Log" : {
       "localizations" : {
@@ -4279,6 +4294,9 @@
         }
       }
     },
+    "No gyms found near you." : {
+
+    },
     "No gyms found nearby. Try increasing search distance." : {
       "localizations" : {
         "sv" : {
@@ -4348,6 +4366,9 @@
           }
         }
       }
+    },
+    "No prompts found" : {
+
     },
     "No training history yet" : {
       "localizations" : {
@@ -4544,6 +4565,9 @@
           }
         }
       }
+    },
+    "Open Settings" : {
+
     },
     "optimal" : {
       "localizations" : {
@@ -5024,6 +5048,9 @@
           }
         }
       }
+    },
+    "Prompts" : {
+
     },
     "Public gym" : {
       "localizations" : {
@@ -5693,9 +5720,6 @@
           }
         }
       }
-    },
-    "Search distance" : {
-
     },
     "Search Distance" : {
       "localizations" : {
@@ -7270,6 +7294,9 @@
     "Utrustning:" : {
 
     },
+    "v%@" : {
+
+    },
     "Validating program..." : {
       "localizations" : {
         "sv" : {
@@ -7300,6 +7327,9 @@
           }
         }
       }
+    },
+    "Version" : {
+
     },
     "Video instruction" : {
       "localizations" : {

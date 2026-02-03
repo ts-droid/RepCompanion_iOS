@@ -115,10 +115,14 @@ class LocationService: NSObject, ObservableObject {
         
         let search = MKLocalSearch(request: request)
         search.start { response, error in
+            if let error = error {
+                print("[LocationService] 🗺️ Apple Maps search error: \(error.localizedDescription)")
+            }
+            
             if let mapItems = response?.mapItems {
-                appleGyms = mapItems.map { item in
-                    // Use modern location property (non-optional CLLocation in newer SDKs)
-                    let gymLocation = item.location // inferred as CLLocation
+                appleGyms = mapItems.compactMap { item in
+                    // Use placemark.location which is the standard way to get the coordinate
+                    guard let gymLocation = item.placemark.location else { return nil }
                     let distance = location.distance(from: gymLocation)
                     
                     return NearbyGym(
@@ -131,7 +135,7 @@ class LocationService: NSObject, ObservableObject {
                         isRepCompanionGym: false
                     )
                 }
-                print("[LocationService] 🗺️ Apple Maps found \(appleGyms.count) gyms")
+                print("[LocationService] 🗺️ Apple Maps found \(appleGyms.count) gyms items")
             }
             dispatchGroup.leave()
         }

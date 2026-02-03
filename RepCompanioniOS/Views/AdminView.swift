@@ -43,7 +43,6 @@ struct AdminView: View {
             } else {
                 VStack(spacing: 0) {
                     // Tab selector
-                    pickerStyle(.segmented)
                     Picker("Type", selection: $selectedTab) {
                         Text("Exercises").tag(0)
                         Text("Utrustning").tag(1)
@@ -152,6 +151,32 @@ struct AdminView: View {
         }
     }
     
+    private var equipmentList: some View {
+        Group {
+            if pendingEquipment.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 50))
+                        .foregroundColor(.green)
+                    Text("No pending equipment")
+                        .font(.headline)
+                    Text("All equipment has been reviewed.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(pendingEquipment) { equipment in
+                        AdminEquipmentCard(equipment: equipment) {
+                            approveEquipment(id: equipment.id)
+                        } onReject: {
+                            selectedItemId = equipment.id
+                            showRejectDialog = true
+                        }
+                    }
+                }
+            }
         }
     }
     
