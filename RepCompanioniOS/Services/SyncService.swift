@@ -285,6 +285,18 @@ class SyncService: ObservableObject {
             }
         }
         
+        // Delete gyms that no longer exist on server
+        let serverGymIds = Set(gymsData.map { $0.id })
+        for existingGym in existingGyms {
+            if !serverGymIds.contains(existingGym.id) {
+                print("[SyncService] 🗑️ Deleting stale gym: \(existingGym.name) (ID: \(existingGym.id))")
+                modelContext.delete(existingGym)
+            }
+        }
+        
+        try modelContext.save()
+        print("[SyncService] ✅ Gyms synced: \(gymsData.count) from server, \(existingGyms.count - gymsData.count) stale gyms deleted")
+        
         // Fetch equipment from API
         let equipmentData = try await apiService.fetchUserEquipment()
         
@@ -402,7 +414,13 @@ class SyncService: ObservableObject {
         profile.sessionsPerWeek = data.sessionsPerWeek ?? profile.sessionsPerWeek
         profile.sessionDuration = data.sessionDuration ?? profile.sessionDuration
         profile.onboardingCompleted = data.onboardingCompleted ?? profile.onboardingCompleted
+        
+        let previousGymId = profile.selectedGymId
         profile.selectedGymId = data.selectedGymId
+        
+        if previousGymId != data.selectedGymId {
+            print("[SyncService] 🏋️ Updated selectedGymId: \(previousGymId ?? "nil") → \(data.selectedGymId ?? "nil")")
+        }
     }
     
     private func createTemplate(from data: ProgramTemplateResponse, userId: String) -> ProgramTemplate {

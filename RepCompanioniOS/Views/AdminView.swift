@@ -7,13 +7,16 @@ struct AdminView: View {
     
     @State private var pendingExercises: [PendingExercise] = []
     @State private var pendingEquipment: [PendingEquipment] = []
-    @State private var selectedTab = 0 // 0: Exercises, 1: Equipment
+    @State private var aiPrompts: [AiPrompt] = []
+    @State private var selectedTab = 0 // 0: Exercises, 1: Equipment, 2: Prompts
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showRejectDialog = false
     @State private var selectedItemId: String?
     @State private var rejectReason: String = ""
     @State private var isRejecting = false
+    @State private var editingPrompt: AiPrompt?
+    @State private var showPromptEditor = false
     
     private var isDev: Bool {
         authService.currentUserEmail == "dev@recompute.it" || 
@@ -40,9 +43,11 @@ struct AdminView: View {
             } else {
                 VStack(spacing: 0) {
                     // Tab selector
+                    pickerStyle(.segmented)
                     Picker("Type", selection: $selectedTab) {
                         Text("Exercises").tag(0)
                         Text("Utrustning").tag(1)
+                        Text("Prompts").tag(2)
                     }
                     .pickerStyle(.segmented)
                     .padding()
@@ -73,8 +78,10 @@ struct AdminView: View {
                     } else {
                         if selectedTab == 0 {
                             exercisesList
-                        } else {
+                        } else if selectedTab == 1 {
                             equipmentList
+                        } else {
+                            promptsList
                         }
                     }
                 }
@@ -104,6 +111,13 @@ struct AdminView: View {
                     }
                 } message: {
                     Text("Do you want to reject this item? You can provide a reason.")
+                }
+                .sheet(isPresented: $showPromptEditor) {
+                    if let prompt = editingPrompt {
+                        PromptEditorView(prompt: prompt) { updatedPrompt in
+                            savePrompt(updatedPrompt)
+                        }
+                    }
                 }
             }
         }
@@ -138,29 +152,59 @@ struct AdminView: View {
         }
     }
     
-    private var equipmentList: some View {
+        }
+    }
+    
+    private var promptsList: some View {
         Group {
-            if pendingEquipment.isEmpty {
+            if aiPrompts.isEmpty {
                 VStack(spacing: 16) {
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 50))
-                        .foregroundColor(.green)
-                    Text("No pending equipment")
+                        .foregroundColor(.gray)
+                    Text("No prompts found")
                         .font(.headline)
-                    Text("All equipment has been reviewed.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
-                    ForEach(pendingEquipment) { equipment in
-                        AdminEquipmentCard(equipment: equipment) {
-                            approveEquipment(id: equipment.id)
-                        } onReject: {
-                            selectedItemId = equipment.id
-                            showRejectDialog = true
+                    ForEach(aiPrompts) { prompt in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(prompt.id)
+                                    .font(.headline)
+                                Spacer()
+                                Text("v\(prompt.version)")
+                                    .font(.caption)
+                                    .padding(4)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
+                            
+                            if let desc = prompt.description {
+                                Text(desc)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Text(prompt.content)
+                                .font(.system(.caption, design: .monospaced))
+                                .lineLimit(3)
+                                .foregroundColor(.secondary)
+                                .padding(8)
+                                .background(Color(.secondarySystemBackground))
+                                .cornerRadius(8)
+                            
+                            HStack {
+                                Spacer()
+                                Button("Edit") {
+                                    editingPrompt = prompt
+                                    showPromptEditor = true
+                                }
+                                .buttonStyle(.bordered)
+                            }
                         }
+                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -168,44 +212,46 @@ struct AdminView: View {
     }
     
     private func loadPendingItems() {
-        // #region agent log
-        let _ = try? FileHandle(forWritingTo: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log")).seekToEndOfFile()
-        let logData1 = "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"AdminView.swift:170\",\"message\":\"loadPendingItems called\",\"data\":{},\"timestamp\":\(Int(Date().timeIntervalSince1970 * 1000))}\n".data(using: .utf8)!
-        try? logData1.write(to: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log"), options: .atomic)
-        // #endregion
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                // #region agent log
-                let _ = try? FileHandle(forWritingTo: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log")).seekToEndOfFile()
-                let logData2 = "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"AdminView.swift:176\",\"message\":\"Starting API calls\",\"data\":{},\"timestamp\":\(Int(Date().timeIntervalSince1970 * 1000))}\n".data(using: .utf8)!
-                try? logData2.write(to: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log"), options: .atomic)
-                // #endregion
                 async let exercises = apiService.fetchPendingExercises()
                 async let equipment = apiService.fetchPendingEquipment()
+                async let prompts = apiService.fetchAiPrompts()
                 
-                let (exercisesResult, equipmentResult) = try await (exercises, equipment)
+                let (exercisesResult, equipmentResult, promptsResult) = try await (exercises, equipment, prompts)
                 
-                // #region agent log
-                let _ = try? FileHandle(forWritingTo: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log")).seekToEndOfFile()
-                let logData3 = "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"AdminView.swift:181\",\"message\":\"API calls succeeded\",\"data\":{\"exercisesCount\":\(exercisesResult.count),\"equipmentCount\":\(equipmentResult.count)},\"timestamp\":\(Int(Date().timeIntervalSince1970 * 1000))}\n".data(using: .utf8)!
-                try? logData3.write(to: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log"), options: .atomic)
-                // #endregion
                 await MainActor.run {
                     self.pendingExercises = exercisesResult
                     self.pendingEquipment = equipmentResult
+                    self.aiPrompts = promptsResult
                     self.isLoading = false
                 }
             } catch {
-                // #region agent log
-                let _ = try? FileHandle(forWritingTo: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log")).seekToEndOfFile()
-                let errorDesc = "\(error)"
-                let errorType = "\(type(of: error))"
-                let logData4 = "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\",\"location\":\"AdminView.swift:186\",\"message\":\"API calls failed\",\"data\":{\"error\":\"\(errorDesc)\",\"errorType\":\"\(errorType)\"},\"timestamp\":\(Int(Date().timeIntervalSince1970 * 1000))}\n".data(using: .utf8)!
-                try? logData4.write(to: URL(fileURLWithPath: "/Users/thomassoderberg/.gemini/antigravity/scratch/Test/RepCompanion 2/RepCompanion 2 Antigravity.xcodeproj/.cursor/debug.log"), options: .atomic)
-                // #endregion
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                }
+            }
+        }
+    }
+    
+    private func savePrompt(_ prompt: AiPrompt) {
+        isLoading = true
+        Task {
+            do {
+                let updated = try await apiService.upsertAiPrompt(prompt: prompt)
+                await MainActor.run {
+                    if let index = aiPrompts.firstIndex(where: { $0.id == updated.id }) {
+                        aiPrompts[index] = updated
+                    } else {
+                        aiPrompts.append(updated)
+                    }
+                    isLoading = false
+                }
+            } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                     self.isLoading = false
@@ -419,5 +465,60 @@ struct AdminEquipmentCard: View {
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
+    }
+}
+
+struct PromptEditorView: View {
+    @Environment(\.dismiss) var dismiss
+    @State var prompt: AiPrompt
+    let onSave: (AiPrompt) -> Void
+    
+    @State private var editedContent: String = ""
+    @State private var editedVersion: String = ""
+    @State private var editedDescription: String = ""
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("ID: \(prompt.id)")) {
+                    TextField("Version", text: $editedVersion)
+                    TextField("Description", text: $editedDescription)
+                }
+                
+                Section(header: Text("Content")) {
+                    TextEditor(text: $editedContent)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(minHeight: 300)
+                }
+            }
+            .navigationTitle("Edit Prompt")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        let updated = AiPrompt(
+                            id: prompt.id,
+                            content: editedContent,
+                            version: editedVersion,
+                            description: editedDescription.isEmpty ? nil : editedDescription,
+                            updatedAt: Date()
+                        )
+                        onSave(updated)
+                        dismiss()
+                    }
+                    .disabled(editedContent.isEmpty || editedVersion.isEmpty)
+                }
+            }
+            .onAppear {
+                editedContent = prompt.content
+                editedVersion = prompt.version
+                editedDescription = prompt.description ?? ""
+            }
+        }
     }
 }

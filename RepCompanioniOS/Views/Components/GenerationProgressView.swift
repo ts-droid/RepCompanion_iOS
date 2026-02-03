@@ -130,9 +130,9 @@ struct GenerationProgressView: View {
             }
         }
         .onAppear {
-            // Show timeout message after 60 seconds
+            // Show timeout message after 90 seconds
             Task {
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+                try? await Task.sleep(nanoseconds: 90_000_000_000) // 90 seconds
                 await MainActor.run {
                     withAnimation {
                         showTimeoutMessage = true

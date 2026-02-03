@@ -1929,7 +1929,62 @@ class APIService {
             throw APIError.httpError(httpResponse.statusCode)
         }
         
-        return try JSONDecoder().decode([PendingExercise].self, from: data)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([PendingExercise].self, from: data)
+    }
+    
+    // MARK: - AI Prompts
+    
+    func fetchAiPrompts() async throws -> [AiPrompt] {
+        let url = URL(string: "\(baseURL)/api/admin/prompts")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([AiPrompt].self, from: data)
+    }
+    
+    func upsertAiPrompt(prompt: AiPrompt) async throws -> AiPrompt {
+        let url = URL(string: "\(baseURL)/api/admin/prompts")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(prompt)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(AiPrompt.self, from: data)
     }
     
     /// Approve a pending exercise
@@ -2482,6 +2537,14 @@ struct PendingExercise: Codable, Identifiable {
     let reviewedAt: Date?
     let rejectionReason: String?
     let createdAt: Date
+}
+
+struct AiPrompt: Codable, Identifiable {
+    let id: String
+    let content: String
+    let version: String
+    let description: String?
+    let updatedAt: Date
 }
 
 struct PendingEquipment: Codable, Identifiable {

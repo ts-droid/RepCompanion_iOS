@@ -104,7 +104,7 @@ struct ProgramTemplateDetailView: View {
                         // Warm-up Section (New)
                         if let warmup = template.warmupDescription, !warmup.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
-                                Label("Warm-up", systemImage: "flame.fill")
+                                Label(String(localized: "Warm-up"), systemImage: "flame.fill")
                                     .font(.headline)
                                     .foregroundStyle(Color.orange)
                                 
@@ -121,7 +121,7 @@ struct ProgramTemplateDetailView: View {
                         
                         // Exercises List
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Exercises")
+                            Text(String(localized: "Exercises"))
                                 .font(.headline)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
                             
@@ -130,10 +130,10 @@ struct ProgramTemplateDetailView: View {
                                     Image(systemName: "dumbbell.fill")
                                         .font(.system(size: 40))
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("No exercises")
+                                    Text(String(localized: "No exercises"))
                                         .font(.subheadline)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("This session has no exercises yet")
+                                    Text(String(localized: "This session has no exercises yet"))
                                         .font(.caption)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                                 }
@@ -161,7 +161,7 @@ struct ProgramTemplateDetailView: View {
                 // Floating Action Button
                 if !exercises.isEmpty {
                     Button(action: startWorkout) {
-                        Text("Start session")
+                        Text(String(localized: "Start session"))
                             .font(.headline)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
@@ -174,16 +174,16 @@ struct ProgramTemplateDetailView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("Session details")
+            .navigationTitle(String(localized: "Session details"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    Button(String(localized: "Close")) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Edit") {
+                    Button(String(localized: "Edit")) {
                         onEdit?()
                     }
                 }
@@ -205,7 +205,16 @@ struct ProgramTemplateDetailView: View {
     }
     
     private func getDayName(_ dayOfWeek: Int) -> String {
-        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
+        let days = [
+            "",
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         return days[safe: dayOfWeek] ?? ""
     }
 }
@@ -247,19 +256,30 @@ struct ProgramExerciseRow: View {
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     
                     if let weight = exercise.targetWeight {
-                        let formattedWeight = weight.truncatingRemainder(dividingBy: 1) == 0
-                            ? String(format: "%.0f", weight)
-                            : String(format: "%.1f", weight)
-                        Label("\(formattedWeight) kg", systemImage: "scalemass")
+                        Label("\(Int(weight)) kg", systemImage: "scalemass.fill")
                             .font(.caption)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                     }
                 }
                 
                 if !exercise.requiredEquipment.isEmpty {
-                    Text("Utrustning: \(exercise.requiredEquipment.joined(separator: ", "))")
-                        .font(.caption2)
-                        .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.8))
+                    HStack(spacing: 2) {
+                        Text("Utrustning:")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        
+                        ForEach(exercise.requiredEquipment.indices, id: \.self) { index in
+                            let equipmentId = exercise.requiredEquipment[index]
+                            Text(LocalizedStringKey(equipmentId))
+                                .font(.caption)
+                            
+                            if index < exercise.requiredEquipment.count - 1 {
+                                Text(",")
+                                    .font(.caption)
+                            }
+                        }
+                    }
+                    .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.8))
                 }
             }
             
@@ -386,7 +406,7 @@ struct FallbackThumbnailView: View {
                     .font(.title2)
                     .foregroundStyle(Color.gray.opacity(0.5))
                 if isSearch {
-                    Text("Search video")
+                    Text(String(localized: "Search video"))
                         .font(.system(size: 8))
                         .foregroundStyle(Color.gray.opacity(0.7))
                 }

@@ -2937,10 +2937,13 @@ struct OnboardingView: View {
                         profile.sessionsPerWeek = apiProfile.sessionsPerWeek ?? 3
                         profile.sessionDuration = apiProfile.sessionDuration ?? 60
                         profile.selectedGymId = apiProfile.selectedGymId
+                        
+                        print("[Onboarding] 🏋️ Set selectedGymId = \(apiProfile.selectedGymId ?? "nil")")
                     }
                     
                     try? modelContext.save()
                     print("[Onboarding] ✅ Profile marked as onboarding completed and synced")
+                    print("[Onboarding] 🏋️ Confirmed selectedGymId in profile: \(profile.selectedGymId ?? "nil")")
                     
                     // Force a full profile sync from server to ensure all fields (including computed ones) are correct
                     print("[Onboarding] 🔄 Performing full profile sync from server...")

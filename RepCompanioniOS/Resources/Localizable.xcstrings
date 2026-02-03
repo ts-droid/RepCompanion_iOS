@@ -7,6 +7,9 @@
     "—" : {
 
     },
+    "," : {
+
+    },
     "&" : {
 
     },
@@ -14,9 +17,6 @@
 
     },
     "%@" : {
-
-    },
-    "%@ kg" : {
 
     },
     "%@kg" : {
@@ -63,6 +63,9 @@
       }
     },
     "%lld kcal" : {
+
+    },
+    "%lld kg" : {
 
     },
     "%lld m" : {
@@ -2586,6 +2589,17 @@
         }
       }
     },
+    "Fri" : {
+      "comment" : "Friday short",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fre"
+          }
+        }
+      }
+    },
     "Friday" : {
       "localizations" : {
         "sv" : {
@@ -3707,6 +3721,17 @@
         }
       }
     },
+    "machine_lat_pulldown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Latsdragsmaskin"
+          }
+        }
+      }
+    },
     "Machines" : {
       "localizations" : {
         "sv" : {
@@ -3896,7 +3921,7 @@
       }
     },
     "Mon" : {
-      "extractionState" : "stale",
+      "comment" : "Monday short",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -5619,7 +5644,7 @@
       }
     },
     "Sat" : {
-      "extractionState" : "stale",
+      "comment" : "Saturday short",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -5668,6 +5693,9 @@
           }
         }
       }
+    },
+    "Search distance" : {
+
     },
     "Search Distance" : {
       "localizations" : {
@@ -6457,7 +6485,7 @@
       }
     },
     "Sun" : {
-      "extractionState" : "stale",
+      "comment" : "Sunday short",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
@@ -6850,6 +6878,17 @@
         }
       }
     },
+    "Thu" : {
+      "comment" : "Thursday short",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tors"
+          }
+        }
+      }
+    },
     "Thursday" : {
       "localizations" : {
         "sv" : {
@@ -7152,6 +7191,17 @@
         }
       }
     },
+    "Tue" : {
+      "comment" : "Tuesday short",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tis"
+          }
+        }
+      }
+    },
     "Tuesday" : {
       "localizations" : {
         "sv" : {
@@ -7217,7 +7267,7 @@
     "Utrustning" : {
 
     },
-    "Utrustning: %@" : {
+    "Utrustning:" : {
 
     },
     "Validating program..." : {
@@ -7359,6 +7409,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vi har skickat en inloggningslänk till **%@**. Klicka på länken i mejlet för att logga in."
+          }
+        }
+      }
+    },
+    "Wed" : {
+      "comment" : "Wednesday short",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ons"
           }
         }
       }

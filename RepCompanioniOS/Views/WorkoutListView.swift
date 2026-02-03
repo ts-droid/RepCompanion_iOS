@@ -48,13 +48,31 @@ struct WorkoutListView: View {
     
     private func getDayName(_ dayOfWeek: Int?) -> String {
         guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Mon", "Tis", "Ons", "Tors", "Fre", "Sat", "Sun"]
+        let days = [
+            "",
+            String(localized: "Mon", comment: "Monday short"),
+            String(localized: "Tue", comment: "Tuesday short"),
+            String(localized: "Wed", comment: "Wednesday short"),
+            String(localized: "Thu", comment: "Thursday short"),
+            String(localized: "Fri", comment: "Friday short"),
+            String(localized: "Sat", comment: "Saturday short"),
+            String(localized: "Sun", comment: "Sunday short")
+        ]
         return days[dayOfWeek]
     }
     
     private func getFullDayName(_ dayOfWeek: Int?) -> String {
-        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return "next" }
-        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
+        guard let dayOfWeek = dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return String(localized: "next") }
+        let days = [
+            "",
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         return days[dayOfWeek]
     }
     
@@ -147,7 +165,7 @@ struct WorkoutListView: View {
                 VStack(alignment: .leading) {
                     // Header
                     HStack {
-                        Text("Training program")
+                        Text(String(localized: "Training program"))
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -216,7 +234,7 @@ struct WorkoutListView: View {
                 // Floating Action Button
                 if !sortedTemplates.isEmpty {
                     Button(action: prepareStartWorkout) {
-                        Text("Start session")
+                        Text(String(localized: "Start session"))
                             .font(.headline)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
@@ -325,7 +343,7 @@ struct ProgramTemplateCard: View {
             
             Spacer()
             
-            Button("Show") {
+            Button(String(localized: "Show")) {
                 onView()
             }
             .font(.subheadline)
