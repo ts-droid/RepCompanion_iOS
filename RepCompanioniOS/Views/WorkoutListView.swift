@@ -222,7 +222,7 @@ struct WorkoutListView: View {
                                     VStack(alignment: .leading, spacing: 12) {
                                         if let week = group.week {
                                             HStack(spacing: 12) {
-                                                Text("WEEK \(week)")
+                                                Text(String(localized: "Week \(week)"))
                                                     .font(.system(size: 12, weight: .black))
                                                     .foregroundStyle(Color.accentColor)
                                                     .padding(.horizontal, 8)
@@ -238,7 +238,7 @@ struct WorkoutListView: View {
                                             .padding(.top, 16)
                                             .padding(.bottom, 4)
                                         } else if groupedTemplates.indices.count > 1 {
-                                            Text(String(localized: "SESSIONS"))
+                                            Text(String(localized: "Sessions"))
                                                 .font(.system(size: 12, weight: .black))
                                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                                                 .padding(.horizontal)
