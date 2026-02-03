@@ -8,7 +8,7 @@ struct LogisticsSelectionView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            Text("Training frequency")
+            Text(String(localized: "Training frequency"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -16,7 +16,7 @@ struct LogisticsSelectionView: View {
             
             VStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Pass per vecka: \(sessionsPerWeek)")
+                    Text(String(localized: "Sessions per week: \(sessionsPerWeek)"))
                         .font(.headline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                     Slider(value: Binding(
@@ -27,7 +27,7 @@ struct LogisticsSelectionView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Session length: \(sessionDuration) minutes")
+                    Text(String(localized: "Session length: \(sessionDuration) minutes"))
                         .font(.headline)
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                     Slider(value: Binding(

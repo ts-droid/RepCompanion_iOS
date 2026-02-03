@@ -96,7 +96,7 @@ struct TrainingAdjustmentView: View {
                     // Navigation Buttons
                     HStack {
                         if currentStep != .motivation {
-                            Button("Tillbaka") {
+                            Button(String(localized: "Back")) {
                                 goBack()
                             }
                             .buttonStyle(.plain)
@@ -123,13 +123,13 @@ struct TrainingAdjustmentView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if !isProcessing {
-                        Button("Avbryt") { dismiss() }
+                        Button(String(localized: "Cancel")) { dismiss() }
                     }
                 }
             }
             .onAppear(perform: loadCurrentSettings)
             .alert(String(localized: "Error"), isPresented: $showErrorAlert) {
-                Button("OK", role: .cancel) { }
+                Button(String(localized: "OK"), role: .cancel) { }
             } message: {
                 Text(errorMessage ?? String(localized: "An unknown error occurred."))
             }
@@ -152,7 +152,7 @@ struct TrainingAdjustmentView: View {
     
     private var MotivationSelectionView: some View {
         VStack(spacing: 24) {
-            Text("What is your primary training goal?")
+            Text(String(localized: "What is your primary training goal?"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -160,8 +160,8 @@ struct TrainingAdjustmentView: View {
             
             VStack(spacing: 16) {
                 MotivationOption(
-                    title: "Lose weight",
-                    description: "Lose weight and improve your health.",
+                    title: String(localized: "Lose weight"),
+                    description: String(localized: "Lose weight and improve your health."),
                     isSelected: motivationType == "lose_weight",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -172,8 +172,8 @@ struct TrainingAdjustmentView: View {
                 )
                 
                 MotivationOption(
-                    title: "Rehabilitation",
-                    description: "Recover from injury or illness.",
+                    title: String(localized: "Rehabilitation"),
+                    description: String(localized: "Recover from injury or illness."),
                     isSelected: motivationType == "rehabilitation",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -184,8 +184,8 @@ struct TrainingAdjustmentView: View {
                 )
                 
                 MotivationOption(
-                    title: "Better health",
-                    description: "Improve stamina, fitness and energy.",
+                    title: String(localized: "Better health"),
+                    description: String(localized: "Improve stamina, fitness and energy."),
                     isSelected: motivationType == "better_health",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -196,8 +196,8 @@ struct TrainingAdjustmentView: View {
                 )
                 
                 MotivationOption(
-                    title: "Build muscle",
-                    description: "Build muscle mass and get stronger.",
+                    title: String(localized: "Build muscle"),
+                    description: String(localized: "Build muscle mass and get stronger."),
                     isSelected: motivationType == "build_muscle",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -208,8 +208,8 @@ struct TrainingAdjustmentView: View {
                 )
                 
                 MotivationOption(
-                    title: "Sports performance",
-                    description: "Train to perform better in your sport.",
+                    title: String(localized: "Sports performance"),
+                    description: String(localized: "Train to perform better in your sport."),
                     isSelected: motivationType == "sport",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,
@@ -220,8 +220,8 @@ struct TrainingAdjustmentView: View {
                 )
                 
                 MotivationOption(
-                    title: "Mobility",
-                    description: "Increase mobility, reduce stiffness and prevent injury.",
+                    title: String(localized: "Mobility"),
+                    description: String(localized: "Increase mobility, reduce stiffness and prevent injury."),
                     isSelected: motivationType == "mobility",
                     colorScheme: colorScheme,
                     selectedTheme: selectedTheme,

@@ -27,23 +27,23 @@ struct SettingsView: View {
         NavigationView {
             List {
                 // HealthKit Integration
-                Section("Health data") {
+                Section(String(localized: "Health data")) {
                     HStack {
                         Image(systemName: "heart.text.square.fill")
                             .foregroundColor(.red)
-                        Text("Apple Health")
+                        Text(String(localized: "Apple Health"))
                         Spacer()
                         if healthKitService.isAuthorized {
-                            Text("Activated")
+                            Text(String(localized: "Activated"))
                                 .foregroundColor(.green)
                         } else {
-                            Text("Deactivated")
+                            Text(String(localized: "Deactivated"))
                                 .foregroundColor(.gray)
                         }
                     }
                     
                     if !healthKitService.isAuthorized {
-                        Button("Activate HealthKit") {
+                        Button(String(localized: "Activate HealthKit")) {
                             Task {
                                 do {
                                     try await healthKitService.requestAuthorization()
@@ -54,7 +54,7 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button("Sync health data") {
+                    Button(String(localized: "Sync health data")) {
                         Task {
                             isSyncing = true
                             do {
@@ -69,23 +69,23 @@ struct SettingsView: View {
                 }
                 
                 // Notifications
-                Section("Notifications") {
+                Section(String(localized: "Notifications")) {
                     HStack {
                         Image(systemName: "bell.fill")
                             .foregroundColor(.blue)
-                        Text("Push notifications")
+                        Text(String(localized: "Push notifications"))
                         Spacer()
                         if notificationService.authorizationStatus == .authorized {
-                            Text("Activated")
+                            Text(String(localized: "Activated"))
                                 .foregroundColor(.green)
                         } else {
-                            Text("Deactivated")
+                            Text(String(localized: "Deactivated"))
                                 .foregroundColor(.gray)
                         }
                     }
                     
                     if notificationService.authorizationStatus != .authorized {
-                        Button("Activate notifications") {
+                        Button(String(localized: "Activate notifications")) {
                             Task {
                                 do {
                                     try await notificationService.requestAuthorization()
@@ -98,43 +98,46 @@ struct SettingsView: View {
                 }
                 
                 // Cloud Sync
-                Section("Syncing") {
+                Section(String(localized: "Syncing")) {
                     HStack {
                         Image(systemName: "icloud.fill")
                             .foregroundColor(.blue)
-                        Text("CloudKit sync")
+                        Text(String(localized: "CloudKit sync"))
                         Spacer()
                         if cloudKitService.isAvailable {
                             switch cloudKitService.syncStatus {
                             case .idle:
-                                Text("Waiting")
+                                Text(String(localized: "Waiting"))
                                     .foregroundColor(.gray)
                             case .syncing:
                                 ProgressView()
                             case .success:
-                                Text("Synced")
+                                Text(String(localized: "Synced"))
                                     .foregroundColor(.green)
                             case .error:
-                                Text("Error")
+                                Text(String(localized: "Error"))
                                     .foregroundColor(.red)
                             }
                         } else {
-                            Text("Not available")
+                            Text(String(localized: "Not available"))
                                 .foregroundColor(.orange)
                         }
                     }
                     
                     if !cloudKitService.isAvailable {
-                        Text("CloudKit entitlement missing. Contact developer.")
+                        Text(String(localized: "CloudKit entitlement missing. Contact developer."))
                             .font(.caption)
                             .foregroundColor(.orange)
                     } else if cloudKitService.lastSyncDate != nil {
-                        Text("Senast synkad: \(cloudKitService.lastSyncDate!, style: .relative)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Text(String(localized: "Last synced:"))
+                            Text(cloudKitService.lastSyncDate!, style: .relative)
+                        }
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
                     
-                    Button("Sync now") {
+                    Button(String(localized: "Sync now")) {
                         Task {
                             // TODO: Pass modelContext
                             // try await cloudKitService.performFullSync(modelContext: modelContext)
@@ -144,18 +147,18 @@ struct SettingsView: View {
                 }
                 
                 // Exercise Catalog
-                Section("Exercise catalog") {
+                Section(String(localized: "Exercise catalog")) {
                     HStack {
                         Image(systemName: "list.bullet.rectangle")
                             .foregroundColor(.blue)
-                        Text("Exercises")
+                        Text(String(localized: "Exercises"))
                         Spacer()
                         if ExerciseCatalogService.shared.lastSyncDate != nil {
-                            Text("Synced")
+                            Text(String(localized: "Synced"))
                                 .font(.caption)
                                 .foregroundColor(.green)
                         } else {
-                            Text("Not synced")
+                            Text(String(localized: "Not synced"))
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
@@ -164,11 +167,11 @@ struct SettingsView: View {
                     NavigationLink(destination: ExerciseListView()) {
                         HStack {
                             Image(systemName: "magnifyingglass")
-                            Text("Browse exercises")
+                            Text(String(localized: "Browse exercises"))
                         }
                     }
                     
-                    Button("Sync exercise catalog") {
+                    Button(String(localized: "Sync exercise catalog")) {
                         Task {
                             // TODO: Pass modelContext
                             // try await ExerciseCatalogService.shared.syncExercises(modelContext: modelContext)
@@ -177,12 +180,12 @@ struct SettingsView: View {
                 }
                 
                 // Social Features
-                Section("Social") {
+                Section(String(localized: "Social")) {
                     NavigationLink(destination: ChallengesView()) {
                         HStack {
                             Image(systemName: "trophy.fill")
                                 .foregroundColor(.yellow)
-                            Text("Challenges")
+                            Text(String(localized: "Challenges"))
                         }
                     }
                     
@@ -190,13 +193,13 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "chart.bar.fill")
                                 .foregroundColor(.blue)
-                            Text("Leaderboard")
+                            Text(String(localized: "Leaderboard"))
                         }
                     }
                 }
                 
                 // Program Management
-                Section("Program management") {
+                Section(String(localized: "Program management")) {
                     Button(role: .none) {
                         showResetPassAlert = true
                     } label: {
@@ -204,8 +207,8 @@ struct SettingsView: View {
                             Image(systemName: "arrow.counterclockwise")
                                 .foregroundColor(.blue)
                             VStack(alignment: .leading) {
-                                Text("Reset to Session 1")
-                                Text("Reset the counter for your current program.")
+                                Text(String(localized: "Reset to Session 1"))
+                                Text(String(localized: "Reset the counter for your current program."))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -219,8 +222,8 @@ struct SettingsView: View {
                             Image(systemName: "exclamationmark.triangle")
                                 .foregroundColor(.red)
                             VStack(alignment: .leading) {
-                                Text("Reset all")
-                                Text("Delete all programs and gyms to start over completely.")
+                                Text(String(localized: "Reset all"))
+                                Text(String(localized: "Delete all programs and gyms to start over completely."))
                                     .font(.caption)
                                     .foregroundColor(.red.opacity(0.8))
                             }
@@ -232,12 +235,12 @@ struct SettingsView: View {
                 let isDevUser = AuthService.shared.currentUserEmail == "dev@recompute.it" || 
                                 AuthService.shared.currentUserEmail == "dev@test.com"
                 if isDevUser {
-                    Section("Admin") {
+                    Section(String(localized: "Admin")) {
                         NavigationLink(destination: AdminView()) {
                             HStack {
                                 Image(systemName: "shield.checkered")
                                     .foregroundColor(.red)
-                                Text("Approve exercises & equipment")
+                                Text(String(localized: "Approve exercises & equipment"))
                             }
                         }
                     }
@@ -257,40 +260,40 @@ struct SettingsView: View {
                 }
                 #endif
             }
-            .navigationTitle("Settings")
+            .navigationTitle(String(localized: "Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(String(localized: "Done")) {
                         dismiss()
                     }
                 }
             }
-            .alert("Reset to Session 1?", isPresented: $showResetPassAlert) {
-                Button("Avbryt", role: .cancel) { }
-                Button("Reset", role: .destructive) {
+            .alert(String(localized: "Reset to Session 1?"), isPresented: $showResetPassAlert) {
+                Button(String(localized: "Cancel"), role: .cancel) { }
+                Button(String(localized: "Reset"), role: .destructive) {
                     resetCurrentPass()
                 }
             } message: {
-                Text("This will reset your counter to Session 1. Your existing training programs will not be deleted.")
+                Text(String(localized: "This will reset your counter to Session 1. Your existing training programs will not be deleted."))
             }
-            .alert("Delete everything and start over?", isPresented: $showResetOnboardingAlert) {
-                Button("Avbryt", role: .cancel) { }
-                Button("Reset", role: .destructive) {
+            .alert(String(localized: "Delete everything and start over?"), isPresented: $showResetOnboardingAlert) {
+                Button(String(localized: "Cancel"), role: .cancel) { }
+                Button(String(localized: "Reset"), role: .destructive) {
                     resetOnboarding()
                 }
             } message: {
-                Text("This will reset onboarding and you will need to go through onboarding again.")
+                Text(String(localized: "This will reset onboarding and you will need to go through onboarding again."))
             }
-            .alert("HealthKit error", isPresented: $showHealthKitAlert) {
-                Button("OK") { }
+            .alert(String(localized: "HealthKit error"), isPresented: $showHealthKitAlert) {
+                Button(String(localized: "OK")) { }
             } message: {
-                Text("Could not activate HealthKit. Check that the app has permission in Settings.")
+                Text(String(localized: "Could not activate HealthKit. Check that the app has permission in Settings."))
             }
-            .alert("Notification error", isPresented: $showNotificationAlert) {
-                Button("OK") { }
+            .alert(String(localized: "Notification error"), isPresented: $showNotificationAlert) {
+                Button(String(localized: "OK")) { }
             } message: {
-                Text("Could not activate notifications. Check that the app has permission in Settings.")
+                Text(String(localized: "Could not activate notifications. Check that the app has permission in Settings."))
             }
         }
     }
@@ -450,11 +453,11 @@ struct ChallengesView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     HStack {
-                        Text("\(challenge.participants) deltagare")
+                        Text(String(localized: "\(challenge.participants) participants"))
                             .font(.caption)
                         Spacer()
                         if challenge.isParticipating {
-                            Text("Participating")
+                            Text(String(localized: "Participating"))
                                 .font(.caption)
                                 .foregroundColor(.green)
                         }
@@ -478,8 +481,8 @@ struct ChallengesView: View {
 
 struct LeaderboardView: View {
     var body: some View {
-        Text("Leaderboard coming soon")
-            .navigationTitle("Leaderboard")
+        Text(String(localized: "Leaderboard coming soon"))
+            .navigationTitle(String(localized: "Leaderboard"))
     }
 }
 

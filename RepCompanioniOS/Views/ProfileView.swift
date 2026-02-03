@@ -180,7 +180,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "target")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Training goals")
+                                Text(String(localized: "Training goals"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -204,7 +204,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "circle.lefthalf.filled")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Color scheme")
+                                Text(String(localized: "Color scheme"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -230,14 +230,14 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "paintpalette")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Select Theme")
+                                Text(String(localized: "Select Theme"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
                             }
                             .padding(.horizontal)
                             
-                            Text("Customize the app appearance with your favorite color scheme")
+                            Text(String(localized: "Customize the app appearance with your favorite color scheme"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                 .padding(.horizontal)
@@ -257,7 +257,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "heart.text.square")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Health integration")
+                                Text(String(localized: "Health integration"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -265,7 +265,7 @@ struct ProfileView: View {
                             .padding(.horizontal)
                             
                             VStack(spacing: 12) {
-                                Text("Automatically sync workout data, steps, sleep and recovery from your health platforms.")
+                                Text(String(localized: "Automatically sync workout data, steps, sleep and recovery from your health platforms."))
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                 
@@ -276,7 +276,7 @@ struct ProfileView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: healthKitService.isAuthorized ? "heart.fill" : "heart")
-                                        Text(healthKitService.isAuthorized ? "Health data connected" : "Connect health data")
+                                        Text(healthKitService.isAuthorized ? String(localized: "Health data connected") : String(localized: "Connect health data"))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -297,7 +297,7 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "mappin.circle")
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("Active Gym")
+                                Text(String(localized: "Active Gym"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
@@ -327,11 +327,11 @@ struct ProfileView: View {
                                         }
                                         
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text("No gym selected")
+                                            Text(String(localized: "No gym selected"))
                                                 .font(.subheadline)
                                                 .fontWeight(.bold)
                                                 .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                            Text("Select a gym to get started")
+                                            Text(String(localized: "Select a gym to get started"))
                                                 .font(.caption2)
                                                 .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                                         }
@@ -357,7 +357,7 @@ struct ProfileView: View {
                             NavigationLink(destination: GymListView()) {
                                 HStack {
                                     Image(systemName: "dumbbell.fill")
-                                    Text("My Gyms")
+                                    Text(String(localized: "My Gyms"))
                                     Spacer()
                                 }
                                 .padding()
