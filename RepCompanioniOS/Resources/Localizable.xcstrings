@@ -6042,6 +6042,9 @@
         }
       }
     },
+    "SESSIONS" : {
+
+    },
     "Sessions per week: %lld" : {
       "localizations" : {
         "sv" : {
@@ -7473,6 +7476,9 @@
           }
         }
       }
+    },
+    "WEEK %lld" : {
+
     },
     "Weekly summary" : {
       "localizations" : {
