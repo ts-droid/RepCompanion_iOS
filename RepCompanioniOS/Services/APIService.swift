@@ -971,6 +971,7 @@ class APIService {
                     templateName: base.templateName,
                     muscleFocus: base.muscleFocus,
                     dayOfWeek: base.dayOfWeek,
+                    weekNumber: base.weekNumber,
                     estimatedDurationMinutes: base.estimatedDurationMinutes,
                     exercises: meta.exercises // Inject the exercises from the wrapper!
                 )
