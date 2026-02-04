@@ -1,0 +1,128 @@
+/* Admin Dashboard Specific Styles */
+.admin-header {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary-gradient-from)),
+    hsl(var(--primary-gradient-to))
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+
+.admin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+  border-color: hsl(var(--primary) / 0.2);
+}
+
+.glass-panel {
+  background: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.stat-card-gradient {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-gradient::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    hsl(var(--primary) / 0.05) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.admin-tabs-list {
+  background: hsl(var(--muted) / 0.5) !important;
+  padding: 4px !important;
+  border-radius: calc(var(--radius) + 4px) !important;
+}
+
+.admin-table-row {
+  transition: background-color 0.2s ease;
+}
+
+.admin-table-row:hover {
+  background-color: hsl(var(--primary) / 0.02) !important;
+}
+
+/* Custom scrollbar for admin panels */
+.admin-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollable::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+}
+
+.admin-scrollable::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Animations */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-admin-fade {
+  animation: fadeInSlide 0.4s ease-out forwards;
+}
+
+.delay-1 {
+  animation-delay: 0.1s;
+}
+.delay-2 {
+  animation-delay: 0.2s;
+}
+.delay-3 {
+  animation-delay: 0.3s;
+}
+
+/* Fix for dialogs expanding upwards */
+.admin-dialog-top {
+  top: 5vh !important;
+  transform: translate(-50%, 0) !important;
+  margin-bottom: 5vh;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.sticky-proposal {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: hsl(var(--card));
+  margin: -1rem -1rem 1rem -1rem;
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}

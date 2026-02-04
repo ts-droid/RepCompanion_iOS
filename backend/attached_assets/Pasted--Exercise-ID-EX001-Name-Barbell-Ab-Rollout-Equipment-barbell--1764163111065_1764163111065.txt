@@ -1,0 +1,98 @@
+[
+  {
+    "Exercise ID": "EX001",
+    "Name": "Barbell Ab Rollout",
+    "Equipment": "barbell",
+    "Muscle group(s)": [
+      "Abdominals"
+    ],
+    "Categories": [
+      "styrketräning"
+    ],
+    "Gender specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "AI-search terms": [
+      "Barbell rollout",
+      "Ab wheel rollout"
+    ]
+  },
+  {
+    "Exercise ID": "EX002",
+    "Name": "Barbell Biceps Curl",
+    "Equipment": "barbell",
+    "Muscle group(s)": [
+      "Biceps"
+    ],
+    "Categories": [
+      "styrketräning"
+    ],
+    "Gender specialization": "male",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "AI-search terms": [
+      "Barbell curl"
+    ]
+  },
+  {
+    "Exercise ID": "EX003",
+    "Name": "Barbell Standing Calf Raise",
+    "Equipment": "barbell",
+    "Muscle group(s)": [
+      "Calves"
+    ],
+    "Categories": [
+      "styrketräning"
+    ],
+    "Gender specialization": "male",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "AI-search terms": [
+      "Barbell calf raise"
+    ]
+  },
+  {
+    "Exercise ID": "EX004",
+    "Name": "Barbell Upright Row",
+    "Equipment": "barbell",
+    "Muscle group(s)": [
+      "Deltoids",
+      "Trapezius"
+    ],
+    "Categories": [
+      "styrketräning"
+    ],
+    "Gender specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "AI-search terms": [
+      "Upright row"
+    ]
+  },
+  {
+    "Exercise ID": "EX005",
+    "Name": "Barbell Overhead Press",
+    "Equipment": "barbell",
+    "Muscle group(s)": [
+      "Deltoids",
+      "Triceps"
+    ],
+    "Categories": [
+      "styrketräning"
+    ],
+    "Gender specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "AI-search terms": [
+      "Overhead press",
+      "Military press",
+      "OHP"
+    ]
+  },
+  …
+]

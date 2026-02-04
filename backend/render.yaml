@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: repcompanion-server
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APPLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: AI_PROMPT_VERSION
+        value: v3
+      - key: AI_INTEGRATIONS_OPENAI_API_KEY
+        sync: false
+      - key: AI_INTEGRATIONS_OPENAI_BASE_URL
+        value: https://api.openai.com/v1
+      - key: ROBOFLOW_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: VITAL_API_KEY
+        sync: false
+      - key: VITAL_WEBHOOK_SECRET
+        sync: false
+      - key: VITAL_REGION
+        value: eu
+      - key: VITAL_ENVIRONMENT
+        value: production

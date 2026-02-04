@@ -1,0 +1,1 @@
+ALTER TABLE `userProfiles` ADD `hasAiProgram` int DEFAULT 0;

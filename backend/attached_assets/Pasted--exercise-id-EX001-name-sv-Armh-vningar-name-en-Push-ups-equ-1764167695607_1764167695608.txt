@@ -1,0 +1,5619 @@
+[
+  {
+    "exercise_id": "EX001",
+    "name_sv": "Armhävningar",
+    "name_en": "Push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "push-ups",
+      "pushups"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX002",
+    "name_sv": "Armhävningar mot vägg",
+    "name_en": "Wall push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "wall push-ups",
+      "wall pushups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX003",
+    "name_sv": "Armhävningar på knäna",
+    "name_en": "Knee push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "knee push-ups",
+      "knee pushups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX004",
+    "name_sv": "Armhävningar med fötter i ringar",
+    "name_en": "Ring push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "ring push-ups",
+      "ring pushups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX005",
+    "name_sv": "Bänkpress",
+    "name_en": "Bench press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "bench press",
+      "barbell bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX006",
+    "name_sv": "Bänkpress med fötterna uppe",
+    "name_en": "Feet-elevated bench press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "feet-elevated bench press",
+      "feet elevated bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX007",
+    "name_sv": "Bänkpress i smithmaskin",
+    "name_en": "Smith machine bench press",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "smith machine bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX008",
+    "name_sv": "Bröstpress i maskin",
+    "name_en": "Machine chest press",
+    "equipment": "machine",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine chest press"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX009",
+    "name_sv": "Bröstpress med kabel",
+    "name_en": "Cable chest press",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable chest press"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX010",
+    "name_sv": "Dips",
+    "name_en": "Dips",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "triceps",
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dips"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX011",
+    "name_sv": "Dips mot bänk",
+    "name_en": "Bench dips",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "triceps",
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "bench dips"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX012",
+    "name_sv": "Floor press",
+    "name_en": "Floor press",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "floor press"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX013",
+    "name_sv": "Floor press med hantlar",
+    "name_en": "Dumbbell floor press",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell floor press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX014",
+    "name_sv": "Flyes med gummiband",
+    "name_en": "Resistance band flyes",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "resistance band flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX015",
+    "name_sv": "Hantelflyes",
+    "name_en": "Dumbbell flyes",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX016",
+    "name_sv": "Liggande hantelpress",
+    "name_en": "Dumbbell bench press",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX017",
+    "name_sv": "Maskinflyes",
+    "name_en": "Machine flyes",
+    "equipment": "machine",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX018",
+    "name_sv": "Nedåtlutande bänkpress",
+    "name_en": "Decline bench press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "decline bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX019",
+    "name_sv": "Pec deck",
+    "name_en": "Pec deck",
+    "equipment": "machine",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "pec deck"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX020",
+    "name_sv": "Pullover med hantel",
+    "name_en": "Dumbbell pullover",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell pullover"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX021",
+    "name_sv": "Smalbänk med fötterna uppe",
+    "name_en": "Close-grip bench press with feet elevated",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "triceps",
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "close-grip bench press with feet elevated"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX022",
+    "name_sv": "Stående kabelflyes",
+    "name_en": "Standing cable flyes",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "standing cable flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX023",
+    "name_sv": "Stående flyes med gummiband",
+    "name_en": "Standing band flyes",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "standing band flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX024",
+    "name_sv": "Uppåtlutande armhävningar",
+    "name_en": "Incline push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "incline push-ups",
+      "incline pushups"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX025",
+    "name_sv": "Uppåtlutande armhävningar på knäna",
+    "name_en": "Incline knee push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "incline knee push-ups",
+      "incline knee pushups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX026",
+    "name_sv": "Uppåtlutande bänkpress",
+    "name_en": "Incline bench press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "incline bench press",
+      "barbell incline bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX027",
+    "name_sv": "Uppåtlutande hantelpress",
+    "name_en": "Incline dumbbell press",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "incline dumbbell press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX028",
+    "name_sv": "Assisterande Chins",
+    "name_en": "Assisted pull-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back",
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "assisted pull-ups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX029",
+    "name_sv": "Chins",
+    "name_en": "Pull-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back",
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "pull-ups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX030",
+    "name_sv": "Chins med omvänt grepp",
+    "name_en": "Reverse-grip pull-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back",
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "reverse-grip pull-ups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX031",
+    "name_sv": "Enhands kabelrodd",
+    "name_en": "Single-arm cable row",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "single-arm cable row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX032",
+    "name_sv": "Enhands latsdrag",
+    "name_en": "Single-arm lat pulldown",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "single-arm lat pulldown"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX033",
+    "name_sv": "Frivändning",
+    "name_en": "Power clean",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "power clean"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX034",
+    "name_sv": "Hantelrodd",
+    "name_en": "Dumbbell row",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX035",
+    "name_sv": "Hängande rodd",
+    "name_en": "Inverted row",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "inverted row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX036",
+    "name_sv": "Hängande rodd med underhandsgrepp",
+    "name_en": "Underhand grip inverted row",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back",
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "underhand grip inverted row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX037",
+    "name_sv": "Hängande styrkeryck",
+    "name_en": "Hanging power snatch",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging power snatch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX038",
+    "name_sv": "Hängande styrkevändning",
+    "name_en": "Hanging power clean",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging power clean"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX039",
+    "name_sv": "Hängryck",
+    "name_en": "Hanging snatch",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging snatch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX040",
+    "name_sv": "Hängvändning",
+    "name_en": "Hanging clean",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging clean"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX041",
+    "name_sv": "Kabelrodd med brett grepp",
+    "name_en": "Wide-grip cable row",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "wide-grip cable row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX042",
+    "name_sv": "Kabelrodd med smalt grepp",
+    "name_en": "Close-grip cable row",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "close-grip cable row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX043",
+    "name_sv": "Kickstöt",
+    "name_en": "Kickback (shoulder)",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "kickback (shoulder)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX044",
+    "name_sv": "Latsdrag",
+    "name_en": "Lat pulldown",
+    "equipment": "machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lat pulldown"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX045",
+    "name_sv": "Latsdrag med omvänt grepp",
+    "name_en": "Reverse-grip lat pulldown",
+    "equipment": "machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "reverse-grip lat pulldown"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX046",
+    "name_sv": "Latsdrag med raka armar",
+    "name_en": "Straight-arm lat pulldown",
+    "equipment": "machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "straight-arm lat pulldown"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX047",
+    "name_sv": "Långa marklyft",
+    "name_en": "Long Romanian deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "long romanian deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX048",
+    "name_sv": "Marklyft",
+    "name_en": "Deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "deadlift",
+      "barbell deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX049",
+    "name_sv": "Marklyft med hantlar",
+    "name_en": "Dumbbell deadlift",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX050",
+    "name_sv": "Maskinrodd",
+    "name_en": "Machine row",
+    "equipment": "machine",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX051",
+    "name_sv": "Pendlayrodd",
+    "name_en": "Pendlay row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "pendlay row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX052",
+    "name_sv": "Raka marklyft",
+    "name_en": "Romanian deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "romanian deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX053",
+    "name_sv": "Rodd med T-bar",
+    "name_en": "T-bar row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "t-bar row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX054",
+    "name_sv": "Ryck",
+    "name_en": "Snatch",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "snatch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX055",
+    "name_sv": "Ryck från bockar",
+    "name_en": "Hang snatch from blocks",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hang snatch from blocks"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX056",
+    "name_sv": "Ryckmarklyft",
+    "name_en": "Snatch-grip deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "snatch-grip deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX057",
+    "name_sv": "Ryggresning",
+    "name_en": "Back extension",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "back extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX058",
+    "name_sv": "Ryggresning på golvet",
+    "name_en": "Floor back extension",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "floor back extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX059",
+    "name_sv": "Shrug med hantlar",
+    "name_en": "Dumbbell shrug",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "back",
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell shrug"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX060",
+    "name_sv": "Shrug med skivstång",
+    "name_en": "Barbell shrug",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "barbell shrug"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX061",
+    "name_sv": "Sittstöt",
+    "name_en": "Push press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "push press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX062",
+    "name_sv": "Skivstångsrodd",
+    "name_en": "Barbell row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "barbell row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX063",
+    "name_sv": "Styrkeryck",
+    "name_en": "Power snatch",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "power snatch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX064",
+    "name_sv": "Styrkevändning",
+    "name_en": "Power clean",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "power clean"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX065",
+    "name_sv": "Stöt",
+    "name_en": "Clean and jerk",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "clean and jerk"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX066",
+    "name_sv": "Sumomarklyft",
+    "name_en": "Sumo deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "sumo deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX067",
+    "name_sv": "Sälrodd",
+    "name_en": "Seal row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "seal row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX068",
+    "name_sv": "Tempomarklyft",
+    "name_en": "Tempo deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "tempo deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX069",
+    "name_sv": "Trapbarmarklyft",
+    "name_en": "Trap bar deadlift",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "trap bar deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX070",
+    "name_sv": "Trapbarmarklyft med låga handtag",
+    "name_en": "Trap bar deadlift (low handles)",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "trap bar deadlift (low handles)"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX071",
+    "name_sv": "Trapbarmarklyft med höga handtag",
+    "name_en": "Trap bar deadlift (high handles)",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "trap bar deadlift (high handles)"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX072",
+    "name_sv": "Utfallsstöt",
+    "name_en": "Split jerk",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "legs",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "split jerk"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX073",
+    "name_sv": "Upphöjda marklyft",
+    "name_en": "Elevated deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "elevated deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX074",
+    "name_sv": "Aprodd",
+    "name_en": "Upright row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "upright row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX075",
+    "name_sv": "Axelpress i maskin",
+    "name_en": "Machine shoulder press",
+    "equipment": "machine",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine shoulder press"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX076",
+    "name_sv": "Axelpress med hantlar",
+    "name_en": "Dumbbell shoulder press",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell shoulder press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX077",
+    "name_sv": "Facepull",
+    "name_en": "Face pull",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "face pull"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX078",
+    "name_sv": "Framåtlyft med hantlar",
+    "name_en": "Dumbbell front raise",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell front raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX079",
+    "name_sv": "Framåtlyft med skivstång",
+    "name_en": "Barbell front raise",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "barbell front raise"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX080",
+    "name_sv": "Framåtlyft med viktskiva",
+    "name_en": "Plate front raise",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "plate front raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX081",
+    "name_sv": "Horisontell utåtrotation av axel med hantel",
+    "name_en": "Horizontal external shoulder rotation",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "horizontal external shoulder rotation"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX082",
+    "name_sv": "Hög kabelrodd med rep",
+    "name_en": "High cable rope row",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "high cable rope row"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX083",
+    "name_sv": "Inåtrotation av axel med band",
+    "name_en": "Shoulder internal rotation with band",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "shoulder internal rotation with band"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX084",
+    "name_sv": "Isärdrag med band",
+    "name_en": "Band pull-apart",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "band pull-apart"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX085",
+    "name_sv": "Liggande horisontell inåtrotation av axel med hantel",
+    "name_en": "Lying horizontal internal shoulder rotation",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying horizontal internal shoulder rotation"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX086",
+    "name_sv": "Liggande inåtrotation av axel med hantel",
+    "name_en": "Lying internal shoulder rotation",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying internal shoulder rotation"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX087",
+    "name_sv": "Liggande utåtrotation av axel med hantel",
+    "name_en": "Lying external shoulder rotation",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying external shoulder rotation"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX088",
+    "name_sv": "Omvända hantelflyes",
+    "name_en": "Reverse dumbbell flyes",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "reverse dumbbell flyes"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX089",
+    "name_sv": "Omvända maskinflyes",
+    "name_en": "Reverse machine flyes",
+    "equipment": "machine",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "reverse machine flyes"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX090",
+    "name_sv": "Press",
+    "name_en": "Military press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "military press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX091",
+    "name_sv": "Press bakom nacke",
+    "name_en": "Behind-the-neck press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "behind-the-neck press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX092",
+    "name_sv": "Press bakom nacke med ryckfattning",
+    "name_en": "Behind-the-neck push press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "behind-the-neck push press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX093",
+    "name_sv": "Pushpress",
+    "name_en": "Push press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "push press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX094",
+    "name_sv": "Sidolyft i maskin",
+    "name_en": "Machine lateral raise",
+    "equipment": "machine",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine lateral raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX095",
+    "name_sv": "Sidolyft med hantlar",
+    "name_en": "Dumbbell lateral raise",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell lateral raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX096",
+    "name_sv": "Sidolyft med kabel",
+    "name_en": "Cable lateral raise",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable lateral raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX097",
+    "name_sv": "Sittande axelpress i smithmaskin",
+    "name_en": "Seated shoulder press (Smith machine)",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "seated shoulder press (smith machine)"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX098",
+    "name_sv": "Sittande axelpress med hantlar",
+    "name_en": "Seated dumbbell shoulder press",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "seated dumbbell shoulder press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX099",
+    "name_sv": "Sittande axelpress med skivstång",
+    "name_en": "Seated barbell shoulder press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "seated barbell shoulder press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX100",
+    "name_sv": "Statiskt framåtlyft",
+    "name_en": "Static front raise",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "static front raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX101",
+    "name_sv": "Stående drag till hakan",
+    "name_en": "Standing upright row",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "shoulders",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "standing upright row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX102",
+    "name_sv": "Uppåtlutande bänkpress i smithmaskin",
+    "name_en": "Incline bench press in Smith machine",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "incline bench press in smith machine"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX103",
+    "name_sv": "Utåtrotation av axel med band",
+    "name_en": "Shoulder external rotation with band",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "shoulders"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "shoulder external rotation with band"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX104",
+    "name_sv": "Bakåtlutad sittande hantelcurl",
+    "name_en": "Incline dumbbell curl",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "incline dumbbell curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX105",
+    "name_sv": "Hantelcurl",
+    "name_en": "Dumbbell curl",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX106",
+    "name_sv": "Hammarcurl",
+    "name_en": "Hammer curl",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "hammer curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX107",
+    "name_sv": "Kabelcurl med rep",
+    "name_en": "Cable rope curl",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable rope curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX108",
+    "name_sv": "Kabelcurl med stång",
+    "name_en": "Cable bar curl",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable bar curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX109",
+    "name_sv": "Koncentrationscurl",
+    "name_en": "Concentration curl",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "concentration curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX110",
+    "name_sv": "Maskincurl",
+    "name_en": "Machine curl",
+    "equipment": "machine",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX111",
+    "name_sv": "Preachercurl med hantel",
+    "name_en": "Dumbbell preacher curl",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell preacher curl"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX112",
+    "name_sv": "Preachercurl med skivstång",
+    "name_en": "Barbell preacher curl",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "barbell preacher curl"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX113",
+    "name_sv": "Skivstångscurl",
+    "name_en": "Barbell curl",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "barbell curl"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX114",
+    "name_sv": "Spidercurl",
+    "name_en": "Spider curl",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "biceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "spider curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX115",
+    "name_sv": "French press med hantel",
+    "name_en": "Dumbbell skullcrusher",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell skullcrusher"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX116",
+    "name_sv": "French press med skivstång",
+    "name_en": "Barbell skullcrusher",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "barbell skullcrusher"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX117",
+    "name_sv": "Liggande tricepsextension bakom huvudet",
+    "name_en": "Lying tricep extension",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying tricep extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX118",
+    "name_sv": "Liggande tricepsextension med hantlar",
+    "name_en": "Lying dumbbell tricep extension",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying dumbbell tricep extension"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX119",
+    "name_sv": "Smala armhävningar",
+    "name_en": "Diamond push-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "chest",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "diamond push-ups",
+      "diamond pushups"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX120",
+    "name_sv": "Smalbänk / Bänkpress med smalt grepp",
+    "name_en": "Close-grip bench press",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "triceps",
+      "chest"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "close-grip bench press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "bench"
+    ]
+  },
+  {
+    "exercise_id": "EX121",
+    "name_sv": "Tricepsextension med kroppsvikt",
+    "name_en": "Bodyweight tricep extension",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "bodyweight tricep extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX122",
+    "name_sv": "Tricepsextension över huvudet med kabel",
+    "name_en": "Overhead cable tricep extension",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "overhead cable tricep extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX123",
+    "name_sv": "Triceps pushdown med rep",
+    "name_en": "Cable tricep pushdown (rope)",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable tricep pushdown (rope)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX124",
+    "name_sv": "Triceps pushdown med stång",
+    "name_en": "Cable tricep pushdown (bar)",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable tricep pushdown (bar)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX125",
+    "name_sv": "Benpress",
+    "name_en": "Leg press",
+    "equipment": "machine",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "leg press"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX126",
+    "name_sv": "Benspark",
+    "name_en": "Leg extension",
+    "equipment": "machine",
+    "muscle_groups": [
+      "quadriceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "leg extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX127",
+    "name_sv": "Boxböj",
+    "name_en": "Box squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "box squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX128",
+    "name_sv": "Bulgarian split squat",
+    "name_en": "Bulgarian split squat",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "bulgarian split squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX129",
+    "name_sv": "Bältesböj",
+    "name_en": "Belt squat",
+    "equipment": "machine",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "belt squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX130",
+    "name_sv": "Excentriska tåhävningar",
+    "name_en": "Eccentric calf raises",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "calves"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "eccentric calf raises"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX131",
+    "name_sv": "Frontböj",
+    "name_en": "Front squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "front squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX132",
+    "name_sv": "Good morning",
+    "name_en": "Good Morning",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "good morning"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX133",
+    "name_sv": "Grunda knäböj med kroppsvikt",
+    "name_en": "Partial squat (bodyweight)",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "partial squat (bodyweight)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX134",
+    "name_sv": "Grunda utfall med kroppsvikt",
+    "name_en": "Partial lunges (bodyweight)",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "partial lunges (bodyweight)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX135",
+    "name_sv": "Hack squat i maskin",
+    "name_en": "Hack squat (machine)",
+    "equipment": "machine",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "hack squat (machine)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX136",
+    "name_sv": "Höftadduktion i maskin",
+    "name_en": "Hip adduction (machine)",
+    "equipment": "machine",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "hip adduction (machine)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX137",
+    "name_sv": "Knäböj",
+    "name_en": "Squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "squat",
+      "barbell squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX138",
+    "name_sv": "Knäböj i smithmaskin",
+    "name_en": "Smith machine squat",
+    "equipment": "smith machine",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "smith machine squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "smith",
+      "barbell"
+    ]
+  },
+  {
+    "exercise_id": "EX139",
+    "name_sv": "Knäböj med hantlar",
+    "name_en": "Dumbbell squat",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX140",
+    "name_sv": "Knäböj med kroppsvikt",
+    "name_en": "Squat (bodyweight)",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "squat (bodyweight)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX141",
+    "name_sv": "Knäböj med safety squat bar",
+    "name_en": "Safety squat bar squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "safety squat bar squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX142",
+    "name_sv": "Knäböj mot stol",
+    "name_en": "Bench (box) squat",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "bench (box) squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX143",
+    "name_sv": "Liggande lårcurl",
+    "name_en": "Lying leg curl",
+    "equipment": "machine",
+    "muscle_groups": [
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lying leg curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX144",
+    "name_sv": "Pausböj",
+    "name_en": "Pause squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "pause squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX145",
+    "name_sv": "Ryckböj / Overhead Squat",
+    "name_en": "Overhead squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "overhead squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate",
+      "squat rack"
+    ]
+  },
+  {
+    "exercise_id": "EX146",
+    "name_sv": "Sittande lårcurl",
+    "name_en": "Seated leg curl",
+    "equipment": "machine",
+    "muscle_groups": [
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "seated leg curl"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX147",
+    "name_sv": "Sittande vadpress",
+    "name_en": "Seated calf raise",
+    "equipment": "machine",
+    "muscle_groups": [
+      "calves"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "seated calf raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX148",
+    "name_sv": "Step-ups",
+    "name_en": "Step-ups",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "step-ups"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX149",
+    "name_sv": "Stående vadpress",
+    "name_en": "Standing calf raise",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "calves"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "standing calf raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX150",
+    "name_sv": "Tåhävningar",
+    "name_en": "Calf raises",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "calves"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "calf raises"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX151",
+    "name_sv": "Utfall med hantlar",
+    "name_en": "Dumbbell lunges",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell lunges"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX152",
+    "name_sv": "Utfall med kroppsvikt",
+    "name_en": "Bodyweight lunges",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "bodyweight lunges"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX153",
+    "name_sv": "Utfall med skivstång",
+    "name_en": "Barbell lunges",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "barbell lunges"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX154",
+    "name_sv": "Utfallsgång med skivstång",
+    "name_en": "Barbell walking lunges",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "barbell walking lunges"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX155",
+    "name_sv": "Utfallsteg åt sidan",
+    "name_en": "Side lunges",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "side lunges"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX156",
+    "name_sv": "Zercher Squat",
+    "name_en": "Zercher squat",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "zercher squat"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX157",
+    "name_sv": "Enbens hip thrust",
+    "name_en": "Single-leg hip thrust",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "single-leg hip thrust"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX158",
+    "name_sv": "Enbens sätesbrygga",
+    "name_en": "Single-leg glute bridge",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "single-leg glute bridge"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX159",
+    "name_sv": "Frog pump",
+    "name_en": "Frog pump",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "frog pump"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX160",
+    "name_sv": "Frog pump med hantel",
+    "name_en": "Dumbbell frog pump",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "dumbbell frog pump"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX161",
+    "name_sv": "Hip thrust",
+    "name_en": "Hip thrust",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hip thrust"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX162",
+    "name_sv": "Hip thrust i maskin",
+    "name_en": "Machine hip thrust",
+    "equipment": "machine",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine hip thrust"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX163",
+    "name_sv": "Hip thrust med band runt knäna",
+    "name_en": "Hip thrust with band around knees",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hip thrust with band around knees"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX164",
+    "name_sv": "Höftabduktion i maskin",
+    "name_en": "Hip abduction (machine)",
+    "equipment": "machine",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "hip abduction (machine)"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX165",
+    "name_sv": "Höftsträckning med kabel",
+    "name_en": "Cable hip extension",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "cable hip extension"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX166",
+    "name_sv": "Kickback i maskin",
+    "name_en": "Machine kickback",
+    "equipment": "machine",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "machine kickback"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX167",
+    "name_sv": "Kissande hunden",
+    "name_en": "Donkey kick",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "donkey kick"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX168",
+    "name_sv": "Musslan",
+    "name_en": "Clamshell",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "clamshell"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX169",
+    "name_sv": "Rumänska marklyft",
+    "name_en": "Romanian deadlift",
+    "equipment": "barbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": true,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "romanian deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "barbell",
+      "plate"
+    ]
+  },
+  {
+    "exercise_id": "EX170",
+    "name_sv": "Rumänska marklyft med hantlar",
+    "name_en": "Dumbbell Romanian deadlift",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dumbbell Romanian deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX171",
+    "name_sv": "Rumänska enbensmarklyft",
+    "name_en": "Single-leg Romanian deadlift",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "single-leg Romanian deadlift"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX172",
+    "name_sv": "Sidospark mot band",
+    "name_en": "Side kick with band",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "side kick with band"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX173",
+    "name_sv": "Sidosteg med band",
+    "name_en": "Lateral band walk",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "lateral band walk"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX174",
+    "name_sv": "Sittande höftabduktion mot band",
+    "name_en": "Seated hip abduction with band",
+    "equipment": "resistance band",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "seated hip abduction with band"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "band",
+      "resistance"
+    ]
+  },
+  {
+    "exercise_id": "EX175",
+    "name_sv": "Stående kickback i maskin",
+    "name_en": "Standing machine kickback",
+    "equipment": "machine",
+    "muscle_groups": [
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": false,
+    "ai_aliases": [
+      "standing machine kickback"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX176",
+    "name_sv": "Sätesbrygga",
+    "name_en": "Glute bridge",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "glute bridge"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX177",
+    "name_sv": "Bergsklättrare",
+    "name_en": "Mountain climbers",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "weight_loss",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "mountain climbers"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX178",
+    "name_sv": "Brutalbänk",
+    "name_en": "Roman chair leg raise",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "roman chair leg raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX179",
+    "name_sv": "Crunches",
+    "name_en": "Crunches",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "crunches"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX180",
+    "name_sv": "Crunch i maskin",
+    "name_en": "Machine crunch",
+    "equipment": "machine",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "machine crunch"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "machine"
+    ]
+  },
+  {
+    "exercise_id": "EX181",
+    "name_sv": "Deadbugs",
+    "name_en": "Dead bugs",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "dead bugs"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX182",
+    "name_sv": "Hängande benlyft",
+    "name_en": "Hanging leg raise",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging leg raise"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX183",
+    "name_sv": "Hängande knälyft",
+    "name_en": "Hanging knee raise",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "hanging knee raise"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX184",
+    "name_sv": "Kabelcrunch",
+    "name_en": "Cable crunch",
+    "equipment": "cable machine",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "cable crunch"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "cable",
+      "bar"
+    ]
+  },
+  {
+    "exercise_id": "EX185",
+    "name_sv": "Knästående planka",
+    "name_en": "Kneeling plank",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kneeling plank"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX186",
+    "name_sv": "Knästående sidoplanka",
+    "name_en": "Kneeling side plank",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "rehabilitation",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kneeling side plank"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX187",
+    "name_sv": "Knästående utrullning med maghjul",
+    "name_en": "Kneeling ab wheel rollout",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kneeling ab wheel rollout"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX188",
+    "name_sv": "Liggande benlyft",
+    "name_en": "Lying leg raise",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "lying leg raise"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX189",
+    "name_sv": "Planka",
+    "name_en": "Plank",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "plank"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX190",
+    "name_sv": "Sidoplanka",
+    "name_en": "Side plank",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "side plank"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX191",
+    "name_sv": "Sit-up",
+    "name_en": "Sit-up",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "sit-up"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX192",
+    "name_sv": "Sned crunch",
+    "name_en": "Oblique crunch",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "oblique crunch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX193",
+    "name_sv": "Sned sit-up",
+    "name_en": "Oblique sit-up",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "abs"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "oblique sit-up"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight",
+      "floor"
+    ]
+  },
+  {
+    "exercise_id": "EX194",
+    "name_sv": "Goblet Squat",
+    "name_en": "Goblet squat",
+    "equipment": "dumbbell",
+    "muscle_groups": [
+      "quadriceps",
+      "glutes"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": true,
+    "core_engagement": true,
+    "ai_aliases": [
+      "goblet squat"
+    ],
+    "training_level_priority": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "dumbbell"
+    ]
+  },
+  {
+    "exercise_id": "EX195",
+    "name_sv": "Kettlebell Clean",
+    "name_en": "Kettlebell clean",
+    "equipment": "kettlebell",
+    "muscle_groups": [
+      "shoulders",
+      "back",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kettlebell clean"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "kettlebell"
+    ]
+  },
+  {
+    "exercise_id": "EX196",
+    "name_sv": "Kettlebellpress",
+    "name_en": "Kettlebell press",
+    "equipment": "kettlebell",
+    "muscle_groups": [
+      "shoulders",
+      "triceps"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "kettlebell press"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "kettlebell"
+    ]
+  },
+  {
+    "exercise_id": "EX197",
+    "name_sv": "Kettlebellrodd",
+    "name_en": "Kettlebell row",
+    "equipment": "kettlebell",
+    "muscle_groups": [
+      "back"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": false,
+    "ai_aliases": [
+      "kettlebell row"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "kettlebell"
+    ]
+  },
+  {
+    "exercise_id": "EX198",
+    "name_sv": "Kettlebell Snatch",
+    "name_en": "Kettlebell snatch",
+    "equipment": "kettlebell",
+    "muscle_groups": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "categories": [
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kettlebell snatch"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "kettlebell"
+    ]
+  },
+  {
+    "exercise_id": "EX199",
+    "name_sv": "Kettlebell Swing",
+    "name_en": "Kettlebell swing",
+    "equipment": "kettlebell",
+    "muscle_groups": [
+      "glutes",
+      "hamstrings",
+      "core"
+    ],
+    "categories": [
+      "cardio",
+      "strength_training"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "kettlebell swing"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "kettlebell"
+    ]
+  },
+  {
+    "exercise_id": "EX200",
+    "name_sv": "Burpees",
+    "name_en": "Burpees",
+    "equipment": "bodyweight",
+    "muscle_groups": [
+      "full_body",
+      "core"
+    ],
+    "categories": [
+      "strength_training",
+      "weight_loss"
+    ],
+    "gender_specialization": "both",
+    "requires_1RM": false,
+    "good_for_beginners": false,
+    "core_engagement": true,
+    "ai_aliases": [
+      "burpees"
+    ],
+    "training_level_priority": [
+      "intermediate",
+      "advanced"
+    ],
+    "equipment_mapping_tags": [
+      "bodyweight"
+    ]
+  }
+]

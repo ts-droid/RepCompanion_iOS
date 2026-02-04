@@ -1,0 +1,411 @@
+Här är vad jag faktiskt hittar i koden som webapp – både riktiga/potentiella buggar och saker jag skulle fixa för att göra den stabilare och trevligare att jobba med framåt.
+
+Obs: Vissa filer i zippen är uppenbart trunkerade (med “…”/ellips i stället för riktig kod, t.ex. ThemeContext.tsx, Dashboard.tsx). Där kan jag inte göra en full review, så nedan fokuserar jag på de delar där koden är komplett.
+
+1. Konkreta buggar / tydliga fotanglar
+1.1 Avatar-bildkomprimering kan “hänga”
+
+Fil: client/src/components/AvatarSelector.tsx
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    ...
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;              // ⬅️ här
+      ...
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(
+            new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            })
+          );
+        }
+      }, "image/jpeg", 0.8);
+    };
+  });
+}
+
+
+Problem:
+
+Om canvas.getContext("2d") returnerar null → funktionen returnerar från onload-callbacken, men Promise:en varken resolve eller reject:ar.
+
+Om canvas.toBlob anropas men ger null blob händer samma sak (bara tyst if (blob) { ... }).
+
+I båda fallen kan await compressImage(file) innebära att UI:t fastnar i “laddar upp”-läge utan att något händer.
+
+Fixförslag:
+
+Gör så att Promise alltid avslutas:
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = (err) => {
+      console.error("Avatar FileReader error", err);
+      resolve(file); // eller reject(err) om du vill hård-faila
+    };
+
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target?.result as string;
+
+      img.onerror = (err) => {
+        console.error("Avatar image load error", err);
+        resolve(file);
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          console.warn("No 2D context, skipping compression");
+          return resolve(file);
+        }
+
+        // … skala width/height …
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            console.warn("Canvas.toBlob returned null, skipping compression");
+            return resolve(file);
+          }
+
+          resolve(
+            new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            }),
+          );
+        }, "image/jpeg", 0.8);
+      };
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+1.2 Health Connect – spinner + polling kan fastna
+
+Fil: client/src/components/HealthConnectButton.tsx
+
+const { data: connections = [], refetch: refetchConnections } = useQuery<HealthConnection[]>({
+  queryKey: ['/api/health/connections'],
+});
+
+const handleConnect = async () => {
+  setIsConnecting(true);
+  try {
+    const res = await apiRequest('POST', '/api/health/connect');
+    const response = await res.json() as { success: boolean; linkUrl: string; linkToken: string };
+
+    if (response.success && response.linkUrl) {
+      window.open(response.linkUrl, '_blank', 'width=500,height=700');
+      
+      const checkInterval = setInterval(async () => {
+        const updatedConnections = await refetchConnections();
+        if (updatedConnections.data && updatedConnections.data.length > connections.length) {
+          clearInterval(checkInterval);
+          setIsConnecting(false);
+        }
+      }, 5000);
+    }
+  } catch (error: any) {
+    console.error('Failed to initiate Health Connect flow:', error);
+    setIsConnecting(false);
+    ...
+  }
+};
+
+
+Problem:
+
+Om API:t svarar utan success === true eller utan linkUrl:
+
+isConnecting förblir true → knappen sitter i “connecting”-state för alltid.
+
+Inget toast till användaren.
+
+setInterval:
+
+Använder connections.length som jämförelsevärde – det är värdet vid klicket (stale closure).
+
+Intervallen rensas bara när length > connections.length. Om användaren aldrig slutför kopplingen körs intervallet i evighet.
+
+Ingen cleanup i useEffect om komponenten skulle unmountas med ett aktivt interval.
+
+Fixförslag:
+
+Säkerställ att isConnecting alltid nollställs:
+
+Spara “baseline”–antalet i en ref eller lokalt i handleConnect.
+
+Lägg till cleanup.
+
+const baselineCountRef = useRef(0);
+
+const handleConnect = async () => {
+  setIsConnecting(true);
+  baselineCountRef.current = connections.length;
+
+  try {
+    const res = await apiRequest('POST', '/api/health/connect');
+    const response = await res.json() as { success?: boolean; linkUrl?: string };
+
+    if (!response.success || !response.linkUrl) {
+      setIsConnecting(false);
+      toast({
+        title: "Kunde inte starta koppling",
+        description: "Försök igen om en stund.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const popup = window.open(response.linkUrl, '_blank', 'width=500,height=700');
+
+    const intervalId = window.setInterval(async () => {
+      const updated = await refetchConnections();
+      const len = updated.data?.length ?? 0;
+      if (len > baselineCountRef.current) {
+        window.clearInterval(intervalId);
+        setIsConnecting(false);
+        toast({ title: "Koppling klar", description: "Din hälsodata synkas nu 🎉" });
+      }
+      // ev. även: om popup stängs → clearInterval + setIsConnecting(false)
+    }, 5000);
+  } catch (error) {
+    console.error("Failed to initiate Health Connect flow:", error);
+    setIsConnecting(false);
+    toast({ ... });
+  }
+};
+
+
+Och gärna lägga interval–id:t i en ref och rensa i en useEffect-cleanup också.
+
+1.3 useIsMobile – framtida kompatibilitet & edge case
+
+Fil: client/src/hooks/use-mobile.tsx
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!isMobile
+}
+
+
+Problem / risk som webapp:
+
+Funkar i moderna browsers, men:
+
+Äldre Safari/IE-stuk använder mql.addListener/removeListener i stället för addEventListener.
+
+Om du senare kör test–miljö, SSR, Storybook etc. utan window → hård krasch.
+
+Förslag (bakåtkompatibelt + säkrare):
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !("matchMedia" in window)) {
+      setIsMobile(false);
+      return;
+    }
+
+    const query = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
+    const mql = window.matchMedia(query);
+
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile("matches" in e ? e.matches : mql.matches);
+    };
+
+    // initial
+    setIsMobile(mql.matches);
+
+    if ("addEventListener" in mql) {
+      mql.addEventListener("change", onChange as any);
+      return () => mql.removeEventListener("change", onChange as any);
+    } else {
+      // äldre API
+      // @ts-expect-error legacy Safari
+      mql.addListener(onChange);
+      // @ts-expect-error legacy Safari
+      return () => mql.removeListener(onChange);
+    }
+  }, []);
+
+  return isMobile;
+}
+
+
+Det här gör ingen skillnad för “vanlig” användare, men gör koden robustare i fler miljöer.
+
+2. Sånt jag skulle fixa / förbättra ändå (webapp-läge)
+2.1 Direkt DOM– och window–användning – samla i små helpers
+
+Du använder window, document, localStorage, URLSearchParams lite överallt:
+
+ThemeContext – sätter data-theme direkt på document.documentElement.
+
+Profile.tsx – window.location.href, manuell blob–download via <a>.
+
+Dashboard.tsx, ActiveSession.tsx, Alternatives.tsx, Warmup.tsx, SessionComplete.tsx – läser URL–parametrar med new URLSearchParams(window.location.search).
+
+PromoCard.tsx, HealthConnectButton.tsx – window.open(...).
+
+Det funkar helt ok i en ren SPA, men det ger:
+
+Svårtestat (många ställen att mocka).
+
+Mer jobb den dagen du vill lägga till SSR, testa i Node, eller köra samma logik någon annanstans.
+
+Rekommendation:
+
+Skapa små helpers i t.ex. client/src/lib/platform.ts:
+
+export function openExternal(url: string) {
+  if (typeof window !== "undefined") {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+}
+
+export function getSearchParams() {
+  if (typeof window === "undefined") return new URLSearchParams();
+  return new URLSearchParams(window.location.search);
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+
+Och använd dessa istället. Det är en liten refactor nu, men minskar buggrisk och gör det lättare att ändra beteende centralt.
+
+2.2 Rejäl typning istället för any i kritiska flöden
+
+Framför allt i:
+
+client/src/pages/ActiveSession.tsx
+
+client/src/pages/Alternatives.tsx
+
+client/src/components/EquipmentScanner.tsx (sett delvis)
+
+m.fl.
+
+Du har många ställen med:
+
+sessionLogs.forEach((log: any) => { ... })
+const completedLogs = sessionLogs.filter((log: any) => log.completed);
+
+
+och i Alternatives:
+
+const programData = profile.aiProgramData as any;
+programData.phases?.forEach((phase: any) => { ... });
+
+
+Det här är ställen där ett fältbyte i API:t (completed → isCompleted, exercise.key → exercise.exerciseKey) ger tysta logiska buggar i webappen.
+
+Rekommendation:
+
+Använd typerna från @shared/schema (z.infer på respektive tabell/schema) eller definiera front-end–specifika interfaces.
+
+Byt ut any mot dessa typer, särskilt:
+
+session–/log–strukturer
+
+aiProgramData–strukturen
+
+svar från EquipmentScanner/AI-detektion.
+
+Det är mer “DX”-fix än akut bug, men det är här framtida buggar kommer dyka upp.
+
+2.3 Health Connect & QR/Camera – defensivare felhantering
+
+För webapp-läge är det här mest UX-städ men minskar konstiga edge-case buggar:
+
+EquipmentScanner:
+
+Du loggar fel vid getUserMedia och visar toast – bra.
+
+Jag hade även:
+
+disable:at knappar när isScanning true.
+
+fallback-UI om navigator.mediaDevices saknas (gamla browsers / stående i in-app-webview).
+
+HealthConnectButton:
+
+Lägg till hantering för:
+
+refetchConnections() som kastar fel → logga + visa toast, stoppa spinner.
+
+Timeout (t.ex. sluta polla efter 2–3 minuter och visa “Avbruten eller tog för lång tid”).
+
+2.4 ThemeContext – hantera korrupt localStorage snyggt
+
+Du använder localStorage för att spara theme (plus även dismissed tips etc). I ThemeContext kan t.ex. en trasig localStorage–post göra att du försöker ladda ett tema som inte finns.
+
+I filen (delvis trunkerad i zippen) ser jag:
+
+function isValidTheme(value: string): value is Theme {
+  return ["main", "forest", "purple", "ocean", "sunset", "slate", "crimson", "pink"].includes(value);
+}
+
+
+Bra – men se till att du faktiskt använder den när du läser från storage, t.ex.:
+
+useEffect(() => {
+  try {
+    const stored = localStorage.getItem("theme");
+    if (stored && isValidTheme(stored)) {
+      setThemeState(stored);
+      applyThemeToDocument(stored);
+    } else {
+      applyThemeToDocument("main");
+    }
+  } catch (error) {
+    console.error("Failed to read theme from localStorage", error);
+    applyThemeToDocument("main");
+  }
+  setInitialized(true);
+}, []);
+
+
+På samma sätt för dismissedTips i use-training-tips – try/catch finns, men se till att fallbacken är vettig om parsning misslyckas.
+
+2.5 Små UX/robusthetsdetaljer
+
+Några “quality of life”-grejer som minskar buggrapporter:
+
+URL-parametrar
+På flera sidor (Dashboard, Warmup, SessionComplete, ActiveSession) hämtar ni tab/ids från window.location.search en gång vid mount.
+Om ni börjar ändra query params client-side (utan full reload) kommer de värdena inte uppdateras. Ett litet useSearchParams-hook baserat på wouter/window.onpopstate skulle göra det mer robust.
+
+SetInterval / timers generellt
+Se till att alla intervaller och timeouts städas upp i useEffect-cleanup om de lever längre än en user action (HealthConnect är den tydliga). Det är klassisk “osynlig” bugkategori i single-page apps.

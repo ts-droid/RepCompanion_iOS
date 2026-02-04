@@ -1,0 +1,14 @@
+.DS_Store
+**/.DS_Store
+node_modules
+**/node_modules
+*.log
+**/*.log
+.env
+**/.env
+.local
+**/.local
+dist
+**/dist
+build
+**/build

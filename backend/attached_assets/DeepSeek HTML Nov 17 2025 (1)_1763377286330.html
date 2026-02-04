@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepCompanion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            color: #888;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            padding: 6px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #fff;
+        }
+
+        /* Meter Containers */
+        .meter-single {
+            display: block;
+        }
+
+        .meter-combined {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .meter-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .meter-title {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Circular Meters */
+        .meter-circle {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .meter-circle.small {
+            width: 120px;
+            height: 120px;
+        }
+
+        .meter-outer {
+            width: 100%;
+            height: 100%;
+            border: 10px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .meter-outer.thin {
+            border-width: 8px;
+        }
+
+        .meter-progress {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 100%;
+            height: 100%;
+            border: 10px solid transparent;
+            border-radius: 50%;
+            clip-path: inset(0 0 0 50%);
+        }
+
+        .meter-progress.thin {
+            top: -8px;
+            left: -8px;
+            border-width: 8px;
+        }
+
+        .meter-progress-fill {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 10px solid;
+            border-radius: 50%;
+            clip-path: inset(0 50% 0 0);
+            transform: rotate(0deg);
+            transition: transform 1.5s ease-in-out;
+        }
+
+        .meter-progress-fill.thin {
+            border-width: 8px;
+        }
+
+        /* Activity Meter */
+        .activity-meter .meter-progress-fill {
+            border-color: #ff6b6b;
+            transform: rotate(180deg); /* 50% */
+        }
+
+        /* Recovery Meter */
+        .recovery-meter .meter-progress-fill {
+            border-color: #4ecdc4;
+            transform: rotate(126deg); /* 35% */
+        }
+
+        .meter-inner {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meter-inner.small {
+            width: 84px;
+            height: 84px;
+        }
+
+        .meter-value {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .meter-value.small {
+            font-size: 20px;
+        }
+
+        .activity-meter .meter-value {
+            color: #ff6b6b;
+        }
+
+        .recovery-meter .meter-value {
+            color: #4ecdc4;
+        }
+
+        .meter-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .info-text {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Quick Start */
+        .quick-start {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 12px 8px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #888;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .activity-stat .stat-value {
+            color: #ff6b6b;
+        }
+
+        .recovery-stat .stat-value {
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* View Management */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="app-title">RepCompanion</div>
+            <div class="app-subtitle">Din träningskompanjon</div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-view="activity-view">Aktivitet</div>
+            <div class="tab" data-view="recovery-view">Återhämtning</div>
+            <div class="tab" data-view="combined-view">Kombinerad</div>
+        </div>
+
+        <!-- Activity View -->
+        <div class="view active" id="activity-view">
+            <div class="section-header">AKTIVITET</div>
+            
+            <div class="meter-single">
+                <div class="meter-card activity-meter">
+                    <div class="meter-title">DAGENS AKTIVITET</div>
+                    <div class="meter-circle">
+                        <div class="meter-outer"></div>
+                        <div class="meter-progress">
+                            <div class="meter-progress-fill"></div>
+                        </div>
+                        <div class="meter-inner">
+                            <div class="meter-value">50%</div>
+                            <div class="meter-label">Av mål</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item activity-stat">
+                            <div class="stat-value">4,280</div>
+                            <div class="stat-label">STEG</div>
+                        </div>
+                        <div class="stat-item activity-stat">
+                            <div class="stat-value">32min</div>
+                            <div class="stat-label">AKTIV</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">DAGENS MÅL</div>
+                <div class="info-text">
+                    Fortsätt så här! Du är halvvägs till ditt dagliga mål på 10,000 steg. 
+                    Ett 30-minuters promenad skulle få dig till 75% av målet.
+                </div>
+            </div>
+        </div>
+
+        <!-- Recovery View -->
+        <div class="view" id="recovery-view">
+            <div class="section-header">ÅTERHÄMTNING</div>
+            
+            <div class="meter-single">
+                <div class="meter-card recovery-meter">
+                    <div class="meter-title">ÅTERHÄMTNINGSNIVÅ</div>
+                    <div class="meter-circle">
+                        <div class="meter-outer"></div>
+                        <div class="meter-progress">
+                            <div class="meter-progress-fill"></div>
+                        </div>
+                        <div class="meter-inner">
+                            <div class="meter-value">35%</div>
+                            <div class="meter-label">Optimal</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item recovery-stat">
+                            <div class="stat-value">6h 20m</div>
+                            <div class="stat-label">SÖMN</div>
+                        </div>
+                        <div class="stat-item recovery-stat">
+                            <div class="stat-value">42</div>
+                            <div class="stat-label">HRV</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">ÅTERHÄMTNING</div>
+                <div class="info-text">
+                    Optimera din återhämtning med tillräcklig sömn (7-9 timmar) och rätt näring. 
+                    Din kropp bygger muskler när du vilar, inte när du tränar! Förbättra din återhämtning genom:
+                    <br><br>
+                    • 7-9 timmars kvalitativ sömn<br>
+                    • Hydrering med elektrolyter<br>
+                    • Proteintillförsel efter träning<br>
+                    • Aktiva återhämtningsdagar
+                </div>
+            </div>
+        </div>
+
+        <!-- Combined View -->
+        <div class="view" id="combined-view">
+            <div class="section-header">ÖVERSIKT</div>
+            
+            <div class="meter-combined">
+                <!-- Activity Meter -->
+                <div class="meter-card activity-meter">
+                    <div class="meter-title">AKTIVITET</div>
+                    <div class="meter-circle small">
+                        <div class="meter-outer thin"></div>
+                        <div class="meter-progress thin">
+                            <div class="meter-progress-fill thin"></div>
+                        </div>
+                        <div class="meter-inner small">
+                            <div class="meter-value small">50%</div>
+                            <div class="meter-label">Av mål</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item activity-stat">
+                            <div class="stat-value">4,280</div>
+                            <div class="stat-label">STEG</div>
+                        </div>
+                        <div class="stat-item activity-stat">
+                            <div class="stat-value">32min</div>
+                            <div class="stat-label">AKTIV</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recovery Meter -->
+                <div class="meter-card recovery-meter">
+                    <div class="meter-title">ÅTERHÄMTNING</div>
+                    <div class="meter-circle small">
+                        <div class="meter-outer thin"></div>
+                        <div class="meter-progress thin">
+                            <div class="meter-progress-fill thin"></div>
+                        </div>
+                        <div class="meter-inner small">
+                            <div class="meter-value small">35%</div>
+                            <div class="meter-label">Optimal</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item recovery-stat">
+                            <div class="stat-value">6h 20m</div>
+                            <div class="stat-label">SÖMN</div>
+                        </div>
+                        <div class="stat-item recovery-stat">
+                            <div class="stat-value">42</div>
+                            <div class="stat-label">HRV</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">HELHETSSTATUS</div>
+                <div class="info-text">
+                    Din aktivitetsnivå är på god väg, men återhämtningen behöver förbättras. 
+                    Överväg att lägga till en vilodag eller fokusera på sömnkvalitet ikväll.
+                    <br><br>
+                    <strong>Rekommendation:</strong> Lätt aktiv återhämtning som promenad eller stretching.
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="quick-start">
+            <div class="info-title">Snabbstart</div>
+            <div class="info-text" style="margin-bottom: 20px;">
+                Kör igång med nästa träningspass på en gång!
+            </div>
+            <button class="start-button">Starta pass</button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active">Hem</div>
+            <div class="nav-item">Program</div>
+            <div class="nav-item">Statistik</div>
+            <div class="nav-item">Profil</div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all views
+                document.querySelectorAll('.view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                
+                // Show selected view
+                const viewName = this.getAttribute('data-view');
+                document.getElementById(viewName).classList.add('active');
+            });
+        });
+
+        // Bottom navigation functionality
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // Start workout button
+        document.querySelector('.start-button').addEventListener('click', function() {
+            const originalText = this.textContent;
+            this.textContent = 'Startar...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.textContent = 'Pass startat!';
+                this.style.background = 'linear-gradient(135deg, #4ecdc4, #67e6dc)';
+                
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = 'linear-gradient(135deg, #ff6b6b, #ff8e8e)';
+                    this.disabled = false;
+                }, 2000);
+            }, 1000);
+        });
+
+        // Animate meters on load
+        window.addEventListener('load', function() {
+            // Activity meter - 50%
+            setTimeout(() => {
+                const activityFills = document.querySelectorAll('.activity-meter .meter-progress-fill');
+                activityFills.forEach(fill => {
+                    fill.style.transform = 'rotate(180deg)';
+                });
+            }, 500);
+            
+            // Recovery meter - 35%
+            setTimeout(() => {
+                const recoveryFills = document.querySelectorAll('.recovery-meter .meter-progress-fill');
+                recoveryFills.forEach(fill => {
+                    fill.style.transform = 'rotate(126deg)';
+                });
+            }, 800);
+        });
+    </script>
+</body>
+</html>

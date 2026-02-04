@@ -1,0 +1,148 @@
+{
+  "version": "v4-impl-plan-1",
+  "language_policy": {
+    "backend": "English",
+    "ui": "Localized per user (exercise/equipment translation maps)",
+    "llm_output": "English text fields, exercise selection is IDs-only"
+  },
+  "goals": [
+    "Deterministic timing (no 'short sessions') using configurable time model",
+    "Lower tokens/cost by using candidate pools instead of sending long exercise lists",
+    "IDs-only output to eliminate fuzzy exercise name parsing in runtime",
+    "Cache analysis to reuse across program generations"
+  ],
+  "time_model": {
+    "defaults": {
+      "work_seconds_per_10_reps": 30,
+      "rest_between_sets_seconds": 90,
+      "rest_between_exercises_seconds": 120,
+      "warmup_minutes_default": 8,
+      "cooldown_minutes_default": 5
+    },
+    "user_override": true,
+    "storage": "user_time_model"
+  },
+  "database_changes": {
+    "migration_file": "migration.sql",
+    "new_tables": [
+      "user_time_model",
+      "equipment_aliases",
+      "exercise_aliases",
+      "exercise_caps",
+      "candidate_pools"
+    ],
+    "extended_tables": [
+      {
+        "table": "equipment_catalog",
+        "add": ["equipment_key"]
+      },
+      {
+        "table": "user_equipment",
+        "add": ["equipment_key"]
+      }
+    ],
+    "indices": [
+      "ux_exercises_exercise_id (where exercise_id is not null)",
+      "ux_equipment_catalog_equipment_key (where equipment_key is not null)",
+      "trgm indices for alias_norm",
+      "candidate_pools lookup index"
+    ]
+  },
+  "prompting_v4": {
+    "files": [
+      "server/prompts/v4/analysis.ts",
+      "server/prompts/v4/blueprint.ts"
+    ],
+    "step_a_analysis": {
+      "purpose": "Convert profile -> focus distribution (sum 100) + volume guidance",
+      "cache": {
+        "recommended_ttl_days": 30,
+        "store_table": "user_analysis_cache (existing) or new table if preferred"
+      }
+    },
+    "step_b_blueprint": {
+      "purpose": "Produce a program blueprint using ONLY IDs from candidate_pools",
+      "output": "IDs-only JSON + priority + sets/reps/rest/load",
+      "notes": "Server enforces final time fitting deterministically"
+    }
+  },
+  "server_changes": {
+    "new_code": [
+      {
+        "file": "server/utils/timeFitting.ts",
+        "responsibility": "Estimate duration and deterministically fit sessions into allowed duration range"
+      }
+    ],
+    "integration_points": [
+      {
+        "file": "server/workout-generation-service.ts",
+        "change": "Introduce V4 pipeline (analysis cache -> candidate pools -> blueprint -> deterministic time fitting)."
+      },
+      {
+        "file": "server/exercise-matcher.ts",
+        "change": "Move equipment matching to canonical equipment_key using equipment_aliases; avoid includes()-only matching."
+      }
+    ],
+    "recommended_endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/user/time-model",
+        "purpose": "Read user_time_model (or return defaults)"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/user/time-model",
+        "purpose": "Update user_time_model with validation and audit"
+      },
+      {
+        "method": "POST",
+        "path": "/api/program/generate-v4",
+        "purpose": "Generate V4 blueprint via LLM, run deterministic time fitting, persist, return"
+      }
+    ]
+  },
+  "candidate_pool_strategy": {
+    "why": "Avoid sending huge exercise lists to the LLM and enforce valid outputs",
+    "buckets": [
+      "warmup",
+      "main_push",
+      "main_pull",
+      "main_legs",
+      "accessory_upper",
+      "accessory_lower",
+      "core",
+      "cardio"
+    ],
+    "size_guideline": {
+      "min_per_bucket": 8,
+      "max_per_bucket": 25
+    },
+    "rebuild_triggers": [
+      "user equipment changes",
+      "gym changes",
+      "primary goal changes",
+      "sport changes",
+      "analysis cache refresh"
+    ],
+    "storage": "candidate_pools (user/gym/global scopes)"
+  },
+  "localization": {
+    "approach": "Keep canonical IDs in backend; UI maps IDs to localized strings.",
+    "exercise_translation": "Use exercises.name/name_en and/or a dedicated translation map keyed by exercise_id",
+    "equipment_translation": "Use equipment_catalog.name/name_en and/or a dedicated translation map keyed by equipment_key"
+  },
+  "acceptance_criteria": {
+    "timing": {
+      "target": ">=95% of sessions fitted within allowed range",
+      "no_short_sessions": "No session <80% of the week's longest session after fitting (optional additional rule)"
+    },
+    "validity": {
+      "invalid_ids": "<=0.5% (should be near 0 with candidate pools)",
+      "equipment_violations": "0 (enforced by pool construction and validation)"
+    },
+    "cost": {
+      "token_reduction": ">=50% vs sending full exercise lists",
+      "analysis_cache_hit_rate": ">=80% for repeat users (within TTL)"
+    }
+  }
+}

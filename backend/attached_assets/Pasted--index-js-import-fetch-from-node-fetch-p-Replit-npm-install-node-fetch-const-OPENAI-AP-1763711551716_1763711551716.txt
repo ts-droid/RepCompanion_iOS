@@ -1,0 +1,183 @@
+// index.js
+
+import fetch from "node-fetch"; // på Replit: `npm install node-fetch`
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // lägg din nyckel i Secrets på Replit
+
+const SYSTEM_PROMPT = `
+Du är en erfaren tränare med expertis i styrka, kondition och periodisering.
+Du skapar tidsoptimerade, säkra och praktiska träningspass.
+
+REGLER:
+- Använd endast utrustning som anges.
+- Anpassa volym, intensitet och komplexitet efter trainingLevel.
+- Använd 1RM-värden om de finns; om de saknas ska du auto-generera rimliga 1RM baserat på kön, ålder, kroppsvikt och trainingLevel.
+- Anpassa fokus för passen efter goalStrength, goalVolume, goalEndurance, goalCardio.
+- Alla pass ska ligga nära måldurationen.
+
+AUTO-GENERERING AV 1RM (OBLIGATORISKT):
+Om 1RM saknas:
+- Nybörjare: ca 0.6–0.8 x kroppsvikt i press, 1.0–1.3 x kroppsvikt i böj/mark.
+- Intermediate: ca 0.8–1.2 x kroppsvikt i press, 1.3–1.8 x kroppsvikt i böj/mark.
+- Avancerad: ca 1.2–1.5 x kroppsvikt i press, 1.8–2.5 x kroppsvikt i böj/mark.
+Justera nedåt för högre ålder och för kvinnor (ca 55–70 % av mansnivå).
+
+TIDSKRAV:
+- targetSessionDurationMinutes kommer från user-meddelandet.
+- Varje pass: estimatedDurationMinutes inom ±10 % av targetSessionDurationMinutes.
+- Inget pass får vara kortare än 80 % av längsta passet samma vecka.
+
+TIDSMODELL:
+- 10 reps ≈ 30 sek arbetstid. Skala ungefärligt för andra reps.
+- Tid per set ≈ arbetstid + restSeconds.
+- Lägg till 15–30 sek per övning för byten.
+
+OUTPUTFORMAT (OBLIGATORISKT):
+Svara ENDAST med JSON:
+{
+  "meta": {
+    "sessionsPerWeek": number,
+    "targetSessionDurationMinutes": number,
+    "allowedDurationRangeMinutes": { "min": number, "max": number },
+    "totalPlannedWeeklyMinutes": number,
+    "notes": string
+  },
+  "sessions": [
+    {
+      "name": string,
+      "day": string,
+      "focus": string,
+      "targetDurationMinutes": number,
+      "estimatedDurationMinutes": number,
+      "exercises": [
+        {
+          "name": string,
+          "equipment": string,
+          "sets": number,
+          "reps": string,
+          "intensity": string,
+          "restSeconds": number,
+          "estimatedExerciseDurationMinutes": number
+        }
+      ]
+    }
+  ]
+}
+
+Ingen text utanför JSON, inga kommentarer, ingen markdown.
+`;
+
+function buildUserPrompt(profile, sessionDuration, weekdayList, equipmentList) {
+  return `
+ANVÄNDARPROFIL:
+- age: ${profile.age}
+- sex: ${profile.sex}
+- bodyWeight: ${profile.bodyWeight} kg
+- height: ${profile.height} cm
+- bodyFatPercent: ${profile.bodyFatPercent} %
+- muscleMassPercent: ${profile.muscleMassPercent} %
+
+- trainingLevel: ${profile.trainingLevel}
+- motivationType: ${profile.motivationType || ""}
+- trainingGoals: ${profile.trainingGoals || ""}
+- specificSport: ${profile.specificSport || ""}
+
+1RM:
+- oneRmBench: ${profile.oneRmBench ?? ""}
+- oneRmOhp: ${profile.oneRmOhp ?? ""}
+- oneRmDeadlift: ${profile.oneRmDeadlift ?? ""}
+- oneRmSquat: ${profile.oneRmSquat ?? ""}
+- oneRmLatpull: ${profile.oneRmLatpull ?? ""}
+
+- currentPassNumber: ${profile.currentPassNumber}
+
+MÅL (0–100):
+- goalStrength: ${profile.goalStrength}
+- goalVolume: ${profile.goalVolume}
+- goalEndurance: ${profile.goalEndurance}
+- goalCardio: ${profile.goalCardio}
+
+SCHEMA:
+- sessionsPerWeek: ${profile.sessionsPerWeek}
+- targetSessionDurationMinutes: ${sessionDuration}
+- allowedWeekdays: ${weekdayList.join(", ")}
+
+UTRUSTNING:
+${equipmentList && equipmentList.length ? equipmentList.join(", ") : "Endast kroppsvikt"}
+
+UPPGIFT:
+Skapa ett veckoschema med ${profile.sessionsPerWeek} pass enligt system-reglerna ovan.
+Svara ENDAST med JSON enligt det definierade formatet.
+`;
+}
+
+export async function fetchTrainingPlan(profile, sessionDuration, weekdayList, equipmentList) {
+  const userPrompt = buildUserPrompt(profile, sessionDuration, weekdayList, equipmentList);
+
+  const body = {
+    model: "gpt-4o-mini",           // byt till den modell du använder via Replit/GPT-5
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt }
+    ],
+    max_tokens: 1200,
+    temperature: 0.5
+  };
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`OpenAI error: ${res.status} ${errorText}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices[0]?.message?.content ?? "{}";
+  return JSON.parse(content);
+}
+
+// Exempel-test (kan köras i Replit):
+(async () => {
+  const profile = {
+    age: 35,
+    sex: "Man",
+    bodyWeight: 85,
+    height: 180,
+    bodyFatPercent: 18,
+    muscleMassPercent: 40,
+    trainingLevel: "Intermediate",
+    motivationType: "Progression",
+    trainingGoals: "Bygga styrka och muskler",
+    specificSport: "",
+    oneRmBench: null,
+    oneRmOhp: null,
+    oneRmDeadlift: null,
+    oneRmSquat: null,
+    oneRmLatpull: null,
+    currentPassNumber: 1,
+    goalStrength: 80,
+    goalVolume: 70,
+    goalEndurance: 40,
+    goalCardio: 30,
+    sessionsPerWeek: 4
+  };
+
+  const sessionDuration = 60;
+  const weekdayList = ["Måndag", "Onsdag", "Fredag", "Lördag"];
+  const equipmentList = ["Skivstång", "Hantlar", "Kabelmaskin", "Löpband"];
+
+  try {
+    const plan = await fetchTrainingPlan(profile, sessionDuration, weekdayList, equipmentList);
+    console.log(JSON.stringify(plan, null, 2));
+  } catch (err) {
+    console.error(err);
+  }
+})();
