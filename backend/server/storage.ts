@@ -97,6 +97,7 @@ export interface IStorage {
   // Equipment operations
   getUserEquipment(userId: string): Promise<UserEquipment[]>;
   getGymEquipment(gymId: string): Promise<UserEquipment[]>;
+  getGymEquipment(gymId: string): Promise<UserEquipment[]>;
   upsertEquipment(equipment: InsertUserEquipment): Promise<UserEquipment>;
   deleteEquipment(id: string): Promise<void>;
   getEquipmentCatalog(): Promise<any[]>;
@@ -420,6 +421,13 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userEquipment)
       .where(eq(userEquipment.userId, userId));
+  }
+
+  async getGymEquipment(gymId: string): Promise<UserEquipment[]> {
+    return await db
+      .select()
+      .from(userEquipment)
+      .where(eq(userEquipment.gymId, gymId));
   }
 
   async getGymEquipment(gymId: string): Promise<UserEquipment[]> {

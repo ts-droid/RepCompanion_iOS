@@ -501,6 +501,11 @@ app.post("/api/profile/suggest-onerm", isAuthenticatedOrDev, async (req: any, re
           specificSport: null, // ← CRITICAL: Clear stale sport data
           sessionsPerWeek: 3,
           sessionDuration: 60,
+          onboardingCompleted: false,
+          equipmentRegistered: false,
+          selectedGymId: null,
+          hasAiProgram: false,
+          aiProgramData: null,
         })
         .where(eq(userProfiles.userId, userId));
 
@@ -509,6 +514,35 @@ app.post("/api/profile/suggest-onerm", isAuthenticatedOrDev, async (req: any, re
     } catch (error) {
       console.error("[API] ❌ Error resetting profile:", error);
       res.status(500).json({ message: "Failed to reset profile" });
+    }
+  });
+
+  // Reset user gyms (remove only non-verified gyms) and clear active gym if needed
+  app.post("/api/gyms/reset", isAuthenticatedOrDev, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      const removed = await db
+        .delete(gyms)
+        .where(and(eq(gyms.userId, userId), eq(gyms.isVerified, false)))
+        .returning();
+      
+      // If selected gym was removed, clear selection
+      const profile = await storage.getUserProfile(userId);
+      if (profile?.selectedGymId) {
+        const stillExists = await storage.getGym(profile.selectedGymId);
+        if (!stillExists) {
+          await db
+            .update(userProfiles)
+            .set({ selectedGymId: null, updatedAt: new Date() })
+            .where(eq(userProfiles.userId, userId));
+        }
+      }
+      
+      res.json({ success: true, removed: removed.length });
+    } catch (error) {
+      console.error("[API] ❌ Error resetting gyms:", error);
+      res.status(500).json({ message: "Failed to reset gyms" });
     }
   });
 
@@ -778,6 +812,28 @@ app.post("/api/profile/suggest-onerm", isAuthenticatedOrDev, async (req: any, re
     } catch (error) {
       console.error("[GYM] Failed to search nearby gyms:", error);
       res.status(500).json({ message: "Failed to search nearby gyms" });
+    }
+  });
+
+  app.get("/api/gyms/:id([0-9a-fA-F-]{36})/equipment", isAuthenticatedOrDev, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const gymId = req.params.id;
+      const gym = await storage.getGym(gymId);
+
+      if (!gym) {
+        return res.status(404).json({ message: "Gym not found" });
+      }
+
+      const canAccess = gym.userId === userId || gym.isPublic || gym.isVerified;
+      if (!canAccess) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const equipment = await storage.getGymEquipment(gymId);
+      res.json(equipment);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gym equipment" });
     }
   });
 
