@@ -9,7 +9,7 @@ import { PromoCard } from "@/components/PromoCard";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import confetti from "canvas-confetti";
-import celebrationGif from "@assets/celebration.gif";
+import celebrationGif from "../assets/celebration.gif";
 import type { WorkoutSession, ExerciseLog, ProgramTemplate, ProgramTemplateExercise } from "@shared/schema";
 
 type TemplateWithExercises = ProgramTemplate & {
