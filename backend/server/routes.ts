@@ -3429,6 +3429,49 @@ Svara ENDAST med ett JSON-objekt i följande format (ingen annan text):
     }
   });
 
+  // ========== GYM CAMPAIGNS ==========
+  // Public endpoint — shown before login (no auth required)
+  app.get("/api/gym-campaigns/active", async (_req, res) => {
+    try {
+      const campaigns = await storage.getActiveGymCampaigns();
+      res.json(campaigns);
+    } catch (error: any) {
+      console.error("[GymCampaigns] Error fetching active campaigns:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
+    }
+  });
+
+  // Admin endpoints — require admin auth
+  app.post("/api/gym-campaigns", requireAdminAuth, async (req, res) => {
+    try {
+      const campaign = await storage.createGymCampaign(req.body);
+      res.status(201).json(campaign);
+    } catch (error: any) {
+      console.error("[GymCampaigns] Error creating campaign:", error);
+      res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
+  app.patch("/api/gym-campaigns/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const campaign = await storage.updateGymCampaign(req.params.id, req.body);
+      res.json(campaign);
+    } catch (error: any) {
+      console.error("[GymCampaigns] Error updating campaign:", error);
+      res.status(500).json({ error: "Failed to update campaign" });
+    }
+  });
+
+  app.delete("/api/gym-campaigns/:id", requireAdminAuth, async (req, res) => {
+    try {
+      await storage.deleteGymCampaign(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("[GymCampaigns] Error deleting campaign:", error);
+      res.status(500).json({ error: "Failed to delete campaign" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

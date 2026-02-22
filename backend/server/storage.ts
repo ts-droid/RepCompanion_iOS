@@ -186,6 +186,12 @@ export interface IStorage {
   getExercisesByIds(ids: string[]): Promise<any[]>;
   getCandidatePools(userId: string, gymId?: string): Promise<import("@shared/schema").CandidatePool[]>;
   updateUserActivity(userId: string): Promise<void>;
+
+  // Gym campaign operations
+  getActiveGymCampaigns(): Promise<import("@shared/schema").GymCampaign[]>;
+  createGymCampaign(campaign: import("@shared/schema").InsertGymCampaign): Promise<import("@shared/schema").GymCampaign>;
+  updateGymCampaign(id: string, data: Partial<import("@shared/schema").InsertGymCampaign>): Promise<import("@shared/schema").GymCampaign>;
+  deleteGymCampaign(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2132,6 +2138,42 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAiPrompt(id: string): Promise<void> {
     await db.delete(aiPrompts).where(eq(aiPrompts.id, id));
+  }
+
+  // ========== GYM CAMPAIGNS ==========
+
+  async getActiveGymCampaigns(): Promise<import("@shared/schema").GymCampaign[]> {
+    const { gymCampaigns } = await import("@shared/schema");
+    const now = new Date();
+    return db.select().from(gymCampaigns).where(
+      and(
+        eq(gymCampaigns.isActive, true),
+        // startsAt <= now
+        sql`${gymCampaigns.startsAt} <= ${now}`,
+        // endsAt IS NULL OR endsAt > now
+        or(
+          isNull(gymCampaigns.endsAt),
+          sql`${gymCampaigns.endsAt} > ${now}`
+        )
+      )
+    );
+  }
+
+  async createGymCampaign(campaign: import("@shared/schema").InsertGymCampaign): Promise<import("@shared/schema").GymCampaign> {
+    const { gymCampaigns } = await import("@shared/schema");
+    const [created] = await db.insert(gymCampaigns).values(campaign).returning();
+    return created;
+  }
+
+  async updateGymCampaign(id: string, data: Partial<import("@shared/schema").InsertGymCampaign>): Promise<import("@shared/schema").GymCampaign> {
+    const { gymCampaigns } = await import("@shared/schema");
+    const [updated] = await db.update(gymCampaigns).set(data).where(eq(gymCampaigns.id, id)).returning();
+    return updated;
+  }
+
+  async deleteGymCampaign(id: string): Promise<void> {
+    const { gymCampaigns } = await import("@shared/schema");
+    await db.delete(gymCampaigns).where(eq(gymCampaigns.id, id));
   }
 }
 

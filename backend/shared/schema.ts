@@ -964,3 +964,29 @@ export type TrackPromoImpression = z.infer<typeof trackPromoImpressionSchema>;
 export type TrackAffiliateClick = z.infer<typeof trackAffiliateClickSchema>;
 export type PromoIdParam = z.infer<typeof promoIdParamSchema>;
 export type PromoPlacementParam = z.infer<typeof promoPlacementParamSchema>;
+
+// ========== GYM CAMPAIGNS (Launch interstitial ads) ==========
+
+export const gymCampaigns = pgTable("gym_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gymId: varchar("gym_id").references(() => gyms.id, { onDelete: "cascade" }),
+  gymName: varchar("gym_name", { length: 200 }).notNull(),
+  logoUrl: text("logo_url"),
+  offerText: text("offer_text").notNull(),
+  ctaLabel: varchar("cta_label", { length: 100 }).notNull().default("Läs mer"),
+  ctaUrl: text("cta_url").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  startsAt: timestamp("starts_at").defaultNow().notNull(),
+  endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  idxGymCampaignsActive: index("idx_gym_campaigns_active").on(table.isActive, table.startsAt, table.endsAt),
+}));
+
+export const insertGymCampaignSchema = createInsertSchema(gymCampaigns).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type GymCampaign = typeof gymCampaigns.$inferSelect;
+export type InsertGymCampaign = z.infer<typeof insertGymCampaignSchema>;

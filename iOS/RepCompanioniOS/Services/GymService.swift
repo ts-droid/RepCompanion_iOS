@@ -91,8 +91,8 @@ class GymService: ObservableObject {
             predicate: #Predicate { $0.userId == userId }
         )
         
-        let existingGyms = (try? modelContext.fetch(descriptor)) ?? []
-        if existingGyms.isEmpty {
+        let gymsForUser = (try? modelContext.fetch(descriptor)) ?? []
+        if gymsForUser.isEmpty {
             gym.isSelected = true
             updateSelectedGymInProfile(gymId: gym.id, userId: userId, modelContext: modelContext)
         }

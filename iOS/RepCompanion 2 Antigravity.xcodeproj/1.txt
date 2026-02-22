@@ -1,0 +1,1 @@
+375:				INFOPLIST_KEY_NSHealthShareUsageDescription = "RepCompanion behöver läsa din hälsodata för att visa din träningsaktivitet, steg, hjärtfrekvens och sömn för att ge dig personliga träningsråd och spåra din progression.";
