@@ -27,35 +27,35 @@ struct ExerciseProgressionView: View {
                     VStack(spacing: 16) {
                         HStack(spacing: 20) {
                             StatBox(
-                                title: "Max weight",
+                                title: String(localized: "Max weight"),
                                 value: "\(stats.maxWeight?.formattedWeight ?? "0") kg",
                                 colorScheme: colorScheme
                             )
                             StatBox(
-                                title: "Snitt vikt",
+                                title: String(localized: "Average weight"),
                                 value: "\(stats.avgWeight?.formattedWeight ?? "0") kg",
                                 colorScheme: colorScheme
                             )
                             StatBox(
-                                title: "Senaste",
+                                title: String(localized: "Latest"),
                                 value: "\(stats.lastWeight?.formattedWeight ?? "0") kg",
                                 colorScheme: colorScheme
                             )
                         }
-                        
+
                         HStack(spacing: 20) {
                             StatBox(
-                                title: "Total volym",
+                                title: String(localized: "Total volume"),
                                 value: "\(stats.totalVolume.formattedWeight) kg",
                                 colorScheme: colorScheme
                             )
                             StatBox(
-                                title: "Totala sets",
+                                title: String(localized: "Total sets"),
                                 value: "\(stats.totalSets)",
                                 colorScheme: colorScheme
                             )
                             StatBox(
-                                title: "Sessioner",
+                                title: String(localized: "Sessions"),
                                 value: "\(stats.totalSessions)",
                                 colorScheme: colorScheme
                             )
@@ -67,7 +67,7 @@ struct ExerciseProgressionView: View {
                 // Progression Chart
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text("Weight progression")
+                        Text(String(localized: "Weight progression"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -88,10 +88,10 @@ struct ExerciseProgressionView: View {
                             Image(systemName: "chart.line.uptrend.xyaxis")
                                 .font(.system(size: 60))
                                 .foregroundColor(.gray)
-                            Text("No data yet")
+                            Text(String(localized: "No data yet"))
                                 .font(.headline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Log exercises to see progression")
+                            Text(String(localized: "Log exercises to see progression"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -102,14 +102,14 @@ struct ExerciseProgressionView: View {
                             ForEach(progressionData) { point in
                                 LineMark(
                                     x: .value("Date", point.date, unit: .day),
-                                    y: .value("Vikt", point.weight)
+                                    y: .value(String(localized: "Weight"), point.weight)
                                 )
                                 .foregroundStyle(Color.accentBlue)
                                 .interpolationMethod(.catmullRom)
                                 
                                 PointMark(
                                     x: .value("Date", point.date, unit: .day),
-                                    y: .value("Vikt", point.weight)
+                                    y: .value(String(localized: "Weight"), point.weight)
                                 )
                                 .foregroundStyle(Color.accentBlue)
                             }

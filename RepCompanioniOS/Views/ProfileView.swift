@@ -109,11 +109,11 @@ struct ProfileView: View {
                             .padding(.horizontal, 20)
                             
                             VStack(spacing: 4) {
-                                Text("Dev")
+                                Text(authService.currentUserName ?? "–")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: effectiveColorScheme))
-                                Text("dev@test.com")
+                                Text(authService.currentUserEmail ?? "–")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: effectiveColorScheme))
                             }

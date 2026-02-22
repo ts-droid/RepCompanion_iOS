@@ -43,7 +43,7 @@ struct EditProgramTemplateView: View {
                             }
                             
                             HStack {
-                                Text("Estimated workout time")
+                                Text(String(localized: "Estimated workout time"))
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 Spacer()
@@ -98,7 +98,7 @@ struct EditProgramTemplateView: View {
                         }) {
                             HStack {
                                 Image(systemName: "plus.circle.fill")
-                                Text("Add exercise")
+                                Text(String(localized: "Add exercise"))
                             }
                             .font(.headline)
                             .foregroundColor(.white)
@@ -119,7 +119,7 @@ struct EditProgramTemplateView: View {
                     }) {
                         HStack {
                             Image(systemName: "play.circle.fill")
-                            Text("Start session")
+                            Text(String(localized: "Start session"))
                         }
                         .font(.headline)
                         .fontWeight(.bold)
@@ -133,7 +133,7 @@ struct EditProgramTemplateView: View {
                     Button(action: {
                         saveChanges()
                     }) {
-                        Text("Save changes")
+                        Text(String(localized: "Save changes"))
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                             .frame(maxWidth: .infinity)
@@ -150,16 +150,16 @@ struct EditProgramTemplateView: View {
                 .padding()
                 .background(Color.appBackground(for: colorScheme))
             }
-            .navigationTitle("Edit session")
+            .navigationTitle(String(localized: "Edit session"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Avbryt") {
+                    Button(String(localized: "Cancel")) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Spara") {
+                    Button(String(localized: "Save")) {
                         saveChanges()
                     }
                     .fontWeight(.semibold)
@@ -239,7 +239,16 @@ struct EditProgramTemplateView: View {
     
     private func getDayName(_ dayOfWeek: Int) -> String {
         guard dayOfWeek >= 1, dayOfWeek <= 7 else { return "" }
-        let days = ["", "Monday", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Saturday", "Sunday"]
+        let days = [
+            "",
+            String(localized: "Monday"),
+            String(localized: "Tuesday"),
+            String(localized: "Wednesday"),
+            String(localized: "Thursday"),
+            String(localized: "Friday"),
+            String(localized: "Saturday"),
+            String(localized: "Sunday")
+        ]
         return days[dayOfWeek]
     }
 }
@@ -322,7 +331,7 @@ struct EditableExerciseCard: View {
             HStack(spacing: 12) {
                 // Sets
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Set")
+                    Text(String(localized: "Sets"))
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     TextField("", value: $sets, format: .number)
@@ -337,7 +346,7 @@ struct EditableExerciseCard: View {
                 
                 // Reps
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Reps")
+                    Text(String(localized: "Reps"))
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     TextField("", text: $reps)
@@ -351,7 +360,7 @@ struct EditableExerciseCard: View {
                 
                 // Weight
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Kg")
+                    Text(String(localized: "Kg"))
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     TextField("", value: $weight, format: .number)
@@ -409,7 +418,7 @@ struct AddExerciseView: View {
                 if selectedExercise == nil {
                     // Exercise selection
                     VStack(spacing: 16) {
-                        TextField("Search exercise", text: $searchText)
+                        TextField(String(localized: "Search exercise"), text: $searchText)
                             .textFieldStyle(.roundedBorder)
                             .padding()
                         
@@ -437,16 +446,16 @@ struct AddExerciseView: View {
                             .padding()
                         
                         VStack(spacing: 16) {
-                            Stepper("Set: \(sets)", value: $sets, in: 1...10)
-                            TextField("Reps (e.g. 8-12)", text: $reps)
+                            Stepper(String(format: String(localized: "Sets: %d"), sets), value: $sets, in: 1...10)
+                            TextField(String(localized: "Reps (e.g. 8-12)"), text: $reps)
                                 .textFieldStyle(.roundedBorder)
-                            TextField("Vikt (kg)", value: $weight, format: .number)
+                            TextField(String(localized: "Weight (kg)"), value: $weight, format: .number)
                                 .textFieldStyle(.roundedBorder)
                                 .keyboardType(.decimalPad)
                         }
                         .padding()
                         
-                        Button("Add") {
+                        Button(String(localized: "Add")) {
                             let exerciseKey = selectedExercise!.id
                             let allMuscles = selectedExercise!.primaryMuscles + selectedExercise!.secondaryMuscles
                             let newExercise = ProgramTemplateExercise(
@@ -468,16 +477,16 @@ struct AddExerciseView: View {
                     }
                 }
             }
-            .navigationTitle("Add exercise")
+            .navigationTitle(String(localized: "Add exercise"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if selectedExercise != nil {
-                        Button("Tillbaka") {
+                        Button(String(localized: "Back")) {
                             selectedExercise = nil
                         }
                     } else {
-                        Button("Avbryt") {
+                        Button(String(localized: "Cancel")) {
                             dismiss()
                         }
                     }

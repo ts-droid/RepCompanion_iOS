@@ -21,10 +21,10 @@ struct ExercisePBsView: View {
                             Image(systemName: "trophy")
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
-                            Text("No personal bests yet")
+                            Text(String(localized: "No personal bests yet"))
                                 .font(.headline)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
-                            Text("Log exercises to see your PBs here")
+                            Text(String(localized: "Log exercises to see your PBs here"))
                                 .font(.caption)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                                 .multilineTextAlignment(.center)
@@ -40,7 +40,7 @@ struct ExercisePBsView: View {
                 .padding(.top)
             }
         }
-        .navigationTitle("Personal best")
+        .navigationTitle(String(localized: "Personal best"))
         .navigationBarTitleDisplayMode(.large)
     }
 }
@@ -57,7 +57,7 @@ struct ExercisePBRow: View {
                     .font(.headline)
                     .foregroundColor(Color.textPrimary(for: colorScheme))
                 
-                Text("Total volym: \(formatWeight(exercise.totalVolume))")
+                Text(String(localized: "Total volume:") + " \(formatWeight(exercise.totalVolume))")
                     .font(.caption)
                     .foregroundColor(Color.textSecondary(for: colorScheme))
             }
@@ -74,7 +74,7 @@ struct ExercisePBRow: View {
                         .font(.title3.bold())
                         .foregroundColor(Color.textPrimary(for: colorScheme))
                 }
-                Text("Max weight")
+                Text(String(localized: "Max weight"))
                     .font(.caption2)
                     .foregroundColor(Color.textSecondary(for: colorScheme))
             }

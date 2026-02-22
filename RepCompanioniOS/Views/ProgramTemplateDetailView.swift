@@ -193,13 +193,13 @@ struct ProgramTemplateDetailView: View {
                     ActiveWorkoutView(session: session, template: template)
                 }
             }
-            .alert("Start session", isPresented: $showStartConfirmation) {
-                Button("Yes, let's go!") {
+            .alert(String(localized: "Start session"), isPresented: $showStartConfirmation) {
+                Button(String(localized: "Yes, let's go!")) {
                     confirmStartWorkout()
                 }
-                Button("Avbryt", role: .cancel) {}
+                Button(String(localized: "Cancel"), role: .cancel) {}
             } message: {
-                Text("Vill du starta \(getDayName(template.dayOfWeek ?? 0))s pass idag?")
+                Text(String(format: String(localized: "Do you want to start %@'s session today?"), getDayName(template.dayOfWeek ?? 0)))
             }
         }
     }
@@ -264,7 +264,7 @@ struct ProgramExerciseRow: View {
                 
                 if !exercise.requiredEquipment.isEmpty {
                     HStack(spacing: 2) {
-                        Text("Utrustning:")
+                        Text(String(localized: "Equipment:"))
                             .font(.caption)
                             .fontWeight(.medium)
                         

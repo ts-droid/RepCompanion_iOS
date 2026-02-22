@@ -193,7 +193,7 @@ struct WorkoutListView: View {
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         Spacer()
                         if !sortedTemplates.isEmpty {
-                            Text("Pass \(currentPassNumber)/\(sortedTemplates.count)")
+                            Text(String(format: String(localized: "Session %1$d/%2$d"), currentPassNumber, sortedTemplates.count))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -207,10 +207,10 @@ struct WorkoutListView: View {
                                     Image(systemName: "dumbbell.fill")
                                         .font(.system(size: 50))
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
-                                    Text("No training programs")
+                                    Text(String(localized: "No training programs"))
                                         .font(.headline)
                                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                    Text("Generate a training program to get started")
+                                    Text(String(localized: "Generate a training program to get started"))
                                         .font(.subheadline)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                         .multilineTextAlignment(.center)
@@ -300,16 +300,16 @@ struct WorkoutListView: View {
                 }
             }
             .navigationBarHidden(true)
-            .alert("Start session", isPresented: $showStartConfirmation) {
-                Button("Yes, let's go!") {
+            .alert(String(localized: "Start session"), isPresented: $showStartConfirmation) {
+                Button(String(localized: "Yes, let's go!")) {
                     confirmStartWorkout()
                 }
-                Button("Avbryt", role: .cancel) {}
+                Button(String(localized: "Cancel"), role: .cancel) {}
             } message: {
                 if let template = templateToStart {
-                    Text("Vill du starta \(getFullDayName(template.dayOfWeek))s pass idag?")
+                    Text(String(format: String(localized: "Do you want to start %@'s session today?"), getFullDayName(template.dayOfWeek)))
                 } else {
-                    Text("Do you want to start today's session?")
+                    Text(String(localized: "Do you want to start today's session?"))
                 }
             }
             .sheet(item: $selectedTemplate) { template in
@@ -356,7 +356,7 @@ struct ProgramTemplateCard: View {
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                     
                     if isNext {
-                        Text("Next")
+                        Text(String(localized: "Next"))
                             .font(.caption2)
                             .fontWeight(.bold)
                             .padding(.horizontal, 6)

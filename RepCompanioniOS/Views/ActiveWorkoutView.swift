@@ -44,7 +44,9 @@ struct ActiveWorkoutView: View {
     init(session: WorkoutSession, template: ProgramTemplate?) {
         self.session = session
         self.template = template
+        #if DEBUG
         print("[DEBUG ActiveWorkoutView] Init. Session: \(session.id), Template: \(template?.id.uuidString ?? "nil")")
+        #endif
         
         let sessionId = session.id
         self._exerciseLogs = Query(
@@ -136,7 +138,9 @@ struct ActiveWorkoutView: View {
         
         // Check if we should explicitly force target values (e.g. user declined to update remaining sets)
         if forceUseTargetForNextSet {
+            #if DEBUG
             print("[DEBUG ActiveWorkoutView] Forcing target values for next set")
+            #endif
             weightValue = exercise.targetWeight ?? 0
             repsValue = getMinimumReps(from: exercise.targetReps)
             
@@ -175,7 +179,7 @@ struct ActiveWorkoutView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showCompleteDialog = true }) {
-                        Text("Avsluta...")
+                        Text(String(localized: "Quit..."))
                             .fontWeight(.bold)
                             .foregroundColor(.red)
                     }
@@ -198,7 +202,9 @@ struct ActiveWorkoutView: View {
                 }
             }
             .onAppear {
+                #if DEBUG
                 print("[DEBUG ActiveWorkoutView] inner onAppear. Exercises count: \(exercises.count), sessionId: \(session.id), showingWarmup: \(showingWarmup)")
+                #endif
                 initializeSessionExercises()
                 restoreStateFromLogs()
                 
@@ -226,21 +232,27 @@ struct ActiveWorkoutView: View {
             )
         }
         .onDisappear {
+            #if DEBUG
             print("[DEBUG ActiveWorkoutView] onDisappear")
+            #endif
             timer?.invalidate()
             timer = nil  // Release timer reference to prevent memory leak
-            
+
             // Accumulate time if session is still active
             if session.status == "active" {
                 let isWatchActive = WatchConnectivityManager.shared.isReachable
-                
+
                 if isWatchActive {
+                    #if DEBUG
                     print("[DEBUG ActiveWorkoutView] onDisappear but Watch is reachable. Keeping timer alive.")
+                    #endif
                 } else {
                     if let start = session.lastStartTime {
                         let additional = Date().timeIntervalSince(start)
                         session.accumulatedTime += additional
+                        #if DEBUG
                         print("[DEBUG ActiveWorkoutView] onDisappear: accumulating \(additional)s. Total: \(session.accumulatedTime)s")
+                        #endif
                     }
                     session.lastStartTime = nil
                     try? modelContext.save()
@@ -260,22 +272,28 @@ struct ActiveWorkoutView: View {
                 if newPhase == .active {
                     // App resumed: Start a new active period
                     session.lastStartTime = Date()
+                    #if DEBUG
                     print("[DEBUG ActiveWorkoutView] App active, resuming timer")
+                    #endif
                 } else {
                     // App going to background or inactive: Accumulate time so far
-                    
+
                     // Check if they are using Apple Watch (reachable)
                     // Or if they have it installed, we can be more lenient to avoid accidental pauses
                     let isWatchActive = WatchConnectivityManager.shared.isReachable
-                    
+
                     if isWatchActive {
+                        #if DEBUG
                         print("[DEBUG ActiveWorkoutView] App inactive but Watch is reachable. Keeping timer alive.")
+                        #endif
                         // Don't clear lastStartTime, so it keeps calculating in background
                     } else {
                         if let start = session.lastStartTime {
                             let additional = Date().timeIntervalSince(start)
                             session.accumulatedTime += additional
+                            #if DEBUG
                             print("[DEBUG ActiveWorkoutView] App inactive, accumulating \(additional)s. Total: \(session.accumulatedTime)s")
+                            #endif
                         }
                         session.lastStartTime = nil
                     }
@@ -299,30 +317,30 @@ struct ActiveWorkoutView: View {
                 dismiss()
             }
         }
-        .alert("Update remaining sets?", isPresented: $showApplyToAllDialog) {
-            Button("Yes, update all") {
+        .alert(String(localized: "Update remaining sets?"), isPresented: $showApplyToAllDialog) {
+            Button(String(localized: "Yes, update all")) {
                 applyToRemainingSets()
                 completeSetActual()
             }
-            Button("No, just this set") {
+            Button(String(localized: "No, just this set")) {
                 // Ensure next set uses original target, not the modified values from this set
                 forceUseTargetForNextSet = true
                 completeSetActual()
             }
         } message: {
-            Text("Do you want to apply these values to all remaining sets for this exercise in this session?")
+            Text(String(localized: "Do you want to apply these values to all remaining sets for this exercise in this session?"))
         }
-        .alert("Manage workouts", isPresented: $showCompleteDialog) {
-            Button("Pause & Close", role: .none) { 
+        .alert(String(localized: "Manage workouts"), isPresented: $showCompleteDialog) {
+            Button(String(localized: "Pause & Close"), role: .none) { 
                 // Just dismiss the view, keeping the session active
                 dismiss() 
             }
-            Button("Avsluta & Spara", role: .destructive) { 
+            Button(String(localized: "Finish & Save"), role: .destructive) { 
                 completeSession() 
             }
-            Button("Avbryt", role: .cancel) { }
+            Button(String(localized: "Cancel"), role: .cancel) { }
         } message: {
-            Text("Do you want to pause the session to continue later, or end it completely?")
+            Text(String(localized: "Do you want to pause the session to continue later, or end it completely?"))
         }
         .fullScreenCover(isPresented: $showingCompletion) {
             WorkoutCompletionView(
@@ -384,9 +402,13 @@ struct ActiveWorkoutView: View {
             currentExerciseIndex = nextExerciseIndex
             currentSetIndex = nextSetIndex
             showingWarmup = false
+            #if DEBUG
             print("[DEBUG ActiveWorkoutView] Restored state to Exercise: \(nextExerciseIndex), Set: \(nextSetIndex)")
+            #endif
         } else {
-             print("[DEBUG ActiveWorkoutView] All exercises appear complete based on logs")
+            #if DEBUG
+            print("[DEBUG ActiveWorkoutView] All exercises appear complete based on logs")
+            #endif
              // Optional: Handle case where workout is effectively done but not marked 'completed'
              // For now, capping at last info or similar could be better, but staying safe.
         }
@@ -440,7 +462,9 @@ struct ActiveWorkoutView: View {
     
     @ViewBuilder
     private func WarmupDashboardView() -> some View {
+        #if DEBUG
         let _ = print("[DEBUG ActiveWorkoutView] Rendering WarmupDashboardView")
+        #endif
         VStack(spacing: 30) {
             Spacer()
             
@@ -449,7 +473,7 @@ struct ActiveWorkoutView: View {
                     .font(.system(size: 60))
                     .foregroundColor(.accentBlue)
                 
-                Text("Time for warm-up!")
+                Text(String(localized: "Time for warm-up!"))
                     .font(.title2.bold())
                     .foregroundColor(Color.textPrimary(for: colorScheme))
             }
@@ -463,7 +487,7 @@ struct ActiveWorkoutView: View {
             }
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("EQUIPMENT NEEDED")
+                Text(String(localized: "EQUIPMENT NEEDED"))
                     .font(.caption.bold())
                     .foregroundColor(Color.textSecondary(for: colorScheme))
                 
@@ -493,7 +517,7 @@ struct ActiveWorkoutView: View {
             Spacer()
             
             Button(action: { showingWarmup = false }) {
-                Text("Start training")
+                Text(String(localized: "Start training"))
                     .font(.headline.bold())
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -509,11 +533,13 @@ struct ActiveWorkoutView: View {
 
     @ViewBuilder
     private func ExerciseDashboardView() -> some View {
+        #if DEBUG
         let _ = print("[DEBUG ActiveWorkoutView] Rendering ExerciseDashboardView. exercises count: \(exercises.count)")
+        #endif
         if exercises.isEmpty && (template != nil || session.templateId != nil) {
             VStack {
                 ProgressView()
-                Text("Loading exercises...")
+                Text(String(localized: "Loading exercises..."))
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.top)
@@ -544,7 +570,7 @@ struct ActiveWorkoutView: View {
                             }
                             
                             Spacer()
-                            Text("Set \(currentSetIndex + 1)/\(exercise.targetSets)")
+                            Text(String(localized: "Set") + " \(currentSetIndex + 1)/\(exercise.targetSets)")
                                 .font(.subheadline.bold())
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -560,14 +586,14 @@ struct ActiveWorkoutView: View {
                             #endif
                         }
                         
-                        Text("Exercise \(currentExerciseIndex + 1) of \(exercises.count)")
+                        Text(String(localized: "Exercise") + " \(currentExerciseIndex + 1) " + String(localized: "of") + " \(exercises.count)")
                             .font(.subheadline)
                             .foregroundColor(Color.textSecondary(for: colorScheme))
                         
                         Button(action: skipExercise) {
                             HStack {
                                 Image(systemName: "chevron.right.2")
-                                Text("Skip to next exercise")
+                                Text(String(localized: "Skip to next exercise"))
                             }
                             .font(.subheadline.bold())
                             .frame(maxWidth: .infinity)
@@ -587,7 +613,7 @@ struct ActiveWorkoutView: View {
                     VStack(alignment: .leading, spacing: 15) {
                         HStack {
                             Image(systemName: "target")
-                            Text("Goal")
+                            Text(String(localized: "Goal"))
                                 .font(.headline)
                         }
                         .foregroundColor(Color.textPrimary(for: colorScheme))
@@ -595,7 +621,7 @@ struct ActiveWorkoutView: View {
                         Divider().background(Color.textPrimary(for: colorScheme).opacity(0.1))
                         
                         HStack {
-                            Text("Repetitions")
+                            Text(String(localized: "Repetitions"))
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                             Spacer()
                             Text(exercise.targetReps)
@@ -603,7 +629,7 @@ struct ActiveWorkoutView: View {
                         }
                         
                         HStack {
-                            Text("AI suggestions")
+                            Text(String(localized: "AI suggestions"))
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                             Spacer()
                             Text("\(String(format: "%.1f", exercise.targetWeight ?? 0))kg")
@@ -617,18 +643,18 @@ struct ActiveWorkoutView: View {
 
                     // Log Section
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("Log set")
+                        Text(String(localized: "Log set"))
                             .font(.headline)
                             .foregroundColor(Color.textPrimary(for: colorScheme))
                         
                         HStack(spacing: 0) {
                             // Weight Picker
                             VStack(spacing: 4) {
-                                Text("Vikt (kg)")
+                                Text(String(localized: "Weight (kg)"))
                                     .font(.caption.bold())
                                     .foregroundColor(Color.textSecondary(for: colorScheme))
                                 
-                                Picker("Vikt", selection: $weightValue) {
+                                Picker(String(localized: "Weight"), selection: $weightValue) {
                                     ForEach(weightOptions, id: \.self) { value in
                                         Text(value.truncatingRemainder(dividingBy: 1) == 0
                                              ? String(format: "%.0f", value)
@@ -645,11 +671,11 @@ struct ActiveWorkoutView: View {
                             
                             // Reps Picker
                             VStack(spacing: 4) {
-                                Text("Reps")
+                                Text(String(localized: "Reps"))
                                     .font(.caption.bold())
                                     .foregroundColor(Color.textSecondary(for: colorScheme))
                                 
-                                Picker("Reps", selection: $repsValue) {
+                                Picker(String(localized: "Reps"), selection: $repsValue) {
                                     ForEach(repsOptions, id: \.self) { value in
                                         Text("\(value)")
                                             .tag(value)
@@ -666,7 +692,7 @@ struct ActiveWorkoutView: View {
                         
                         HStack(spacing: 12) {
                             Button(action: completeSet) {
-                                Text("Set completed")
+                                Text(String(localized: "Set completed"))
                                     .font(.headline.bold())
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -701,10 +727,10 @@ struct ActiveWorkoutView: View {
     @ViewBuilder
     private func RestLoadingView() -> some View {
         VStack(spacing: 30) {
-            Text("Great job!")
+            Text(String(localized: "Great job!"))
                 .font(.title.bold())
                 .foregroundColor(Color.textPrimary(for: colorScheme))
-            Text("Rest before next set")
+            Text(String(localized: "Rest before next set"))
                 .foregroundColor(Color.textSecondary(for: colorScheme))
             
             ZStack {
@@ -718,7 +744,7 @@ struct ActiveWorkoutView: View {
                     Text(timeString(from: restTimeRemaining))
                         .font(.system(size: 60, weight: .bold, design: .rounded))
                         .foregroundColor(Color.textPrimary(for: colorScheme))
-                    Text("seconds remaining")
+                    Text(String(localized: "seconds remaining"))
                         .font(.caption)
                         .foregroundColor(Color.textSecondary(for: colorScheme))
                 }
@@ -727,7 +753,7 @@ struct ActiveWorkoutView: View {
             Button(action: handleSkipRest) {
                 HStack {
                     Image(systemName: "forward.end.fill")
-                    Text("Skip")
+                    Text(String(localized: "Skip"))
                 }
                 .font(.headline.bold())
                 .padding(.horizontal, 30)
@@ -748,14 +774,14 @@ struct ActiveWorkoutView: View {
             Image(systemName: "dumbbell.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.gray)
-            Text("No exercises found")
+            Text(String(localized: "No exercises found"))
                 .font(.headline)
-            Text("This session appears to have no exercises. End the session and try syncing again.")
+            Text(String(localized: "This session appears to have no exercises. End the session and try syncing again."))
                 .multilineTextAlignment(.center)
                 .font(.subheadline)
                 .foregroundColor(.textSecondary)
             
-            Button("Avsluta pass") {
+            Button(String(localized: "Finish session")) {
                 completeSession()
             }
             .padding()

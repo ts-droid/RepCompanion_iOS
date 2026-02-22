@@ -137,13 +137,14 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                     }
                     
-                    Button(String(localized: "Sync now")) {
-                        Task {
-                            // TODO: Pass modelContext
-                            // try await cloudKitService.performFullSync(modelContext: modelContext)
-                        }
+                    HStack {
+                        Text(String(localized: "Sync now"))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(String(localized: "Coming soon"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    .disabled(!cloudKitService.isAvailable)
                 }
                 
                 // Exercise Catalog
@@ -171,11 +172,13 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button(String(localized: "Sync exercise catalog")) {
-                        Task {
-                            // TODO: Pass modelContext
-                            // try await ExerciseCatalogService.shared.syncExercises(modelContext: modelContext)
-                        }
+                    HStack {
+                        Text(String(localized: "Sync exercise catalog"))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(String(localized: "Coming soon"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 

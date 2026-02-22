@@ -54,7 +54,7 @@ struct ExerciseListView: View {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
-                        TextField("Search exercises...", text: $searchText)
+                        TextField(String(localized: "Search exercises..."), text: $searchText)
                             .textFieldStyle(PlainTextFieldStyle())
                     }
                     .padding()
@@ -65,7 +65,7 @@ struct ExerciseListView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             FilterChip(
-                                title: "Alla kategorier",
+                                title: String(localized: "All categories"),
                                 isSelected: selectedCategory == nil,
                                 colorScheme: colorScheme
                             ) {
@@ -97,7 +97,7 @@ struct ExerciseListView: View {
                         Image(systemName: "figure.strengthtraining.traditional")
                             .font(.system(size: 60))
                             .foregroundColor(.gray)
-                        Text("No exercises found")
+                        Text(String(localized: "No exercises found"))
                             .font(.headline)
                             .foregroundStyle(Color.textSecondary(for: colorScheme))
                     }
@@ -114,7 +114,7 @@ struct ExerciseListView: View {
                 }
             }
             .background(Color.appBackground(for: colorScheme))
-            .navigationTitle("Exercises")
+            .navigationTitle(String(localized: "Exercises"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: syncCatalog) {
@@ -122,10 +122,10 @@ struct ExerciseListView: View {
                     }
                 }
             }
-            .alert("Syncing", isPresented: $showSyncAlert) {
-                Button("OK") { }
+            .alert(String(localized: "Syncing"), isPresented: $showSyncAlert) {
+                Button(String(localized: "OK")) { }
             } message: {
-                Text(isLoading ? "Syncing exercise catalog..." : "Sync completed")
+                Text(isLoading ? String(localized: "Syncing exercise catalog...") : String(localized: "Sync completed"))
             }
         }
     }

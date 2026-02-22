@@ -14,7 +14,7 @@ struct ExerciseDetailView: View {
                 // Video Section
                 if let youtubeUrl = exercise.youtubeUrl {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Video instruction")
+                        Text(String(localized: "Video instruction"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -41,16 +41,16 @@ struct ExerciseDetailView: View {
                 
                 // Exercise Info
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Information")
+                    Text(String(localized: "Information"))
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                    
-                    InfoRow(label: "Kategori", value: exercise.category)
-                    InfoRow(label: "Difficulty level", value: exercise.difficulty.capitalized)
-                    InfoRow(label: "Type", value: exercise.isCompound ? "Sammansatt" : "Isolerad")
-                    
+
+                    InfoRow(label: String(localized: "Category"), value: exercise.category)
+                    InfoRow(label: String(localized: "Difficulty level"), value: exercise.difficulty.capitalized)
+                    InfoRow(label: String(localized: "Type"), value: exercise.isCompound ? String(localized: "Compound") : String(localized: "Isolated"))
+
                     if let pattern = exercise.movementPattern {
-                        InfoRow(label: "Movement patterns", value: pattern)
+                        InfoRow(label: String(localized: "Movement patterns"), value: pattern)
                     }
                 }
                 .padding()
@@ -59,20 +59,20 @@ struct ExerciseDetailView: View {
                 
                 // Muscles
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Muscle groups")
+                    Text(String(localized: "Muscle groups"))
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                    
+
                     VStack(alignment: .leading, spacing: 8) {
                         if !exercise.primaryMuscles.isEmpty {
-                            Text("Primary")
+                            Text(String(localized: "Primary"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             TagView(tags: exercise.primaryMuscles, colorScheme: colorScheme)
                         }
-                        
+
                         if !exercise.secondaryMuscles.isEmpty {
-                            Text("Secondary")
+                            Text(String(localized: "Secondary"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             TagView(tags: exercise.secondaryMuscles, colorScheme: colorScheme)
@@ -86,7 +86,7 @@ struct ExerciseDetailView: View {
                 // Required Equipment
                 if !exercise.requiredEquipment.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Utrustning")
+                        Text(String(localized: "Equipment"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -100,7 +100,7 @@ struct ExerciseDetailView: View {
                 // Description
                 if let description = exercise.exerciseDescription {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Description")
+                        Text(String(localized: "Description"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -116,7 +116,7 @@ struct ExerciseDetailView: View {
                 // Instructions
                 if let instructions = exercise.instructions {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Instructions")
+                        Text(String(localized: "Instructions"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         

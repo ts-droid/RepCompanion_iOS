@@ -22,11 +22,7 @@ struct ActivityDetailView: View {
     @State private var isLoading = true
     
     // TEST: Force test data for debugging
-    #if DEBUG
     private let useTestData = false
-    #else
-    private let useTestData = false
-    #endif
     
     // Computed property for inner progress that always returns test value in DEBUG
     private var innerProgressValue: Double? {
@@ -236,7 +232,7 @@ struct ActivityDetailView: View {
                         }
                         Spacer()
                         if activeMinutes > 0 {
-                            Text("\(activeMinutes) min")
+                            Text("\(activeMinutes) " + String(localized: "min"))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -265,7 +261,7 @@ struct ActivityDetailView: View {
                         }
                         Spacer()
                         if activeCalories > 0 {
-                            Text("\(Int(activeCalories)) kcal")
+                            Text("\(Int(activeCalories)) " + String(localized: "kcal"))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -363,7 +359,9 @@ struct ActivityDetailView: View {
     private func updateWorkoutProgress() {
         let calculated = calculateWorkoutProgress()
         workoutProgress = calculated
+        #if DEBUG
         print("[DEBUG] Workout progress calculated: \(calculated?.description ?? "nil"), todayTemplate: \(todayTemplate != nil ? "exists" : "nil")")
+        #endif
     }
     
     private func loadActivityData() {
@@ -417,7 +415,9 @@ struct ActivityDetailView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
+                    #if DEBUG
                     print("Error loading activity data: \(error)")
+                    #endif
                 }
             }
         }

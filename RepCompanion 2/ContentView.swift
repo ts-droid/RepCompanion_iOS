@@ -10,9 +10,11 @@ import SwiftData
 
 struct ContentView: View {
     @AppStorage("colorScheme") private var colorScheme = "System"
+    @AppStorage("adsRemoved") private var adsRemoved = false
     @Environment(\.modelContext) private var modelContext
     @Query private var userProfiles: [UserProfile]
     @StateObject private var authService = AuthService.shared
+    @State private var showLaunchAd = false
     
     init() {
         // Customize TabBar appearance to match dark theme
@@ -63,23 +65,33 @@ struct ContentView: View {
                         .tabItem {
                             Label(String(localized: "Home"), systemImage: "house.fill")
                         }
-                    
+
                     WorkoutListView()
                         .tabItem {
                             Label(String(localized: "Program"), systemImage: "dumbbell.fill")
                         }
-                    
+
                     StatisticsView()
                         .tabItem {
                             Label(String(localized: "Statistics"), systemImage: "chart.bar.xaxis")
                         }
-                    
+
                     ProfileView()
                         .tabItem {
                             Label(String(localized: "Profile"), systemImage: "person.fill")
                         }
                 }
                 .preferredColorScheme(preferredColorScheme)
+                .onAppear {
+                    if !adsRemoved {
+                        showLaunchAd = true
+                    }
+                }
+                .fullScreenCover(isPresented: $showLaunchAd) {
+                    LaunchAdView {
+                        showLaunchAd = false
+                    }
+                }
             }
         }
     }

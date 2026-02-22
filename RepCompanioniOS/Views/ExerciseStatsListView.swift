@@ -38,7 +38,7 @@ struct ExerciseStatsListView: View {
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 }
                                 if let avgWeight = stats.avgWeight {
-                                    Label("Snitt: \(avgWeight.formattedWeight) kg", systemImage: "chart.bar")
+                                    Label(String(localized: "Average:") + " \(avgWeight.formattedWeight) kg", systemImage: "chart.bar")
                                         .font(.caption)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 }
@@ -52,7 +52,7 @@ struct ExerciseStatsListView: View {
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(Color.accentBlue)
-                            Text("sessions")
+                            Text(String(localized: "sessions"))
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -63,7 +63,7 @@ struct ExerciseStatsListView: View {
         }
         .listStyle(PlainListStyle())
         .background(Color.appBackground(for: colorScheme))
-        .navigationTitle("Exercise statistics")
+        .navigationTitle(String(localized: "Exercise statistics"))
         .navigationBarTitleDisplayMode(.large)
     }
 }

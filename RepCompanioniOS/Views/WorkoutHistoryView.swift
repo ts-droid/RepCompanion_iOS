@@ -21,10 +21,10 @@ struct WorkoutHistoryView: View {
                             Image(systemName: "calendar.badge.clock")
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
-                            Text("No training history yet")
+                            Text(String(localized: "No training history yet"))
                                 .font(.headline)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
-                            Text("Complete your first session to see history here")
+                            Text(String(localized: "Complete your first session to see history here"))
                                 .font(.caption)
                                 .foregroundColor(Color.textSecondary(for: colorScheme))
                                 .multilineTextAlignment(.center)
@@ -40,7 +40,7 @@ struct WorkoutHistoryView: View {
                 .padding(.top)
             }
         }
-        .navigationTitle("Training history")
+        .navigationTitle(String(localized: "Training history"))
         .navigationBarTitleDisplayMode(.large)
     }
 }
@@ -52,7 +52,7 @@ struct HistoryDetailRow: View {
     private var dateFormatter: DateFormatter {
         let df = DateFormatter()
         df.dateStyle = .medium
-        df.locale = Locale(identifier: "sv_SE")
+        df.locale = Locale.current
         return df
     }
     
@@ -79,9 +79,9 @@ struct HistoryDetailRow: View {
             
             // Stats row
             HStack {
-                StatMiniCard(icon: "repeat", label: "Reps", value: "\(item.totalReps)")
+                StatMiniCard(icon: "repeat", label: String(localized: "Reps"), value: "\(item.totalReps)")
                 Spacer()
-                StatMiniCard(icon: "scalemass", label: "Volym", value: formatWeight(item.totalWeight))
+                StatMiniCard(icon: "scalemass", label: String(localized: "Volume"), value: formatWeight(item.totalWeight))
             }
         }
         .padding()
@@ -125,7 +125,7 @@ struct StatusBadge: View {
     }
     
     private var text: String {
-        status == "completed" ? "Klart" : "Avbrutet"
+        status == "completed" ? String(localized: "Done") : String(localized: "Aborted")
     }
     
     var body: some View {

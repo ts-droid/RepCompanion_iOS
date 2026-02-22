@@ -18,12 +18,14 @@ struct HealthTrendsView: View {
         userProfiles.first?.userId ?? "default-user"
     }
     
-    private let metrics = [
-        ("steps", "Steg", "figure.walk"),
-        ("calories_burned", "Kalorier", "flame.fill"),
-        ("sleep_duration_minutes", "Sleep", "moon.fill"),
-        ("heart_rate_avg", "Heart rate", "heart.fill")
-    ]
+    private var metrics: [(String, String, String)] {
+        [
+            ("steps", String(localized: "Steps"), "figure.walk"),
+            ("calories_burned", String(localized: "Calories"), "flame.fill"),
+            ("sleep_duration_minutes", String(localized: "Sleep"), "moon.fill"),
+            ("heart_rate_avg", String(localized: "Heart rate"), "heart.fill")
+        ]
+    }
     
     private var trend: HealthTrend {
         healthService.getTrend(
@@ -43,35 +45,35 @@ struct HealthTrendsView: View {
             VStack(spacing: 24) {
                 // Weekly Summary
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Weekly summary")
+                    Text(String(localized: "Weekly summary"))
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                         .padding(.horizontal)
                     
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         SummaryCard(
-                            title: "Totala steg",
+                            title: String(localized: "Total steps"),
                             value: "\(weeklySummary.totalSteps)",
                             icon: "figure.walk",
                             color: .blue,
                             colorScheme: colorScheme
                         )
                         SummaryCard(
-                            title: "Totala kalorier",
+                            title: String(localized: "Total calories"),
                             value: "\(weeklySummary.totalCalories) kcal",
                             icon: "flame.fill",
                             color: .orange,
                             colorScheme: colorScheme
                         )
                         SummaryCard(
-                            title: "Average sleep",
+                            title: String(localized: "Average sleep"),
                             value: String(format: "%.1f h", weeklySummary.avgSleepHours),
                             icon: "moon.fill",
                             color: .purple,
                             colorScheme: colorScheme
                         )
                         SummaryCard(
-                            title: "Active days",
+                            title: String(localized: "Active days"),
                             value: "\(weeklySummary.activeDays)",
                             icon: "calendar",
                             color: .green,
@@ -83,7 +85,7 @@ struct HealthTrendsView: View {
                 
                 // Metric Selector
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Select metric")
+                    Text(String(localized: "Select metric"))
                         .font(.headline)
                         .foregroundStyle(Color.textPrimary(for: colorScheme))
                         .padding(.horizontal)
@@ -108,7 +110,7 @@ struct HealthTrendsView: View {
                 // Trend Indicator
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Trend")
+                        Text(String(localized: "Trend"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         Spacer()
@@ -118,7 +120,7 @@ struct HealthTrendsView: View {
                     
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Current")
+                            Text(String(localized: "Current"))
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             Text("\(trend.current)")
@@ -128,7 +130,7 @@ struct HealthTrendsView: View {
                         }
                         Spacer()
                         VStack(alignment: .trailing) {
-                            Text("Average")
+                            Text(String(localized: "Average"))
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                             Text("\(trend.average)")
@@ -146,7 +148,7 @@ struct HealthTrendsView: View {
                 // Chart
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Text("History")
+                        Text(String(localized: "History"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -179,7 +181,7 @@ struct HealthTrendsView: View {
                         } else {
                             Image(systemName: "arrow.clockwise")
                         }
-                        Text("Sync health data")
+                        Text(String(localized: "Sync health data"))
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -193,7 +195,7 @@ struct HealthTrendsView: View {
             .padding(.vertical)
         }
         .background(Color.appBackground(for: colorScheme))
-        .navigationTitle("Health trends")
+        .navigationTitle(String(localized: "Health trends"))
         .navigationBarTitleDisplayMode(.large)
     }
     
@@ -317,10 +319,10 @@ struct HealthChartView: View {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 60))
                     .foregroundColor(.gray)
-                Text("No data yet")
+                Text(String(localized: "No data yet"))
                     .font(.headline)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
-                Text("Sync with HealthKit to see data")
+                Text(String(localized: "Sync with HealthKit to see data"))
                     .font(.subheadline)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
             }

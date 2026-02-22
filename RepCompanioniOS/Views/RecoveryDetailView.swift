@@ -15,11 +15,7 @@ struct RecoveryDetailView: View {
     @State private var isLoading = true
     
     // TEST: Force test data for debugging
-    #if DEBUG
     private let useTestData = false
-    #else
-    private let useTestData = false
-    #endif
     
     // Computed property for inner progress - always use sleepScore
     private var innerProgressValue: Double? {
@@ -103,9 +99,9 @@ struct RecoveryDetailView: View {
             // Large Recovery Circle
             VStack(spacing: 16) {
                 StatusCard(
-                    title: "RECOVERY",
+                    title: String(localized: "RECOVERY"),
                     value: "\(recoveryPercent)%",
-                    subtitle: "optimal",
+                    subtitle: String(localized: "optimal"),
                     color: .recoveryPurple,
                     progress: Double(recoveryPercent) / 100.0,
                     icon: "heart",
@@ -120,7 +116,7 @@ struct RecoveryDetailView: View {
             // Recovery Specifications
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Total recovery:")
+                    Text(String(localized: "Total recovery:"))
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -131,7 +127,7 @@ struct RecoveryDetailView: View {
                 }
                 
                 HStack {
-                    Text("Sleep:")
+                    Text(String(localized: "Sleep") + ":")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                     Spacer()
@@ -155,7 +151,7 @@ struct RecoveryDetailView: View {
             
             // Recovery Details Card
             VStack(alignment: .leading, spacing: 16) {
-                Text("RECOVERY DETAILS")
+                Text(String(localized: "RECOVERY DETAILS"))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
@@ -171,12 +167,12 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "moon.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Sleep (last night)")
+                            Text(String(localized: "Sleep (last night)"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
                         Spacer()
-                        Text(String(format: "%.1f h", sleepHours))
+                        Text(String(format: "%.1f " + String(localized: "h"), sleepHours))
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -189,13 +185,13 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "heart.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("HRV")
+                            Text(String(localized: "HRV"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
                         Spacer()
                         if let hrv = hrv {
-                            Text("\(Int(hrv)) ms")
+                            Text("\(Int(hrv)) " + String(localized: "ms"))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -206,7 +202,7 @@ struct RecoveryDetailView: View {
                         }
                     }
                     
-                    Text("Requires Apple Watch for HRV")
+                    Text(String(localized: "Requires Apple Watch for HRV"))
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -218,13 +214,13 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "waveform.path.ecg")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Resting heart rate")
+                            Text(String(localized: "Resting heart rate"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
                         Spacer()
                         if let restingHR = restingHeartRate {
-                            Text("\(Int(restingHR)) bpm")
+                            Text("\(Int(restingHR)) " + String(localized: "bpm"))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
@@ -235,7 +231,7 @@ struct RecoveryDetailView: View {
                         }
                     }
                     
-                    Text("Requires Apple Watch for resting heart rate")
+                    Text(String(localized: "Requires Apple Watch for resting heart rate"))
                         .font(.caption2)
                         .foregroundStyle(Color.textSecondary(for: colorScheme).opacity(0.7))
                         .padding(.leading, 32)
@@ -247,7 +243,7 @@ struct RecoveryDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "heart.circle.fill")
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
-                            Text("Average heart rate")
+                            Text(String(localized: "Average heart rate"))
                                 .font(.subheadline)
                                 .foregroundStyle(Color.textSecondary(for: colorScheme))
                         }
@@ -330,7 +326,9 @@ struct RecoveryDetailView: View {
             vo2Max = 45.0
             // Calculate sleep score - should give ~93%
             sleepScore = calculateSleepScore(sleep: 8.2, hrv: 62.0, restingHR: 56.0)
+            #if DEBUG
             print("[DEBUG RecoveryDetailView] Test data - sleepScore: \(sleepScore?.description ?? "nil")")
+            #endif
             isLoading = false
             return
         }
@@ -379,7 +377,9 @@ struct RecoveryDetailView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
+                    #if DEBUG
                     print("Error loading recovery data: \(error)")
+                    #endif
                 }
             }
         }

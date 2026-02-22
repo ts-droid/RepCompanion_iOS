@@ -47,9 +47,10 @@ struct PersonalTipsSection: View {
                 TipCard(
                     icon: getIcon(for: tip.category),
                     iconColor: getColor(for: tip.category),
-                    title: tip.category.capitalized,
+                    title: String(localized: String.LocalizationValue(tip.category.capitalized)),
                     content: tip.tipText,
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    affiliateLink: tip.affiliateLink
                 )
             } else {
                 // Fallback to default tip if no personalized tips available

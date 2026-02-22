@@ -106,8 +106,8 @@ struct HomeView: View {
                         if let activeSession = activeWorkoutSession {
                             // Resume active session
                             CTACard(
-                                title: "Continue your session",
-                                subtitle: activeSession.sessionName ?? "Workout",
+                                title: String(localized: "Continue your session"),
+                                subtitle: activeSession.sessionName ?? String(localized: "Workout"),
                                 icon: "play.circle.fill",
                                 color: Color.primaryColor(for: colorScheme),
                                 colorScheme: colorScheme,
@@ -119,8 +119,8 @@ struct HomeView: View {
                         } else if programTemplates.isEmpty {
                             // Generate program
                             CTACard(
-                                title: "Get started",
-                                subtitle: "Generate your personalized training program",
+                                title: String(localized: "Get started"),
+                                subtitle: String(localized: "Generate your personalized training program"),
                                 icon: "sparkles",
                                 color: Color.primaryColor(for: colorScheme),
                                 isLoading: isGeneratingProgram,
@@ -132,8 +132,8 @@ struct HomeView: View {
                             let dayName = getDayName(todayTemplate.dayOfWeek)
                             let dayPrefix = dayName.isEmpty ? "" : "\(dayName) • "
                             CTACard(
-                                title: "Time to train!",
-                                subtitle: "\(dayPrefix)\(todayTemplate.muscleFocus ?? todayTemplate.templateName) • \(getExerciseCount(for: todayTemplate)) exercises",
+                                title: String(localized: "Time to train!"),
+                                subtitle: "\(dayPrefix)\(todayTemplate.muscleFocus ?? todayTemplate.templateName) • \(getExerciseCount(for: todayTemplate)) " + String(localized: "exercises"),
                                 icon: "sparkles",
                                 color: Color.primaryColor(for: colorScheme),
                                 colorScheme: colorScheme,
@@ -189,15 +189,17 @@ struct HomeView: View {
                             )
                         }
                         
+                        #if DEBUG
                         // Debug / Manual Sync
                         Button(action: {
                             WatchConnectivityManager.shared.forceSync()
                         }) {
-                            Text("Sync to Watch (Debug)")
+                            Text(String(localized: "Sync to Watch (Debug)"))
                                 .font(.caption)
                                 .foregroundColor(.gray)
                                 .padding()
                         }
+                        #endif
                         
                         Spacer(minLength: 120)
                     }
@@ -206,16 +208,24 @@ struct HomeView: View {
                 
                 // Floating Action Button
                 Button(action: {
+                    #if DEBUG
                     print("[DEBUG HomeView] FAB Clicked. activeWorkoutSession: \(activeWorkoutSession?.id.uuidString ?? "nil")")
+                    #endif
                     if let session = activeWorkoutSession {
+                        #if DEBUG
                         print("[DEBUG HomeView] Resuming session: \(session.id.uuidString)")
+                        #endif
                         self.activeSession = session
                         showActiveWorkout = true
                     } else if programTemplates.isEmpty {
+                        #if DEBUG
                         print("[DEBUG HomeView] No templates, generating...")
+                        #endif
                         generateProgram()
                     } else {
+                        #if DEBUG
                         print("[DEBUG HomeView] Starting new workout from nextTemplate")
+                        #endif
                         startWorkout()
                     }
                 }) {
@@ -292,7 +302,9 @@ struct HomeView: View {
         }
         .sheet(item: $activeSession) { session in
             let template = programTemplates.first(where: { $0.id == session.templateId })
+            #if DEBUG
             let _ = print("[DEBUG HomeView] Opening sheet for session: \(session.id.uuidString), template found: \(template != nil)")
+            #endif
             ActiveWorkoutView(session: session, template: template)
         }
     }
@@ -314,11 +326,7 @@ struct HomeView: View {
     @State private var isLoadingHealthData = false
     
     // TEST DATA FLAG
-    #if DEBUG
-    private let useTestData = false // Set to true to use dummy data
-    #else
     private let useTestData = false
-    #endif
     
     private func calculateActivityPercent() -> Int {
         return activityPercent
@@ -500,11 +508,15 @@ struct HomeView: View {
     
     private func generateProgram() {
         guard let profile = currentProfile else {
+            #if DEBUG
             print("[HomeView] ❌ Cannot generate program: No profile found")
+            #endif
             return
         }
-        
+
+        #if DEBUG
         print("[HomeView] 🚀 Starting program generation for user: \(profile.userId)")
+        #endif
         isGeneratingProgram = true
         showGenerationProgress = true
         generationProgress = 0
@@ -514,12 +526,16 @@ struct HomeView: View {
             do {
                 let service = WorkoutGenerationService.shared
                 if let input = service.getUserWorkoutData(userId: profile.userId, modelContext: modelContext) {
+                    #if DEBUG
                     print("[HomeView] 📥 Workout data gathered for gym: \(input.gymId ?? "none")")
-                    
+                    #endif
+
                     // Update progress during generation
                     await MainActor.run {
                         generationProgress = 30
+                        #if DEBUG
                         print("[HomeView] 📊 Progress: 30% - Requesting generation...")
+                        #endif
                     }
                     
                     // The service already calls saveProgramTemplates internally
@@ -527,7 +543,9 @@ struct HomeView: View {
                     
                     await MainActor.run {
                         generationProgress = 70
+                        #if DEBUG
                         print("[HomeView] 📊 Progress: 70% - Program generated and saved. Adapting to other gyms...")
+                        #endif
                     }
                     
                     // Adapt to all OTHER gyms automatically
@@ -537,10 +555,14 @@ struct HomeView: View {
                         predicate: #Predicate { $0.userId == targetUserId && $0.id != sourceGymId }
                     )
                     let otherGyms = try? modelContext.fetch(otherGymsDescriptor)
+                    #if DEBUG
                     print("[HomeView] 🔍 Found \(otherGyms?.count ?? 0) other gyms for adaptation")
-                    
+                    #endif
+
                     for gym in otherGyms ?? [] {
+                        #if DEBUG
                         print("[HomeView] 🔄 Auto-adapting new program to gym: \(gym.name)")
+                        #endif
                         try? await ProgramAdaptationService.shared.adaptProgram(
                             userId: profile.userId,
                             sourceGymId: input.gymId,
@@ -552,25 +574,33 @@ struct HomeView: View {
                     await MainActor.run {
                         generationProgress = 100
                         generationStatus = "completed"
+                        #if DEBUG
                         print("[HomeView] ✅ Generation and adaptation complete!")
+                        #endif
                     }
                     
                     // Wait a moment to show completion
                     try await Task.sleep(nanoseconds: 1_000_000_000)
                 } else {
+                    #if DEBUG
                     print("[HomeView] ❌ Failed to get user workout data")
+                    #endif
                 }
-                
+
                 await MainActor.run {
                     isGeneratingProgram = false
                     showGenerationProgress = false
+                    #if DEBUG
                     print("[HomeView] 🏁 Cleanup: showGenerationProgress = false")
+                    #endif
                 }
             } catch {
                 await MainActor.run {
                     isGeneratingProgram = false
                     showGenerationProgress = false
+                    #if DEBUG
                     print("[HomeView] ❌ Error generating program: \(error)")
+                    #endif
                 }
             }
         }
@@ -684,7 +714,9 @@ struct HomeView: View {
         }
         
         let progress = Double(totalCompletedReps) / Double(totalPlannedReps)
+        #if DEBUG
         print("[DEBUG HomeView] Workout progress calculated: \(progress) (\(totalCompletedReps)/\(totalPlannedReps))")
+        #endif
         return progress
     }
     
@@ -708,14 +740,18 @@ struct HomeView: View {
     // Update workout progress
     private func updateWorkoutProgress() {
         let progress = calculateWorkoutProgress()
+        #if DEBUG
         print("[DEBUG HomeView] updateWorkoutProgress: \(progress?.description ?? "nil")")
+        #endif
         workoutProgress = progress
     }
     
     // Update sleep score asynchronously
     private func updateSleepScore() {
         guard healthKitService.isAuthorized else {
+            #if DEBUG
             print("[DEBUG HomeView] HealthKit not authorized, cannot calculate sleep score")
+            #endif
             return
         }
         
@@ -731,18 +767,24 @@ struct HomeView: View {
                 let restingHR = try? await healthKitService.getRestingHeartRate()
                 let hrvValue = try? await healthKitService.getLatestHRV()
                 
+                #if DEBUG
                 print("[DEBUG HomeView] Sleep data: \(sleep)h, HRV: \(hrvValue?.description ?? "nil"), RestingHR: \(restingHR?.description ?? "nil")")
-                
+                #endif
+
                 // Calculate sleep score using same logic as RecoveryDetailView
                 let score = calculateSleepScoreValue(sleep: sleep, hrv: hrvValue, restingHR: restingHR)
-                
+
+                #if DEBUG
                 print("[DEBUG HomeView] Calculated sleep score: \(score?.description ?? "nil")")
+                #endif
                 
                 await MainActor.run {
                     sleepScore = score
                 }
             } catch {
+                #if DEBUG
                 print("[DEBUG HomeView] Error calculating sleep score: \(error)")
+                #endif
                 // Set to nil if error
                 await MainActor.run {
                     sleepScore = nil
@@ -973,7 +1015,8 @@ struct TipCard: View {
     let title: String
     let content: String
     let colorScheme: ColorScheme
-    
+    var affiliateLink: String? = nil
+
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Circle()
@@ -983,16 +1026,23 @@ struct TipCard: View {
                     Image(systemName: icon)
                         .foregroundColor(iconColor)
                 )
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.subheadline)
                     .foregroundStyle(Color.textSecondary(for: colorScheme))
-                
+
                 Text(content)
                     .font(.body)
                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
+
+                if let link = affiliateLink, let url = URL(string: link) {
+                    Link(String(localized: "Shop now"), destination: url)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(iconColor)
+                }
             }
         }
         .padding()
