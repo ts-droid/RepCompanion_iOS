@@ -381,7 +381,15 @@ export class DatabaseStorage implements IStorage {
 
   async setSelectedGym(userId: string, gymId: string): Promise<void> {
     const targetGym = await this.getGym(gymId);
-    if (!targetGym || targetGym.userId !== userId) {
+    if (!targetGym) {
+      throw new Error("Gym not found or access denied");
+    }
+
+    const canSelect =
+      targetGym.userId === userId ||
+      (targetGym.isPublic === true && targetGym.isVerified === true);
+
+    if (!canSelect) {
       throw new Error("Gym not found or access denied");
     }
 
