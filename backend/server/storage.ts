@@ -1522,7 +1522,7 @@ export class DatabaseStorage implements IStorage {
 
     if (!profile?.selectedGymId) return new Set();
 
-    const available = await db
+    let available = await db
       .select({ equipmentName: userEquipment.equipmentName, equipmentKey: userEquipment.equipmentKey })
       .from(userEquipment)
       .where(
@@ -1533,12 +1533,45 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
+    // If user has no personal rows on a verified/public gym, use gym public equipment rows.
+    if (available.length === 0) {
+      const [gym] = await db
+        .select({ isPublic: gyms.isPublic, isVerified: gyms.isVerified })
+        .from(gyms)
+        .where(eq(gyms.id, profile.selectedGymId))
+        .limit(1);
+
+      if (gym && (gym.isPublic || gym.isVerified)) {
+        available = await db
+          .select({ equipmentName: userEquipment.equipmentName, equipmentKey: userEquipment.equipmentKey })
+          .from(userEquipment)
+          .where(
+            and(
+              eq(userEquipment.gymId, profile.selectedGymId),
+              eq(userEquipment.available, true)
+            )
+          );
+      }
+    }
+
     const keys = new Set<string>();
+    keys.add("bodyweight");
     for (const item of available) {
       if (item.equipmentKey) keys.add(this.canonicalEquipmentKey(item.equipmentKey));
       keys.add(this.canonicalEquipmentKey(item.equipmentName));
     }
     return keys;
+  }
+
+  private isExerciseCompatibleWithEquipment(requiredEquipment: string[] | undefined, availableEquipment: Set<string>): boolean {
+    if (!requiredEquipment || requiredEquipment.length === 0) return true;
+
+    const required = requiredEquipment
+      .map((eqName) => this.canonicalEquipmentKey(eqName))
+      .filter((eqKey) => eqKey && eqKey !== "unknown" && eqKey !== "none");
+
+    if (required.length === 0) return true;
+    return required.every((eqKey) => eqKey === "bodyweight" || availableEquipment.has(eqKey));
   }
 
   private async findFallbackExerciseForUser(
@@ -1547,9 +1580,10 @@ export class DatabaseStorage implements IStorage {
       primaryMuscles?: string[];
       secondaryMuscles?: string[];
       difficulty?: string;
-    }
+    },
+    preloadedAvailableEquipment?: Set<string>
   ): Promise<{ exerciseName: string; exerciseId: string; requiredEquipment: string[]; muscles: string[] } | null> {
-    const availableEquipment = await this.getUserAvailableEquipmentKeys(userId);
+    const availableEquipment = preloadedAvailableEquipment || await this.getUserAvailableEquipmentKeys(userId);
     const preferredPrimary = this.normalizeMuscles(metadata.primaryMuscles);
     const preferredSecondary = this.normalizeMuscles(metadata.secondaryMuscles);
     const preferredDifficulty = this.normalizeToken(metadata.difficulty || "");
@@ -1625,6 +1659,7 @@ export class DatabaseStorage implements IStorage {
     });
     
     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const availableEquipment = await this.getUserAvailableEquipmentKeys(userId);
     
     for (let i = 0; i < weeklySessions.length; i++) {
       const session = weeklySessions[i];
@@ -1732,7 +1767,7 @@ export class DatabaseStorage implements IStorage {
             primaryMuscles: exercise.primary_muscles,
             secondaryMuscles: exercise.secondary_muscles,
             difficulty: exercise.difficulty
-          });
+          }, availableEquipment);
 
           if (!fallbackExercise) {
             console.error(`[VALIDATION ERROR] ❌ No fallback found for "${aiGeneratedName}" - SKIPPING`);
@@ -1748,6 +1783,30 @@ export class DatabaseStorage implements IStorage {
           finalExerciseName = matchResult.exerciseName;
           // Don't log matched name as key, use ID or slugify matched result
           exerciseKey = matchResult.exerciseId || finalExerciseName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        }
+
+        // Normalize to canonical equipment keys and enforce gym compatibility.
+        resolvedEquipment = await this.normalizeRequiredEquipmentToKeys(resolvedEquipment);
+        if (!this.isExerciseCompatibleWithEquipment(resolvedEquipment, availableEquipment)) {
+          console.warn(
+            `[VALIDATION] Exercise "${finalExerciseName}" requires unavailable equipment [${resolvedEquipment.join(", ")}]. Finding fallback...`
+          );
+          const fallbackExercise = await this.findFallbackExerciseForUser(userId, {
+            primaryMuscles: exercise.primary_muscles,
+            secondaryMuscles: exercise.secondary_muscles,
+            difficulty: exercise.difficulty
+          }, availableEquipment);
+
+          if (!fallbackExercise) {
+            console.error(`[VALIDATION ERROR] ❌ No compatible fallback for "${finalExerciseName}" - SKIPPING`);
+            continue;
+          }
+
+          finalExerciseName = fallbackExercise.exerciseName;
+          exerciseKey = fallbackExercise.exerciseId;
+          resolvedEquipment = await this.normalizeRequiredEquipmentToKeys(fallbackExercise.requiredEquipment);
+          resolvedMuscles = fallbackExercise.muscles;
+          console.log(`[VALIDATION] 🔁 Equipment fallback: "${aiGeneratedName}" → "${finalExerciseName}"`);
         }
         
         // POST-VALIDATION: Fix AI errors where time-based values are used for reps-based exercises
