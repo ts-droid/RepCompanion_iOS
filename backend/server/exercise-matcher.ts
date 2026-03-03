@@ -35,6 +35,24 @@ function slugifyExerciseId(name: string): string {
     .replace(/_+/g, "_");
 }
 
+function toExerciseNameFingerprint(value: string): string {
+  const normalized = normalizeName(value);
+  if (!normalized) return "";
+
+  return normalized
+    .split(" ")
+    .map((word) => {
+      if (word.length <= 3) return word;
+      if (word.endsWith("ies") && word.length > 4) return `${word.slice(0, -3)}y`;
+      if (word.endsWith("sses")) return word.slice(0, -2);
+      if (word.endsWith("es") && word.length > 4) return word.slice(0, -2);
+      if (word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+      return word;
+    })
+    .join(" ")
+    .trim();
+}
+
 const EQUIPMENT_KEY_SYNONYMS: Record<string, string> = {
   dumbbell: "dumbbells",
   dumbbells: "dumbbells",
@@ -64,6 +82,12 @@ const EQUIPMENT_KEY_SYNONYMS: Record<string, string> = {
   bodyweight: "bodyweight",
   kroppsvikt: "bodyweight",
 };
+
+function canonicalEquipmentToken(raw: string): string {
+  const normalized = normalizeName(String(raw || ""));
+  if (!normalized) return "";
+  return EQUIPMENT_KEY_SYNONYMS[normalized] || normalized;
+}
 
 async function normalizeEquipmentKeys(values: string[] | undefined): Promise<string[]> {
   if (!values || values.length === 0) return ["bodyweight"];
@@ -436,17 +460,24 @@ async function createExerciseFromAI(aiGeneratedName: string): Promise<{ name: st
       return null;
     }
 
-    // Check if exercise already exists (avoid duplicates)
-    const existing = await db
-      .select()
-      .from(exercises)
-      .where(
-        sql`${exercises.nameEn} = ${aiGeneratedName} OR ${exercises.name} = ${aiGeneratedName}`
-      )
-      .limit(1);
+    // Check if exercise already exists (avoid duplicates incl. singular/plural variants)
+    const requestedFingerprint = toExerciseNameFingerprint(aiGeneratedName);
+    const allExercises = await db.select().from(exercises);
+    const existing = allExercises.find((ex) => {
+      const candidates = [
+        ex.nameEn || "",
+        ex.name || "",
+        ex.exerciseId || "",
+      ];
+      return candidates.some((candidate) => {
+        const candidateFingerprint = toExerciseNameFingerprint(candidate);
+        return candidateFingerprint && candidateFingerprint === requestedFingerprint;
+      });
+    });
 
-    if (existing.length > 0) {
-      const ex = existing[0];
+    if (existing) {
+      const ex = existing;
+      await saveExerciseAlias(ex.id, aiGeneratedName);
       return { 
         name: ex.nameEn || ex.name, 
         exerciseId: ex.exerciseId || ex.id 
@@ -773,20 +804,35 @@ export async function filterExercisesByUserEquipment(
         .where(
           and(
             eq(userEquipment.userId, userId),
-            eq(userEquipment.gymId, targetGymId)
+            eq(userEquipment.gymId, targetGymId),
+            eq(userEquipment.available, true)
           )
         );
       
-      // FALLBACK: If user has no personal equipment records for this gym, 
-      // check if it's a public/verified gym and use its registered equipment.
+      // FALLBACK: If user has no personal equipment records for this gym,
+      // check if it's a public/verified gym and use owner-managed public equipment.
       if (userEq.length === 0) {
-        const [gym] = await db.select().from(gyms).where(eq(gyms.id, targetGymId));
+        const [gym] = await db
+          .select({
+            id: gyms.id,
+            userId: gyms.userId,
+            isPublic: gyms.isPublic,
+            isVerified: gyms.isVerified,
+          })
+          .from(gyms)
+          .where(eq(gyms.id, targetGymId));
         if (gym && (gym.isPublic || gym.isVerified)) {
           console.log(`[EXERCISE FILTER] User has no records for gym ${targetGymId}. Using public equipment.`);
           userEq = await db
             .select()
             .from(userEquipment)
-            .where(eq(userEquipment.gymId, targetGymId));
+            .where(
+              and(
+                eq(userEquipment.gymId, targetGymId),
+                eq(userEquipment.userId, gym.userId),
+                eq(userEquipment.available, true)
+              )
+            );
         }
       }
       console.log(`[EXERCISE FILTER] Filtering for gym ${targetGymId} with ${userEq.length} equipment items`);
@@ -812,12 +858,20 @@ export async function filterExercisesByUserEquipment(
       return bodyweightExercises.map(serializeExercise);
     }
 
-    // Extract equipment names (normalize for matching)
-    const availableEquipment = userEq.map(eq => 
-      normalizeName(eq.equipmentName)
-    );
+    // Build strict set of available canonical equipment keys.
+    const availableEquipment = new Set<string>(["bodyweight"]);
+    for (const equipmentItem of userEq) {
+      if (equipmentItem.equipmentKey) {
+        const key = canonicalEquipmentToken(equipmentItem.equipmentKey);
+        if (key) availableEquipment.add(key);
+      }
+      if (equipmentItem.equipmentName) {
+        const key = canonicalEquipmentToken(equipmentItem.equipmentName);
+        if (key) availableEquipment.add(key);
+      }
+    }
 
-    console.log(`[EXERCISE FILTER] User has ${availableEquipment.length} pieces of equipment at gym ${targetGymId}`);
+    console.log(`[EXERCISE FILTER] User has ${availableEquipment.size} canonical equipment keys at gym ${targetGymId}`);
 
     // Get all exercises from catalog
     const allExercises = await db.select().from(exercises);
@@ -835,37 +889,15 @@ export async function filterExercisesByUserEquipment(
         return true;
       }
 
-      // Normalize required equipment
-      const required = exercise.requiredEquipment.map(eq => normalizeName(eq));
-      
-      // Allow 'unknown' equipment (from auto-created exercises) - treat as available
-      // Admin can review and update later via unmapped_exercises table
-      const filteredRequired = required.filter(req => req !== 'unknown');
-      
-      // If only 'unknown' equipment, treat as available
-      if (filteredRequired.length === 0) {
-        return true;
-      }
+      // Strict requirement check against canonical equipment keys.
+      const required = exercise.requiredEquipment
+        .map((equipmentName) => canonicalEquipmentToken(equipmentName))
+        .filter(Boolean);
 
-      // Check user's equipment by key first, then by name
-      const availableKeys = userEq.map(ue => ue.equipmentKey).filter(Boolean) as string[];
-      const availableNames = userEq.map(ue => ue.equipmentName ? normalizeName(ue.equipmentName) : "");
+      if (required.length === 0) return false;
+      if (required.some((req) => req === "unknown" || req === "none")) return false;
 
-      // Check if ALL required equipment (excluding 'unknown') is available
-      const allAvailable = filteredRequired.every(req => {
-        // 1. Direct key match (e.g. "barbell" == "barbell")
-        if (availableKeys.includes(req)) return true;
-        
-        // 2. Fuzzy key match (e.g. "barbell" in "standard_barbell")
-        if (availableKeys.some((key: string) => key.includes(req) || req.includes(key))) return true;
-
-        // 3. Name match fallback
-        if (availableNames.some((avail: string) => avail.includes(req) || req.includes(avail))) return true;
-
-        return false;
-      });
-
-      return allAvailable;
+      return required.every((req) => req === "bodyweight" || availableEquipment.has(req));
     });
 
     console.log(`[EXERCISE FILTER] ${matchingExercises.length} exercises match user's equipment`);

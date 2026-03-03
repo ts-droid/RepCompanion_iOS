@@ -77,6 +77,33 @@ function slugifyExerciseId(name: string): string {
     .replace(/_+/g, "_");
 }
 
+function toExerciseNameFingerprint(value: string): string {
+  const normalized = String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) return "";
+
+  const singularized = normalized
+    .split(" ")
+    .map((word) => {
+      if (word.length <= 3) return word;
+      if (word.endsWith("ies") && word.length > 4) return `${word.slice(0, -3)}y`;
+      if (word.endsWith("sses")) return word.slice(0, -2);
+      if (word.endsWith("es") && word.length > 4) return word.slice(0, -2);
+      if (word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+      return word;
+    })
+    .join(" ")
+    .trim();
+
+  return singularized;
+}
+
 function toStringArray(input: unknown): string[] {
   if (Array.isArray(input)) {
     return input
@@ -463,13 +490,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getGymEquipment(gymId: string): Promise<UserEquipment[]> {
-    return await db
-      .select()
-      .from(userEquipment)
-      .where(eq(userEquipment.gymId, gymId));
-  }
+    const [gym] = await db
+      .select({ id: gyms.id, userId: gyms.userId, isPublic: gyms.isPublic, isVerified: gyms.isVerified })
+      .from(gyms)
+      .where(eq(gyms.id, gymId))
+      .limit(1);
 
-  async getGymEquipment(gymId: string): Promise<UserEquipment[]> {
+    if (!gym) return [];
+
+    // Public/verified gyms must only expose owner-managed canonical equipment rows.
+    if (gym.isPublic || gym.isVerified) {
+      return await db
+        .select()
+        .from(userEquipment)
+        .where(
+          and(
+            eq(userEquipment.gymId, gymId),
+            eq(userEquipment.userId, gym.userId)
+          )
+        );
+    }
+
     return await db
       .select()
       .from(userEquipment)
@@ -485,6 +526,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertEquipment(equipmentData: InsertUserEquipment): Promise<UserEquipment> {
+    const [gym] = await db
+      .select({ id: gyms.id, userId: gyms.userId, isPublic: gyms.isPublic, isVerified: gyms.isVerified })
+      .from(gyms)
+      .where(eq(gyms.id, equipmentData.gymId))
+      .limit(1);
+
+    if (!gym) {
+      throw new Error("Gym not found");
+    }
+
+    // Prevent non-owners from modifying canonical equipment on public/verified gyms.
+    if ((gym.isPublic || gym.isVerified) && equipmentData.userId !== gym.userId) {
+      throw new Error("Public/verified gym equipment can only be edited by gym owner/admin");
+    }
+
     const [equipment] = await db
       .insert(userEquipment)
       .values(equipmentData)
@@ -1403,6 +1459,84 @@ export class DatabaseStorage implements IStorage {
       .trim();
   }
 
+  private async findLikelyDuplicateExercise(
+    name: string,
+    nameEn: string,
+    exerciseId?: string
+  ): Promise<import("@shared/schema").Exercise | null> {
+    const candidates = await db.select().from(exercises);
+    if (candidates.length === 0) return null;
+
+    const requestedTokens = new Set<string>();
+    const addToken = (value: string | undefined) => {
+      const raw = String(value || "").trim();
+      if (!raw) return;
+      const strict = this.normalizeToken(raw);
+      if (strict) requestedTokens.add(strict);
+      const fingerprint = toExerciseNameFingerprint(raw);
+      if (fingerprint) requestedTokens.add(fingerprint);
+    };
+
+    addToken(name);
+    addToken(nameEn);
+    addToken(exerciseId);
+
+    for (const row of candidates) {
+      const rowTokens = new Set<string>();
+      const push = (value: string | null | undefined) => {
+        const raw = String(value || "").trim();
+        if (!raw) return;
+        const strict = this.normalizeToken(raw);
+        if (strict) rowTokens.add(strict);
+        const fingerprint = toExerciseNameFingerprint(raw);
+        if (fingerprint) rowTokens.add(fingerprint);
+      };
+
+      push(row.name);
+      push(row.nameEn);
+      push(row.exerciseId);
+      push(row.id);
+
+      if (Array.from(requestedTokens).some((token) => rowTokens.has(token))) {
+        return row;
+      }
+    }
+
+    return null;
+  }
+
+  private async tryCreateAliasIfNeeded(exerciseId: string, aliasValue: string): Promise<void> {
+    const alias = String(aliasValue || "").trim();
+    if (!alias) return;
+
+    const [exercise] = await db
+      .select({ name: exercises.name, nameEn: exercises.nameEn, exerciseId: exercises.exerciseId })
+      .from(exercises)
+      .where(eq(exercises.id, exerciseId))
+      .limit(1);
+
+    if (!exercise) return;
+
+    const aliasNorm = normalizeName(alias);
+    if (!aliasNorm) return;
+
+    const canonicalNorms = new Set([
+      normalizeName(exercise.name || ""),
+      normalizeName(exercise.nameEn || ""),
+      normalizeName(exercise.exerciseId || ""),
+    ]);
+
+    if (canonicalNorms.has(aliasNorm)) return;
+
+    await this.adminCreateExerciseAlias({
+      exerciseId,
+      alias,
+      lang: /[åäö]/i.test(alias) ? "sv" : "en",
+      source: "admin_dedup",
+      aliasNorm,
+    });
+  }
+
   private canonicalEquipmentKey(raw: string): string {
     const token = this.normalizeToken(raw);
     const map: Record<string, string> = {
@@ -1461,9 +1595,14 @@ export class DatabaseStorage implements IStorage {
     return output;
   }
 
-  private async normalizeRequiredEquipmentToKeys(values: string[] | undefined | null): Promise<string[]> {
+  private async normalizeRequiredEquipmentToKeys(
+    values: string[] | undefined | null,
+    options?: { fallbackToBodyweight?: boolean; keepUnknownTokens?: boolean }
+  ): Promise<string[]> {
+    const fallbackToBodyweight = options?.fallbackToBodyweight ?? true;
+    const keepUnknownTokens = options?.keepUnknownTokens ?? false;
     const input = toStringArray(values);
-    if (input.length === 0) return ["bodyweight"];
+    if (input.length === 0) return fallbackToBodyweight ? ["bodyweight"] : [];
 
     const catalog = await db
       .select({
@@ -1506,11 +1645,12 @@ export class DatabaseStorage implements IStorage {
         continue;
       }
 
-      // Strict mode: only keep valid catalog keys; unresolved tokens are dropped.
-      // This guarantees required_equipment stores canonical keys only.
+      if (keepUnknownTokens && !out.includes(normalizedRaw)) {
+        out.push(normalizedRaw);
+      }
     }
 
-    return out.length > 0 ? out : ["bodyweight"];
+    return out.length > 0 ? out : (fallbackToBodyweight ? ["bodyweight"] : []);
   }
 
   private async getUserAvailableEquipmentKeys(userId: string): Promise<Set<string>> {
@@ -1533,10 +1673,10 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // If user has no personal rows on a verified/public gym, use gym public equipment rows.
+    // If user has no personal rows on a verified/public gym, use owner-managed public equipment rows.
     if (available.length === 0) {
       const [gym] = await db
-        .select({ isPublic: gyms.isPublic, isVerified: gyms.isVerified })
+        .select({ userId: gyms.userId, isPublic: gyms.isPublic, isVerified: gyms.isVerified })
         .from(gyms)
         .where(eq(gyms.id, profile.selectedGymId))
         .limit(1);
@@ -1548,6 +1688,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(userEquipment.gymId, profile.selectedGymId),
+              eq(userEquipment.userId, gym.userId),
               eq(userEquipment.available, true)
             )
           );
@@ -1564,13 +1705,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   private isExerciseCompatibleWithEquipment(requiredEquipment: string[] | undefined, availableEquipment: Set<string>): boolean {
-    if (!requiredEquipment || requiredEquipment.length === 0) return true;
+    if (!requiredEquipment || requiredEquipment.length === 0) return false;
 
     const required = requiredEquipment
       .map((eqName) => this.canonicalEquipmentKey(eqName))
-      .filter((eqKey) => eqKey && eqKey !== "unknown" && eqKey !== "none");
+      .filter((eqKey) => !!eqKey);
 
-    if (required.length === 0) return true;
+    if (required.length === 0) return false;
+    if (required.some((eqKey) => eqKey === "unknown" || eqKey === "none")) return false;
     return required.every((eqKey) => eqKey === "bodyweight" || availableEquipment.has(eqKey));
   }
 
@@ -1587,6 +1729,11 @@ export class DatabaseStorage implements IStorage {
     const preferredPrimary = this.normalizeMuscles(metadata.primaryMuscles);
     const preferredSecondary = this.normalizeMuscles(metadata.secondaryMuscles);
     const preferredDifficulty = this.normalizeToken(metadata.difficulty || "");
+
+    // Avoid arbitrary fallback picks (e.g. the same exercise repeated) when AI did not provide muscle hints.
+    if (preferredPrimary.size === 0 && preferredSecondary.size === 0) {
+      return null;
+    }
 
     const catalog = await db.select().from(exercises).where(isNotNull(exercises.nameEn));
     if (catalog.length === 0) return null;
@@ -1660,6 +1807,14 @@ export class DatabaseStorage implements IStorage {
     
     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const availableEquipment = await this.getUserAvailableEquipmentKeys(userId);
+    const exerciseCatalog = await db.select().from(exercises);
+    const exerciseLookup = new Map<string, (typeof exerciseCatalog)[number]>();
+    for (const ex of exerciseCatalog) {
+      if (ex.id) exerciseLookup.set(ex.id, ex);
+      if (ex.exerciseId) exerciseLookup.set(ex.exerciseId, ex);
+      if (ex.nameEn) exerciseLookup.set(this.normalizeToken(ex.nameEn), ex);
+      if (ex.name) exerciseLookup.set(this.normalizeToken(ex.name), ex);
+    }
     
     for (let i = 0; i < weeklySessions.length; i++) {
       const session = weeklySessions[i];
@@ -1785,8 +1940,30 @@ export class DatabaseStorage implements IStorage {
           exerciseKey = matchResult.exerciseId || finalExerciseName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         }
 
+        const catalogExercise =
+          exerciseLookup.get(exerciseKey) ||
+          exerciseLookup.get(this.normalizeToken(finalExerciseName || "")) ||
+          null;
+
+        if (catalogExercise) {
+          finalExerciseName = catalogExercise.nameEn || catalogExercise.name;
+          exerciseKey = catalogExercise.exerciseId || catalogExercise.id;
+          resolvedMuscles = [
+            ...(catalogExercise.primaryMuscles || []),
+            ...(catalogExercise.secondaryMuscles || []),
+          ];
+          resolvedEquipment = await this.normalizeRequiredEquipmentToKeys(
+            catalogExercise.requiredEquipment,
+            { fallbackToBodyweight: true }
+          );
+        } else {
+          resolvedEquipment = await this.normalizeRequiredEquipmentToKeys(
+            resolvedEquipment,
+            { fallbackToBodyweight: false }
+          );
+        }
+
         // Normalize to canonical equipment keys and enforce gym compatibility.
-        resolvedEquipment = await this.normalizeRequiredEquipmentToKeys(resolvedEquipment);
         if (!this.isExerciseCompatibleWithEquipment(resolvedEquipment, availableEquipment)) {
           console.warn(
             `[VALIDATION] Exercise "${finalExerciseName}" requires unavailable equipment [${resolvedEquipment.join(", ")}]. Finding fallback...`
@@ -2152,6 +2329,15 @@ export class DatabaseStorage implements IStorage {
     const generatedExerciseId = slugifyExerciseId(nameEn);
     const exerciseId = providedExerciseId || generatedExerciseId;
     if (!exerciseId) throw new Error("Could not generate exercise_id from nameEn");
+
+    const existing = await this.findLikelyDuplicateExercise(name, nameEn, exerciseId);
+    if (existing) {
+      // Keep canonical exercise row, register new spellings as aliases instead of creating duplicates.
+      await this.tryCreateAliasIfNeeded(existing.id, name);
+      await this.tryCreateAliasIfNeeded(existing.id, nameEn);
+      await this.tryCreateAliasIfNeeded(existing.id, providedExerciseId);
+      return existing;
+    }
 
     const payload: import("@shared/schema").InsertExercise = {
       ...data,
