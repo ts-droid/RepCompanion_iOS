@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { exercises, unmappedExercises, exerciseAliases as exerciseAliasesTable, userProfiles, userEquipment, UserEquipment, gyms } from "@shared/schema";
+import { exercises, unmappedExercises, exerciseAliases as exerciseAliasesTable, userProfiles, userEquipment, UserEquipment, gyms, equipmentCatalog } from "@shared/schema";
 import { eq, sql, or, and } from "drizzle-orm";
 
 /**
@@ -18,9 +18,143 @@ export function normalizeName(name: string): string {
   if (!name) return "";
   return name
     .toLowerCase()
+    .replace(/[_-]+/g, ' ')
     .replace(/[^a-z0-9åäö\s]/g, '') // Keep Swedish chars
     .replace(/\s+/g, ' ')           // Normalize whitespace
     .trim();
+}
+
+function slugifyExerciseId(name: string): string {
+  if (!name) return "";
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_+/g, "_");
+}
+
+const EQUIPMENT_KEY_SYNONYMS: Record<string, string> = {
+  dumbbell: "dumbbells",
+  dumbbells: "dumbbells",
+  hantel: "dumbbells",
+  hantlar: "dumbbells",
+  barbell: "barbell",
+  skivstang: "barbell",
+  skivstång: "barbell",
+  cable: "cable_machine",
+  cables: "cable_machine",
+  kabel: "cable_machine",
+  kabelmaskin: "cable_machine",
+  machine: "machine",
+  maskin: "machine",
+  bench: "flat_bench",
+  bänk: "flat_bench",
+  flat_bench: "flat_bench",
+  adjustable_bench: "adjustable_bench",
+  rack: "power_rack",
+  power_rack: "power_rack",
+  smith_machine: "smith_machine",
+  resistance_band: "resistance_bands",
+  resistance_bands: "resistance_bands",
+  gummiband: "resistance_bands",
+  kettlebell: "kettlebells",
+  kettlebells: "kettlebells",
+  bodyweight: "bodyweight",
+  kroppsvikt: "bodyweight",
+};
+
+async function normalizeEquipmentKeys(values: string[] | undefined): Promise<string[]> {
+  if (!values || values.length === 0) return ["bodyweight"];
+
+  const catalog = await db
+    .select({
+      equipmentKey: equipmentCatalog.equipmentKey,
+      name: equipmentCatalog.name,
+      nameEn: equipmentCatalog.nameEn,
+    })
+    .from(equipmentCatalog);
+
+  const byToken = new Map<string, string>();
+  for (const row of catalog) {
+    const key = (row.equipmentKey || "").trim();
+    if (!key) continue;
+    byToken.set(normalizeName(key), key);
+    if (row.name) byToken.set(normalizeName(row.name), key);
+    if (row.nameEn) byToken.set(normalizeName(row.nameEn), key);
+  }
+
+  const normalized: string[] = [];
+  for (const raw of values) {
+    const token = normalizeName(String(raw || ""));
+    if (!token) continue;
+
+    const direct = byToken.get(token);
+    if (direct) {
+      if (!normalized.includes(direct)) normalized.push(direct);
+      continue;
+    }
+
+    const synonym = EQUIPMENT_KEY_SYNONYMS[token];
+    if (synonym) {
+      if (!normalized.includes(synonym)) normalized.push(synonym);
+      continue;
+    }
+  }
+
+  return normalized.length > 0 ? normalized : ["bodyweight"];
+}
+
+function toCoreName(name: string): string {
+  const stopWords = new Set([
+    "på", "med", "och", "för", "i", "av", "the", "with", "and", "for", "on", "in",
+    "maskin", "machine", "kabelmaskin", "cable", "stationär", "stående", "sittande",
+    "seated", "standing", "lying", "barbell", "dumbbell", "ez", "stång"
+  ]);
+  return normalizeName(name)
+    .split(" ")
+    .filter((word) => word.length > 1 && !stopWords.has(word))
+    .join(" ")
+    .trim();
+}
+
+function tokenOverlapRatio(a: string, b: string): number {
+  const aTokens = new Set(a.split(" ").filter(Boolean));
+  const bTokens = new Set(b.split(" ").filter(Boolean));
+  if (aTokens.size === 0 || bTokens.size === 0) return 0;
+  let common = 0;
+  for (const token of Array.from(aTokens)) {
+    if (bTokens.has(token)) common += 1;
+  }
+  return common / Math.min(aTokens.size, bTokens.size);
+}
+
+function looksLikeExerciseId(value: string): boolean {
+  const candidate = (value || "").trim();
+  if (!candidate) return false;
+
+  const uuidLike = /^[0-9a-f]{8}[-\s][0-9a-f]{4}[-\s][0-9a-f]{4}[-\s][0-9a-f]{4}[-\s][0-9a-f]{12}$/i;
+  if (uuidLike.test(candidate)) return true;
+
+  const compact = candidate.replace(/[^0-9a-f]/gi, "");
+  const compactNoSpace = candidate.replace(/\s+/g, "");
+  if (compact.length >= 24 && compact.length === compactNoSpace.length) return true;
+
+  return false;
+}
+
+function looksLikePlaceholderExerciseCode(value: string): boolean {
+  const candidate = (value || "").trim();
+  if (!candidate) return false;
+
+  // Common LLM placeholder tokens seen in failed generations, e.g. E101, E202, E013.
+  if (/^e\d{2,5}$/i.test(candidate)) return true;
+
+  // Generic short alpha+digits code (2-8 chars) like X12, A203, Z9999.
+  if (/^[a-z]{1,2}\d{2,5}$/i.test(candidate)) return true;
+
+  return false;
 }
 
 // Calculate Levenshtein distance (edit distance) between two strings
@@ -135,6 +269,16 @@ export async function matchExercise(aiGeneratedName: string, metadata?: Exercise
     };
   }
 
+  if (looksLikePlaceholderExerciseCode(aiGeneratedName)) {
+    await logUnmappedExercise(aiGeneratedName, "Rejected: Placeholder exercise code", metadata);
+    return {
+      matched: false,
+      exerciseName: null,
+      exerciseId: null,
+      confidence: 'none',
+    };
+  }
+
   const normalized = normalizeName(aiGeneratedName);
   
   // Step 1: Try exact match on normalized nameEn (ENGLISH ONLY - nameEn must exist)
@@ -217,7 +361,7 @@ export async function matchExercise(aiGeneratedName: string, metadata?: Exercise
     }
   }
 
-  // Step 3: Try fuzzy matching (Levenshtein distance) - ENGLISH ONLY
+  // Step 3: Try fuzzy matching (Levenshtein + core-word overlap) - ENGLISH ONLY
   const allExercises = await db
     .select()
     .from(exercises)
@@ -225,14 +369,25 @@ export async function matchExercise(aiGeneratedName: string, metadata?: Exercise
   
   let bestMatch: typeof allExercises[0] | null = null;
   let bestDistance = Infinity;
-  const threshold = 5; // Max edit distance to accept
+  const coreInput = toCoreName(aiGeneratedName);
 
   for (const exercise of allExercises) {
     // Match against English name (nameEn guaranteed to exist)
-    const distanceEnglish = levenshteinDistance(normalized, normalizeName(exercise.nameEn!));
-    
-    if (distanceEnglish < bestDistance && distanceEnglish <= threshold) {
-      bestDistance = distanceEnglish;
+    const normalizedExercise = normalizeName(exercise.nameEn!);
+    const coreExercise = toCoreName(exercise.nameEn!);
+    const distanceEnglish = levenshteinDistance(normalized, normalizedExercise);
+    const distanceCore = coreInput && coreExercise
+      ? levenshteinDistance(coreInput, coreExercise)
+      : Number.MAX_SAFE_INTEGER;
+    const overlap = coreInput && coreExercise ? tokenOverlapRatio(coreInput, coreExercise) : 0;
+
+    const maxLength = Math.max(normalized.length, normalizedExercise.length);
+    const dynamicThreshold = Math.max(3, Math.floor(maxLength * 0.2));
+    const bestCandidateDistance = Math.min(distanceEnglish, distanceCore);
+    const overlapAccepted = overlap >= 0.75;
+
+    if ((bestCandidateDistance <= dynamicThreshold || overlapAccepted) && bestCandidateDistance < bestDistance) {
+      bestDistance = bestCandidateDistance;
       bestMatch = exercise;
     }
   }
@@ -250,21 +405,12 @@ export async function matchExercise(aiGeneratedName: string, metadata?: Exercise
     };
   }
 
-  // Step 4: No match found - auto-expand catalog
-  const newExercise = await createExerciseFromAI(aiGeneratedName);
-  
-  if (newExercise) {
-    return {
-      matched: true,
-      exerciseName: newExercise.name,
-      exerciseId: newExercise.exerciseId,
-      confidence: 'none', // Auto-created, no prior match
-    };
-  }
-
-  // No match found - log for review
+  // Step 4: No match found - always log for admin review (no auto-create)
+  const suggestedReason = looksLikeExerciseId(aiGeneratedName)
+    ? "Rejected: Name looks like ID/UUID"
+    : null;
   console.log(`[MATCHER] No match found for "${aiGeneratedName}", logging unmapped`);
-  await logUnmappedExercise(aiGeneratedName, null, metadata);
+  await logUnmappedExercise(aiGeneratedName, suggestedReason, metadata);
   
   return {
     matched: false,
@@ -319,14 +465,16 @@ async function createExerciseFromAI(aiGeneratedName: string): Promise<{ name: st
 
     // Create new exercise with English name
     // Always populate nameEn for auto-created exercises (English-only policy)
+    const generatedExerciseId = slugifyExerciseId(aiGeneratedName);
     const [newExercise] = await db.insert(exercises).values({
+      exerciseId: generatedExerciseId || undefined,
       name: aiGeneratedName, // Use English name as primary name for new entries
       nameEn: aiGeneratedName, // CRITICAL: Always populate nameEn
-      category: 'strength', // Default category
+      category: 'Strength', // Default category
       difficulty: 'intermediate',
       primaryMuscles: ['unknown'], // Placeholder
       secondaryMuscles: [],
-      requiredEquipment: ['unknown'], // Placeholder
+      requiredEquipment: ['bodyweight'], // Always store canonical equipment keys
       isCompound: false,
       youtubeUrl: null, // No video yet - admin can add later
       videoType: null,
@@ -495,7 +643,7 @@ export async function enrichExerciseMetadata(
     const isEqMissing = currentEquipment.length === 0 || (currentEquipment.length === 1 && currentEquipment[0] === 'unknown');
     
     if (isEqMissing && metadata.equipment && metadata.equipment.length > 0) {
-       updates.requiredEquipment = metadata.equipment.map(normalizeMetadataValue);
+       updates.requiredEquipment = await normalizeEquipmentKeys(metadata.equipment);
        hasUpdates = true;
     }
 
@@ -527,16 +675,51 @@ async function saveExerciseAlias(exerciseId: string, alias: string, lang: string
   try {
     const normalized = normalizeName(alias);
     if (!normalized) return;
+    if (looksLikePlaceholderExerciseCode(alias)) return;
 
-    await db.insert(exerciseAliasesTable).values({
-      exerciseId,
-      alias,
-      aliasNorm: normalized,
-      lang,
-      source: 'ai_match'
-    }).onConflictDoNothing();
+    const [exercise] = await db
+      .select({ id: exercises.id })
+      .from(exercises)
+      .where(or(eq(exercises.id, exerciseId), eq(exercises.exerciseId, exerciseId)))
+      .limit(1);
+
+    if (!exercise) {
+      console.warn(`[ALIAS] Exercise not found while saving alias "${alias}" for ${exerciseId}`);
+      return;
+    }
+
+    // Keep aliases linked to UUID PK so both legacy and FK-enforced DBs work.
+    const canonicalExerciseRef = exercise.id;
+
+    try {
+      // Prefer legacy-compatible insert (fills both alias_name + alias when column exists).
+      await db.execute(sql`
+        INSERT INTO exercise_aliases (exercise_id, alias_name, alias, alias_norm, lang, source)
+        VALUES (${canonicalExerciseRef}, ${alias}, ${alias}, ${normalized}, ${lang}, 'ai_match')
+        ON CONFLICT (alias_norm) DO NOTHING
+      `);
+    } catch (error: any) {
+      const message = String(error?.message || "").toLowerCase();
+      const missingAliasNameColumn =
+        message.includes("column") &&
+        message.includes("alias_name") &&
+        message.includes("does not exist");
+
+      if (!missingAliasNameColumn) {
+        throw error;
+      }
+
+      // Modern schema path (no alias_name column).
+      await db.insert(exerciseAliasesTable).values({
+        exerciseId: canonicalExerciseRef,
+        alias,
+        aliasNorm: normalized,
+        lang,
+        source: 'ai_match'
+      }).onConflictDoNothing();
+    }
     
-    console.log(`[ALIAS] Saved alias "${alias}" for exercise ${exerciseId}`);
+    console.log(`[ALIAS] Saved alias "${alias}" for exercise ${canonicalExerciseRef}`);
   } catch (error) {
     console.warn(`[ALIAS] Failed to save alias "${alias}" for exercise ${exerciseId}:`, error);
   }

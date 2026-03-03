@@ -67,6 +67,31 @@ import { db } from "./db";
 import { eq, desc, and, or, gte, sql, inArray, isNull, isNotNull } from "drizzle-orm";
 import { matchExercise, normalizeName } from "./exercise-matcher";
 
+function slugifyExerciseId(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_+/g, "_");
+}
+
+function toStringArray(input: unknown): string[] {
+  if (Array.isArray(input)) {
+    return input
+      .map((v) => String(v ?? "").trim())
+      .filter((v) => v.length > 0);
+  }
+  if (typeof input === "string") {
+    return input
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+  }
+  return [];
+}
+
 export interface IStorage {
   // User operations (required by Replit Auth)
   getUser(id: string): Promise<User | undefined>;
@@ -1368,6 +1393,206 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
+  private normalizeToken(value: string): string {
+    return (value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  private canonicalEquipmentKey(raw: string): string {
+    const token = this.normalizeToken(raw);
+    const map: Record<string, string> = {
+      "barbell": "barbell",
+      "skivstang": "barbell",
+      "hantel": "dumbbells",
+      "hantlar": "dumbbells",
+      "dumbbell": "dumbbells",
+      "dumbbells": "dumbbells",
+      "kettlebell": "kettlebells",
+      "kettlebells": "kettlebells",
+      "cable": "cable_machine",
+      "kabel": "cable_machine",
+      "kabelmaskin": "cable_machine",
+      "machine": "machine",
+      "maskin": "machine",
+      "smith": "smith_machine",
+      "smith machine": "smith_machine",
+      "power rack": "power_rack",
+      "rack": "power_rack",
+      "stallning": "power_rack",
+      "bench": "flat_bench",
+      "bank": "flat_bench",
+      "justerbar bank": "adjustable_bench",
+      "pull up stang": "pull_up_bar",
+      "pull up bar": "pull_up_bar",
+      "chinsracke": "pull_up_bar",
+      "bodyweight": "bodyweight",
+      "kroppsvikt": "bodyweight",
+      "band": "resistance_bands",
+      "gummiband": "resistance_bands",
+      "trap bar": "trap_bar",
+      "plyo box": "plyo_box",
+      "box": "plyo_box"
+    };
+
+    if (map[token]) return map[token];
+    if (token.includes("barbell") || token.includes("skivstang")) return "barbell";
+    if (token.includes("dumbbell") || token.includes("hantel")) return "dumbbells";
+    if (token.includes("cable") || token.includes("kabel")) return "cable_machine";
+    if (token.includes("machine") || token.includes("maskin")) return "machine";
+    if (token.includes("bench") || token.includes("bank")) return "flat_bench";
+    if (token.includes("pull up") || token.includes("chin")) return "pull_up_bar";
+    if (token.includes("bodyweight") || token.includes("kroppsvikt")) return "bodyweight";
+    if (token.includes("kettlebell")) return "kettlebells";
+    if (token.includes("band") || token.includes("gummiband")) return "resistance_bands";
+    return token;
+  }
+
+  private normalizeMuscles(values: string[] | undefined | null): Set<string> {
+    const output = new Set<string>();
+    for (const value of values || []) {
+      const normalized = this.normalizeToken(value);
+      if (normalized) output.add(normalized);
+    }
+    return output;
+  }
+
+  private async normalizeRequiredEquipmentToKeys(values: string[] | undefined | null): Promise<string[]> {
+    const input = toStringArray(values);
+    if (input.length === 0) return ["bodyweight"];
+
+    const catalog = await db
+      .select({
+        equipmentKey: equipmentCatalog.equipmentKey,
+        name: equipmentCatalog.name,
+        nameEn: equipmentCatalog.nameEn,
+      })
+      .from(equipmentCatalog);
+
+    const byToken = new Map<string, string>();
+    for (const row of catalog) {
+      const key = (row.equipmentKey || "").trim();
+      if (!key) continue;
+      const normalizedKey = this.normalizeToken(key);
+      byToken.set(normalizedKey, key);
+
+      const sv = this.normalizeToken(row.name || "");
+      if (sv) byToken.set(sv, key);
+
+      const en = this.normalizeToken(row.nameEn || "");
+      if (en) byToken.set(en, key);
+    }
+
+    const out: string[] = [];
+    for (const raw of input) {
+      const normalizedRaw = this.normalizeToken(raw);
+      if (!normalizedRaw) continue;
+
+      const direct = byToken.get(normalizedRaw);
+      if (direct) {
+        if (!out.includes(direct)) out.push(direct);
+        continue;
+      }
+
+      const canonical = this.canonicalEquipmentKey(raw);
+      const normalizedCanonical = this.normalizeToken(canonical);
+      const mappedCanonical = byToken.get(normalizedCanonical);
+      if (mappedCanonical) {
+        if (!out.includes(mappedCanonical)) out.push(mappedCanonical);
+        continue;
+      }
+
+      // Strict mode: only keep valid catalog keys; unresolved tokens are dropped.
+      // This guarantees required_equipment stores canonical keys only.
+    }
+
+    return out.length > 0 ? out : ["bodyweight"];
+  }
+
+  private async getUserAvailableEquipmentKeys(userId: string): Promise<Set<string>> {
+    const [profile] = await db
+      .select({ selectedGymId: userProfiles.selectedGymId })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1);
+
+    if (!profile?.selectedGymId) return new Set();
+
+    const available = await db
+      .select({ equipmentName: userEquipment.equipmentName, equipmentKey: userEquipment.equipmentKey })
+      .from(userEquipment)
+      .where(
+        and(
+          eq(userEquipment.userId, userId),
+          eq(userEquipment.gymId, profile.selectedGymId),
+          eq(userEquipment.available, true)
+        )
+      );
+
+    const keys = new Set<string>();
+    for (const item of available) {
+      if (item.equipmentKey) keys.add(this.canonicalEquipmentKey(item.equipmentKey));
+      keys.add(this.canonicalEquipmentKey(item.equipmentName));
+    }
+    return keys;
+  }
+
+  private async findFallbackExerciseForUser(
+    userId: string,
+    metadata: {
+      primaryMuscles?: string[];
+      secondaryMuscles?: string[];
+      difficulty?: string;
+    }
+  ): Promise<{ exerciseName: string; exerciseId: string; requiredEquipment: string[]; muscles: string[] } | null> {
+    const availableEquipment = await this.getUserAvailableEquipmentKeys(userId);
+    const preferredPrimary = this.normalizeMuscles(metadata.primaryMuscles);
+    const preferredSecondary = this.normalizeMuscles(metadata.secondaryMuscles);
+    const preferredDifficulty = this.normalizeToken(metadata.difficulty || "");
+
+    const catalog = await db.select().from(exercises).where(isNotNull(exercises.nameEn));
+    if (catalog.length === 0) return null;
+
+    let best: { exercise: typeof catalog[number]; score: number } | null = null;
+
+    for (const ex of catalog) {
+      const exPrimary = this.normalizeMuscles(ex.primaryMuscles);
+      const exSecondary = this.normalizeMuscles(ex.secondaryMuscles || []);
+      const exMuscles = new Set(Array.from(exPrimary).concat(Array.from(exSecondary)));
+      const exEquipment = (ex.requiredEquipment || []).map((eqName) => this.canonicalEquipmentKey(eqName));
+
+      const primaryOverlap = Array.from(preferredPrimary).filter((m) => exMuscles.has(m)).length;
+      const secondaryOverlap = Array.from(preferredSecondary).filter((m) => exMuscles.has(m)).length;
+      const allEquipmentAvailable = exEquipment.length === 0
+        || exEquipment.every((eqKey) => eqKey === "bodyweight" || availableEquipment.has(eqKey));
+
+      if (!allEquipmentAvailable) continue;
+
+      let score = 0;
+      score += primaryOverlap * 4;
+      score += secondaryOverlap * 2;
+      score += (exEquipment.length === 0 || exEquipment.every((eq) => eq === "bodyweight")) ? 1 : 3;
+      if (preferredDifficulty && this.normalizeToken(ex.difficulty) === preferredDifficulty) score += 1;
+
+      if (score <= 0) continue;
+      if (!best || score > best.score) best = { exercise: ex, score };
+    }
+
+    if (!best) return null;
+
+    const selected = best.exercise;
+    return {
+      exerciseName: selected.nameEn || selected.name,
+      exerciseId: selected.exerciseId || selected.id,
+      requiredEquipment: selected.requiredEquipment || [],
+      muscles: [...(selected.primaryMuscles || []), ...(selected.secondaryMuscles || [])],
+    };
+  }
+
   async createProgramTemplatesFromAI(userId: string, program: import("./ai-service").AIWorkoutProgram): Promise<void> {
     console.log("[STORAGE] createProgramTemplatesFromAI called for userId:", userId);
     console.log("[STORAGE] Program overview:", program.program_overview.week_focus_summary);
@@ -1495,18 +1720,35 @@ export class DatabaseStorage implements IStorage {
           secondaryMuscles: exercise.secondary_muscles,
           difficulty: exercise.difficulty
         });
-        
-        // CRITICAL: Only accept matched exercises with English names
-        // Do NOT fall back to aiGeneratedName if match fails
+
+        let finalExerciseName: string;
+        let exerciseKey: string;
+        let resolvedEquipment: string[] = exercise.required_equipment || [];
+        let resolvedMuscles: string[] = exercise.target_muscles || [];
+
         if (!matchResult.matched || !matchResult.exerciseName) {
-          console.error(`[VALIDATION ERROR] ❌ Exercise "${aiGeneratedName}" not matched to catalog - SKIPPING`);
-          console.warn(`[VALIDATION] Skipping unmatched exercise to enforce English-only policy`);
-          continue; // Skip this exercise
+          console.warn(`[VALIDATION] Exercise "${aiGeneratedName}" not matched. Attempting gym-compatible fallback...`);
+          const fallbackExercise = await this.findFallbackExerciseForUser(userId, {
+            primaryMuscles: exercise.primary_muscles,
+            secondaryMuscles: exercise.secondary_muscles,
+            difficulty: exercise.difficulty
+          });
+
+          if (!fallbackExercise) {
+            console.error(`[VALIDATION ERROR] ❌ No fallback found for "${aiGeneratedName}" - SKIPPING`);
+            continue;
+          }
+
+          finalExerciseName = fallbackExercise.exerciseName;
+          exerciseKey = fallbackExercise.exerciseId;
+          resolvedEquipment = fallbackExercise.requiredEquipment;
+          resolvedMuscles = fallbackExercise.muscles;
+          console.log(`[VALIDATION] 🔁 Fallback selected: "${aiGeneratedName}" → "${finalExerciseName}"`);
+        } else {
+          finalExerciseName = matchResult.exerciseName;
+          // Don't log matched name as key, use ID or slugify matched result
+          exerciseKey = matchResult.exerciseId || finalExerciseName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         }
-        
-        const finalExerciseName = matchResult.exerciseName;
-        // Don't log matched name as key, use ID or slugify matched result
-        const exerciseKey = matchResult.exerciseId || finalExerciseName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
         
         // POST-VALIDATION: Fix AI errors where time-based values are used for reps-based exercises
         let validatedReps = exercise.reps || '8-12';
@@ -1586,8 +1828,8 @@ export class DatabaseStorage implements IStorage {
           targetSets: exercise.sets || 3,
           targetReps: validatedReps,
           targetWeight: suggestedWeight,
-          requiredEquipment: exercise.required_equipment || [],
-          muscles: exercise.target_muscles || [],
+          requiredEquipment: resolvedEquipment,
+          muscles: resolvedMuscles,
           notes: [
             exercise.technique_cues?.join('. '),
             exercise.suggested_weight_notes,
@@ -1775,39 +2017,163 @@ export class DatabaseStorage implements IStorage {
   }
 
   async adminUpdateExercise(id: string, data: Partial<import("@shared/schema").Exercise>): Promise<import("@shared/schema").Exercise> {
-    const [updated] = await db.update(exercises).set(data).where(eq(exercises.id, id)).returning();
+    const [current] = await db.select().from(exercises).where(eq(exercises.id, id)).limit(1);
+    if (!current) throw new Error("Exercise not found");
+
+    const updates: Partial<import("@shared/schema").Exercise> = { ...data };
+
+    if (typeof data.name === "string") {
+      updates.name = data.name.trim();
+    }
+    if (typeof data.nameEn === "string") {
+      updates.nameEn = data.nameEn.trim();
+    }
+    if (typeof data.exerciseId === "string") {
+      updates.exerciseId = data.exerciseId.trim();
+    }
+    if (typeof data.category === "string") {
+      const category = data.category.trim();
+      if (!category) throw new Error("Category is required");
+      updates.category = category;
+    }
+
+    if (data.primaryMuscles !== undefined) {
+      const primary = toStringArray(data.primaryMuscles);
+      if (primary.length === 0) throw new Error("At least one primary muscle is required");
+      updates.primaryMuscles = primary;
+    }
+
+    if (data.secondaryMuscles !== undefined) {
+      updates.secondaryMuscles = toStringArray(data.secondaryMuscles);
+    }
+
+    if (data.requiredEquipment !== undefined) {
+      updates.requiredEquipment = await this.normalizeRequiredEquipmentToKeys(data.requiredEquipment);
+    }
+
+    const effectiveNameEn =
+      (typeof updates.nameEn === "string" && updates.nameEn) ||
+      current.nameEn ||
+      (typeof updates.name === "string" && updates.name) ||
+      current.name;
+    const effectiveExerciseId =
+      (typeof updates.exerciseId === "string" && updates.exerciseId) ||
+      current.exerciseId ||
+      "";
+
+    if (!effectiveExerciseId) {
+      const generated = slugifyExerciseId(effectiveNameEn || "");
+      if (!generated) throw new Error("Could not generate exercise_id from exercise name");
+      updates.exerciseId = generated;
+    }
+
+    // Ensure secondary muscle field is always present (empty array if unspecified)
+    if (current.secondaryMuscles == null && updates.secondaryMuscles === undefined) {
+      updates.secondaryMuscles = [];
+    }
+
+    const [updated] = await db.update(exercises).set(updates).where(eq(exercises.id, id)).returning();
     return updated;
   }
 
   async adminCreateExercise(data: import("@shared/schema").InsertExercise): Promise<import("@shared/schema").Exercise> {
-    const [inserted] = await db.insert(exercises).values(data).returning();
+    const name = String(data.name || "").trim();
+    const nameEn = String(data.nameEn || name).trim();
+    const category = String(data.category || "").trim();
+    const primaryMuscles = toStringArray(data.primaryMuscles);
+    const secondaryMuscles = toStringArray(data.secondaryMuscles);
+    const requiredEquipment = await this.normalizeRequiredEquipmentToKeys(data.requiredEquipment);
+
+    if (!name) throw new Error("name is required");
+    if (!nameEn) throw new Error("nameEn is required");
+    if (!category) throw new Error("category is required");
+    if (primaryMuscles.length === 0) throw new Error("At least one primary muscle is required");
+
+    const providedExerciseId = String(data.exerciseId || "").trim();
+    const generatedExerciseId = slugifyExerciseId(nameEn);
+    const exerciseId = providedExerciseId || generatedExerciseId;
+    if (!exerciseId) throw new Error("Could not generate exercise_id from nameEn");
+
+    const payload: import("@shared/schema").InsertExercise = {
+      ...data,
+      name,
+      nameEn,
+      category,
+      exerciseId,
+      primaryMuscles,
+      secondaryMuscles,
+      requiredEquipment,
+    };
+
+    const [inserted] = await db.insert(exercises).values(payload).returning();
     return inserted;
   }
 
   async adminCreateExerciseAlias(data: import("@shared/schema").InsertExerciseAlias): Promise<import("@shared/schema").ExerciseAlias> {
+    const [exercise] = await db
+      .select({ id: exercises.id, exerciseId: exercises.exerciseId })
+      .from(exercises)
+      .where(or(eq(exercises.id, data.exerciseId), eq(exercises.exerciseId, data.exerciseId)))
+      .limit(1);
+
+    if (!exercise) {
+      throw new Error(`Exercise not found for alias: ${data.exerciseId}`);
+    }
+
+    // Some deployed databases enforce FK exercise_aliases.exercise_id -> exercises.id (UUID).
+    // Always store canonical UUID here for compatibility.
+    const canonicalExerciseRef = exercise.id;
     const norm = normalizeName(data.alias);
-    const [alias] = await db.insert(exerciseAliases)
-      .values({
-        ...data,
-        aliasNorm: norm
-      })
-      .onConflictDoUpdate({
-        target: exerciseAliases.aliasNorm,
-        set: {
-          exerciseId: data.exerciseId,
-          alias: data.alias,
-          lang: data.lang || 'sv',
-          source: data.source || 'admin'
-        }
-      })
-      .returning();
-    return alias;
+    try {
+      const legacy = await db.execute(sql`
+        INSERT INTO exercise_aliases (exercise_id, alias_name, alias, alias_norm, lang, source)
+        VALUES (${canonicalExerciseRef}, ${data.alias}, ${data.alias}, ${norm}, ${data.lang || 'sv'}, ${data.source || 'admin'})
+        ON CONFLICT (alias_norm) DO UPDATE
+          SET exercise_id = EXCLUDED.exercise_id,
+              alias_name = EXCLUDED.alias_name,
+              alias = EXCLUDED.alias,
+              lang = EXCLUDED.lang,
+              source = EXCLUDED.source
+        RETURNING id, exercise_id, alias, alias_norm, lang, source, created_at
+      `);
+      return legacy.rows[0] as import("@shared/schema").ExerciseAlias;
+    } catch (error: any) {
+      const message = String(error?.message || "").toLowerCase();
+      const missingAliasNameColumn =
+        message.includes("column") &&
+        message.includes("alias_name") &&
+        message.includes("does not exist");
+
+      if (!missingAliasNameColumn) {
+        throw error;
+      }
+
+      const [alias] = await db.insert(exerciseAliases)
+        .values({
+          ...data,
+          exerciseId: canonicalExerciseRef,
+          aliasNorm: norm
+        })
+        .onConflictDoUpdate({
+          target: exerciseAliases.aliasNorm,
+          set: {
+            exerciseId: canonicalExerciseRef,
+            alias: data.alias,
+            lang: data.lang || 'sv',
+            source: data.source || 'admin'
+          }
+        })
+        .returning();
+      return alias;
+    }
   }
 
   async adminCreateEquipment(data: import("@shared/schema").InsertEquipmentCatalog): Promise<import("@shared/schema").EquipmentCatalog> {
+    const generatedKey = slugifyExerciseId(String(data.nameEn || data.name || ""));
     const finalData = {
       ...data,
-      type: data.type || data.category || "machine"
+      type: data.type || data.category || "machine",
+      equipmentKey: String(data.equipmentKey || "").trim() || generatedKey || undefined,
     };
     const [inserted] = await db.insert(equipmentCatalog).values(finalData).returning();
     return inserted;
@@ -1818,27 +2184,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async adminUpdateEquipment(id: string, data: Partial<import("@shared/schema").EquipmentCatalog>): Promise<import("@shared/schema").EquipmentCatalog> {
-    const [updated] = await db.update(equipmentCatalog).set(data).where(eq(equipmentCatalog.id, id)).returning();
+    const [current] = await db.select().from(equipmentCatalog).where(eq(equipmentCatalog.id, id)).limit(1);
+    if (!current) throw new Error("Equipment not found");
+
+    const updates: Partial<import("@shared/schema").EquipmentCatalog> = { ...data };
+    const providedKey = String(data.equipmentKey || "").trim();
+    if (data.equipmentKey !== undefined) {
+      updates.equipmentKey = providedKey;
+    }
+
+    if (!providedKey) {
+      const effectiveNameEn = String(data.nameEn || current.nameEn || "").trim();
+      const effectiveName = String(data.name || current.name || "").trim();
+      const generatedKey = slugifyExerciseId(effectiveNameEn || effectiveName);
+      if (generatedKey) {
+        updates.equipmentKey = generatedKey;
+      }
+    }
+
+    const [updated] = await db.update(equipmentCatalog).set(updates).where(eq(equipmentCatalog.id, id)).returning();
     return updated;
   }
 
   async adminCreateEquipmentAlias(data: import("@shared/schema").InsertEquipmentAlias): Promise<import("@shared/schema").EquipmentAlias> {
     const norm = normalizeName(data.alias);
-    const [alias] = await db.insert(equipmentAliases)
-      .values({
-        ...data,
-        aliasNorm: norm
-      })
-      .onConflictDoUpdate({
-        target: equipmentAliases.aliasNorm,
-        set: {
-          equipmentKey: data.equipmentKey,
-          alias: data.alias,
-          source: data.source || 'admin'
-        }
-      })
-      .returning();
-    return alias;
+    try {
+      const [alias] = await db.insert(equipmentAliases)
+        .values({
+          ...data,
+          aliasNorm: norm
+        })
+        .onConflictDoUpdate({
+          target: equipmentAliases.aliasNorm,
+          set: {
+            equipmentKey: data.equipmentKey,
+            alias: data.alias,
+            source: data.source || 'admin'
+          }
+        })
+        .returning();
+      return alias;
+    } catch (error: any) {
+      const message = String(error?.message || "");
+      if (!message.includes('alias_name')) {
+        throw error;
+      }
+
+      // Compatibility path for databases that still require legacy alias_name.
+      const legacy = await db.execute(sql`
+        INSERT INTO equipment_aliases (equipment_key, alias_name, alias, alias_norm, lang, source)
+        VALUES (${data.equipmentKey}, ${data.alias}, ${data.alias}, ${norm}, ${data.lang || 'sv'}, ${data.source || 'admin'})
+        ON CONFLICT (alias_norm) DO UPDATE
+          SET equipment_key = EXCLUDED.equipment_key,
+              alias_name = EXCLUDED.alias_name,
+              alias = EXCLUDED.alias,
+              lang = EXCLUDED.lang,
+              source = EXCLUDED.source
+        RETURNING id, equipment_key, alias, alias_norm, lang, source, created_at
+      `);
+      return legacy.rows[0] as import("@shared/schema").EquipmentAlias;
+    }
   }
 
   async adminGetAllUsers(): Promise<(User & { profile?: UserProfile })[]> {
@@ -1989,8 +2394,8 @@ export class DatabaseStorage implements IStorage {
     if (!source || !target) {
       throw new Error("Source or target exercise not found");
     }
-    // We use exerciseId (slug like 'bench_press') as the primary key for logic, 
-    // falling back to the UUID id if exerciseId is missing
+    // We use exerciseId (slug like 'bench_press') for logs/templates/stats,
+    // and UUID id for alias FK compatibility.
     const sourceKey = source.exerciseId || source.id;
     const targetKey = target.exerciseId || target.id;
 
@@ -1998,8 +2403,8 @@ export class DatabaseStorage implements IStorage {
 
     // 2. Migrate Aliases
     await db.update(exerciseAliases)
-      .set({ exerciseId: targetKey })
-      .where(eq(exerciseAliases.exerciseId, sourceKey));
+      .set({ exerciseId: target.id })
+      .where(or(eq(exerciseAliases.exerciseId, source.id), eq(exerciseAliases.exerciseId, sourceKey)));
 
     // 3. Update Exercise Logs
     await db.update(exerciseLogs)
