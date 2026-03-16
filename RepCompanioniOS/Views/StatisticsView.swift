@@ -16,11 +16,11 @@ struct StatisticsView: View {
                         // Header
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("Training statistics")
+                                Text(String(localized: "Training statistics"))
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                Text("Monitor your progress over time")
+                                Text(String(localized: "Monitor your progress over time"))
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                             }
@@ -33,9 +33,9 @@ struct StatisticsView: View {
                             NavigationLink(destination: WorkoutHistoryView()) {
                                 ClickableStatCard(
                                     icon: "calendar",
-                                    title: "Totala Sessioner",
+                                    title: String(localized: "Total Sessions"),
                                     value: "\(StatsCalculator.shared.totalSessions(modelContext: modelContext))",
-                                    subtitle: "Completed workouts",
+                                    subtitle: String(localized: "Completed workouts"),
                                     colorScheme: colorScheme
                                 )
                             }
@@ -43,18 +43,18 @@ struct StatisticsView: View {
                             
                             StatCard(
                                 icon: "flame",
-                                title: "Total Volym",
+                                title: String(localized: "Total Volume"),
                                 value: StatsCalculator.shared.formattedTotalVolume(modelContext: modelContext),
-                                subtitle: "Lyftat i totalt",
+                                subtitle: String(localized: "Total weight lifted"),
                                 colorScheme: colorScheme
                             )
                             
                             NavigationLink(destination: ExercisePBsView()) {
                                 ClickableStatCard(
                                     icon: "dumbbell.fill",
-                                    title: "Unique Exercises",
+                                    title: String(localized: "Unique Exercises"),
                                     value: "\(StatsCalculator.shared.uniqueExercises(modelContext: modelContext))",
-                                    subtitle: "Various training exercises",
+                                    subtitle: String(localized: "Various training exercises"),
                                     colorScheme: colorScheme
                                 )
                             }
@@ -62,27 +62,27 @@ struct StatisticsView: View {
                             
                             StatCard(
                                 icon: "clock",
-                                title: "Snitt Pass",
+                                title: String(localized: "Average session"),
                                 value: StatsCalculator.shared.formattedAverageDuration(modelContext: modelContext),
-                                subtitle: "Per workout",
+                                subtitle: String(localized: "Per workout"),
                                 colorScheme: colorScheme
                             )
                         }
                         .padding(.horizontal)
                         
                         // Weekly Sessions Chart
-                        ChartCard(title: "Veckovisa Sessioner", subtitle: "Your workouts per week over time", colorScheme: colorScheme) {
+                        ChartCard(title: String(localized: "Weekly Sessions"), subtitle: String(localized: "Your workouts per week over time"), colorScheme: colorScheme) {
                             WeeklySessionsChart(data: StatsCalculator.shared.getWeeklySessionCounts(modelContext: modelContext))
                         }
                         
                         // Top Exercises Chart
-                        ChartCard(title: "Top exercises", subtitle: "Your most trained exercises by volume", colorScheme: colorScheme) {
+                        ChartCard(title: String(localized: "Top exercises"), subtitle: String(localized: "Your most trained exercises by volume"), colorScheme: colorScheme) {
                             TopExercisesChart(data: StatsCalculator.shared.getTopExercises(modelContext: modelContext))
                         }
                         
                         // Muscle Distribution Chart
                         NavigationLink(destination: MuscleBalanceView()) {
-                            ChartCard(title: "Muscle distribution", subtitle: "Distribution of sets per muscle group", colorScheme: colorScheme) {
+                            ChartCard(title: String(localized: "Muscle distribution"), subtitle: String(localized: "Distribution of sets per muscle group"), colorScheme: colorScheme) {
                                 ExerciseDistributionChart(data: StatsCalculator.shared.getMuscleDistribution(modelContext: modelContext))
                             }
                         }
@@ -91,21 +91,21 @@ struct StatisticsView: View {
                         // Strength Development Charts
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
-                                Text("Strength development")
+                                Text(String(localized: "Strength development"))
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 Spacer()
                                 NavigationLink(destination: ExerciseStatsListView()) {
-                                    Text("Visa alla")
+                                    Text(String(localized: "View all"))
                                         .font(.caption)
                                         .foregroundStyle(Color.accentBlue)
                                 }
                             }
                             .padding(.horizontal)
                             
-                            StrengthChartCard(title: "Squat", current: "70 kg max", average: "38.0 kg snitt", colorScheme: colorScheme)
-                            StrengthChartCard(title: "Bench press", current: "70 kg max", average: "60.0 kg snitt", colorScheme: colorScheme)
+                            StrengthChartCard(title: String(localized: "Squat"), current: "70 kg " + String(localized: "max"), average: "38.0 kg " + String(localized: "average"), colorScheme: colorScheme)
+                            StrengthChartCard(title: String(localized: "Bench press"), current: "70 kg " + String(localized: "max"), average: "60.0 kg " + String(localized: "average"), colorScheme: colorScheme)
                         }
                         
                         // Health Trends
@@ -114,10 +114,10 @@ struct StatisticsView: View {
                                 Image(systemName: "heart.text.square.fill")
                                     .foregroundColor(.red)
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Health trends")
+                                    Text(String(localized: "Health trends"))
                                         .font(.headline)
                                         .foregroundStyle(Color.textPrimary(for: colorScheme))
-                                    Text("View your health metrics over time")
+                                    Text(String(localized: "View your health metrics over time"))
                                         .font(.caption)
                                         .foregroundStyle(Color.textSecondary(for: colorScheme))
                                 }
@@ -133,14 +133,14 @@ struct StatisticsView: View {
                         
                         // History Section
                         VStack(alignment: .leading) {
-                            Text("Training history")
+                            Text(String(localized: "Training history"))
                                 .font(.title3)                                .fontWeight(.bold)
                                 .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 .padding(.horizontal)
                             
                             let history = StatsCalculator.shared.getWorkoutHistory(modelContext: modelContext).prefix(5)
                             if history.isEmpty {
-                                Text("No history yet")
+                                Text(String(localized: "No history yet"))
                                     .font(.subheadline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .padding()
@@ -149,8 +149,8 @@ struct StatisticsView: View {
                                     HistoryRow(
                                         title: item.name,
                                         date: item.date.formatted(date: .abbreviated, time: .omitted),
-                                        time: "\(item.duration) min",
-                                        status: item.status == "completed" ? "Completed" : "Avbrutet",
+                                        time: "\(item.duration) " + String(localized: "min"),
+                                        status: item.status == "completed" ? String(localized: "Completed") : String(localized: "Cancelled"),
                                         isCompleted: item.status == "completed",
                                         colorScheme: colorScheme
                                     )
@@ -380,7 +380,7 @@ struct ExerciseDistributionChart: View {
                     }
                 }
                 if data.count > 6 {
-                    Text("+ \(data.count - 6) till")
+                    Text("+ \(data.count - 6) " + String(localized: "more"))
                         .font(.system(size: 8))
                         .foregroundStyle(.tertiary)
                 }

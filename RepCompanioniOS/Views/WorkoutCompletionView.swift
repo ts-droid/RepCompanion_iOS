@@ -81,12 +81,12 @@ struct WorkoutCompletionView: View {
                             .padding(.top, 40)
                             
                             VStack(spacing: 8) {
-                                Text("Great job!")
+                                Text(String(localized: "Great job!"))
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 
-                                Text("You have completed your entire workout!")
+                                Text(String(localized: "You have completed your entire workout!"))
                                     .font(.headline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
@@ -101,12 +101,12 @@ struct WorkoutCompletionView: View {
                                 .padding(.top, 40)
                             
                             VStack(spacing: 8) {
-                                Text("Session completed")
+                                Text(String(localized: "Session completed"))
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.textPrimary(for: colorScheme))
                                 
-                                Text("Here is a summary of what you accomplished.")
+                                Text(String(localized: "Here is a summary of what you accomplished."))
                                     .font(.headline)
                                     .foregroundStyle(Color.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
@@ -116,7 +116,7 @@ struct WorkoutCompletionView: View {
                     
                     // Summary Grid
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Summary")
+                        Text(String(localized: "Summary"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
@@ -124,25 +124,25 @@ struct WorkoutCompletionView: View {
                             SummaryStatCard(
                                 icon: "clock",
                                 value: "\(stats.durationMinutes)",
-                                label: "minuter",
+                                label: String(localized: "minutes"),
                                 colorScheme: colorScheme
                             )
                             SummaryStatCard(
                                 icon: "dumbbell.fill",
                                 value: "\(stats.exerciseCount)",
-                                label: "exercises",
+                                label: String(localized: "exercises"),
                                 colorScheme: colorScheme
                             )
                             SummaryStatCard(
                                 icon: "checkmark.circle.fill",
                                 value: "\(stats.setCount)",
-                                label: "set",
+                                label: String(localized: "set"),
                                 colorScheme: colorScheme
                             )
                             SummaryStatCard(
                                 icon: "bolt.fill",
                                 value: stats.totalVolumeKg.formattedWeight,
-                                label: "kg total",
+                                label: String(localized: "kg total"),
                                 colorScheme: colorScheme
                             )
                         }
@@ -154,11 +154,11 @@ struct WorkoutCompletionView: View {
                     
                     // Notes Section
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Anteckningar (valfritt)")
+                        Text(String(localized: "Notes (optional)"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary(for: colorScheme))
                         
-                        TextField("How did the session feel? Anything to remember for next time?", text: $notes, axis: .vertical)
+                        TextField(String(localized: "How did the session feel? Anything to remember for next time?"), text: $notes, axis: .vertical)
                             .lineLimit(3...6)
                             .padding(12)
                             .background(Color.appBackground(for: colorScheme))
@@ -171,7 +171,7 @@ struct WorkoutCompletionView: View {
                             .toolbar {
                                 ToolbarItemGroup(placement: .keyboard) {
                                     Spacer()
-                                    Button("Done") {
+                                    Button(String(localized: "Done")) {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     }
                                 }
@@ -184,7 +184,7 @@ struct WorkoutCompletionView: View {
                     
                     // Finalize Button
                     Button(action: finalizeSession) {
-                        Text("Complete workout")
+                        Text(String(localized: "Complete workout"))
                             .font(.headline)
                             .fontWeight(.bold)
                             .foregroundColor(.white)

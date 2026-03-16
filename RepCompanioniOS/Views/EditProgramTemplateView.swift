@@ -11,6 +11,8 @@ struct EditProgramTemplateView: View {
     @State private var exercises: [ProgramTemplateExercise] = []
     @State private var hasChanges = false
     @State private var showAddExercise = false
+    @State private var activeSession: WorkoutSession?
+    @State private var showActiveWorkout = false
     
     private var templateExercises: [ProgramTemplateExercise] {
         template.exercises.sorted { $0.orderIndex < $1.orderIndex }
@@ -180,6 +182,11 @@ struct EditProgramTemplateView: View {
                     }
                 )
             }
+            .sheet(isPresented: $showActiveWorkout) {
+                if let session = activeSession {
+                    ActiveWorkoutView(session: session, template: template)
+                }
+            }
         }
     }
     
@@ -198,9 +205,40 @@ struct EditProgramTemplateView: View {
     }
     
     private func saveChangesAndStart() {
-        saveChangesInternal()
-        // TODO: Start workout session
-        // This would create a WorkoutSession and navigate to ActiveWorkoutView
+        // Save changes without dismissing
+        let currentIds = Set(exercises.map { $0.id.uuidString })
+        for exercise in templateExercises {
+            if !currentIds.contains(exercise.id.uuidString) {
+                modelContext.delete(exercise)
+            }
+        }
+        for exercise in exercises {
+            if let existing = templateExercises.first(where: { $0.id == exercise.id }) {
+                existing.exerciseName = exercise.exerciseName
+                existing.targetSets = exercise.targetSets
+                existing.targetReps = exercise.targetReps
+                existing.targetWeight = exercise.targetWeight
+                existing.orderIndex = exercise.orderIndex
+            } else {
+                exercise.template = template
+                modelContext.insert(exercise)
+            }
+        }
+        try? modelContext.save()
+        hasChanges = false
+
+        // Start workout session
+        let session = WorkoutSession(
+            userId: template.userId,
+            templateId: template.id,
+            sessionType: "strength",
+            sessionName: template.templateName,
+            status: "active"
+        )
+        modelContext.insert(session)
+        try? modelContext.save()
+        activeSession = session
+        showActiveWorkout = true
     }
     
     private func saveChangesInternal() {

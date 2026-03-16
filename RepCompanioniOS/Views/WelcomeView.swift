@@ -39,16 +39,16 @@ struct WelcomeView: View {
                                 icon: "list.clipboard.fill",
                                 iconBg: Color(hex: "E0F2F1"),
                                 iconColor: Color(hex: "00897B"),
-                                title: "Personal training programs",
-                                subtitle: "Customize your schedule based on your goals and needs."
+                                title: String(localized: "Personal training programs"),
+                                subtitle: String(localized: "Customize your schedule based on your goals and needs.")
                             )
                             
                             FeatureCard(
                                 icon: "lightbulb.fill",
                                 iconBg: Color(hex: "FFF9C4"),
                                 iconColor: Color(hex: "FBC02D"),
-                                title: "Tips & advice along the way",
-                                subtitle: "Get expert tips and motivation to keep you on track."
+                                title: String(localized: "Tips & advice along the way"),
+                                subtitle: String(localized: "Get expert tips and motivation to keep you on track.")
                             )
                             
                             FeatureCard(
