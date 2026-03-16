@@ -161,6 +161,13 @@ final class UserProfile {
     
     // MARK: - Computed Properties
     
+    /// Determines which body measurement fields to prioritise in UI and notifications.
+    /// Muskel-fokus om styrka + volym > 60 % av målen, annars viktnedgångsfokus.
+    var measurementFocus: MeasurementFocus {
+        let muscleScore = goalStrength + goalVolume
+        return muscleScore > 60 ? .muscleBuild : .weightLoss
+    }
+
     /// Returns a user-friendly Swedish label for the motivation type
     var derivedTrainingFocus: String {
         guard let motivation = motivationType else {

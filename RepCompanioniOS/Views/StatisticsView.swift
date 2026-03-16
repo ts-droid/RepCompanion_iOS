@@ -5,6 +5,8 @@ import SwiftData
 struct StatisticsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
+    @StateObject private var authService = AuthService.shared
+    @Query(sort: \BodyMeasurement.date, order: .reverse) private var bodyMeasurements: [BodyMeasurement]
     
     var body: some View {
         NavigationView {
@@ -131,6 +133,13 @@ struct StatisticsView: View {
                         }
                         .padding(.horizontal)
                         
+                        // Body Progress Card
+                        BodyProgressStatCard(
+                            measurements: bodyMeasurements,
+                            colorScheme: colorScheme
+                        )
+                        .padding(.horizontal)
+
                         // History Section
                         VStack(alignment: .leading) {
                             Text(String(localized: "Training history"))
@@ -164,6 +173,107 @@ struct StatisticsView: View {
             }
             .navigationBarHidden(true)
         }
+    }
+}
+
+// MARK: - BodyProgressStatCard
+
+struct BodyProgressStatCard: View {
+    let measurements: [BodyMeasurement]
+    let colorScheme: ColorScheme
+
+    @StateObject private var authService = AuthService.shared
+
+    private var latest: BodyMeasurement? { measurements.first }
+
+    private var weightPoints: [(Date, Double)] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return measurements
+            .filter { $0.date >= cutoff }
+            .sorted { $0.date < $1.date }
+            .compactMap { m in m.weight.map { (m.date, $0) } }
+    }
+
+    private var weightDelta30d: Double? {
+        guard let latest = measurements.first?.weight else { return nil }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let old = measurements.last(where: { $0.date <= cutoff && $0.weight != nil })?.weight
+        guard let oldVal = old else { return nil }
+        return latest - oldVal
+    }
+
+    var body: some View {
+        NavigationLink(destination: BodyProgressView(
+            userId: authService.currentUserId ?? "",
+            focus: .weightLoss
+        )) {
+            HStack(spacing: 16) {
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(Color.accentBlue.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "scalemass.fill")
+                        .foregroundColor(Color.accentBlue)
+                        .font(.system(size: 18))
+                }
+
+                // Text
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(String(localized: "Viktutveckling"))
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                    if let w = latest?.weight {
+                        HStack(spacing: 6) {
+                            Text(formatVal(w) + " kg")
+                                .font(.caption)
+                                .foregroundColor(Color.textSecondary(for: colorScheme))
+                            if let d = weightDelta30d, d != 0 {
+                                Text((d > 0 ? "+" : "") + formatVal(d) + " kg")
+                                    .font(.caption2)
+                                    .foregroundColor(d < 0 ? .green : .red)
+                                    .padding(.horizontal, 4).padding(.vertical, 1)
+                                    .background((d < 0 ? Color.green : Color.red).opacity(0.1))
+                                    .cornerRadius(4)
+                            }
+                        }
+                    } else {
+                        Text(String(localized: "Inga mätningar än"))
+                            .font(.caption)
+                            .foregroundColor(Color.textSecondary(for: colorScheme))
+                    }
+                }
+
+                Spacer()
+
+                // Mini sparkline
+                if weightPoints.count >= 2 {
+                    Chart {
+                        ForEach(weightPoints, id: \.0) { date, val in
+                            LineMark(x: .value("D", date), y: .value("V", val))
+                                .foregroundStyle(Color.accentBlue)
+                                .lineStyle(StrokeStyle(lineWidth: 2))
+                                .interpolationMethod(.catmullRom)
+                        }
+                    }
+                    .frame(width: 70, height: 36)
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(Color.textSecondary(for: colorScheme).opacity(0.5))
+            }
+            .padding()
+            .background(Color.cardBackground(for: colorScheme))
+            .cornerRadius(12)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private func formatVal(_ v: Double) -> String {
+        v.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(v)) : String(format: "%.1f", v)
     }
 }
 

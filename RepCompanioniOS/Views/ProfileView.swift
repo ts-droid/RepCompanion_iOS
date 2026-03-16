@@ -10,9 +10,11 @@ struct ProfileView: View {
     @StateObject private var healthKitService = HealthKitService.shared
     @State private var showSettings = false
     @State private var showTrainingAdjustment = false
-    
+    @State private var showBodyLog = false
+
     @Query private var profiles: [UserProfile]
     @Query private var gyms: [Gym]
+    @Query(sort: \BodyMeasurement.date, order: .reverse) private var allMeasurements: [BodyMeasurement]
     
     private var currentProfile: UserProfile? {
         if let userId = authService.currentUserId {
@@ -292,6 +294,16 @@ struct ProfileView: View {
                             .padding(.horizontal)
                         }
                         
+                        // Body Measurements
+                        BodyMeasurementSectionView(
+                            userId: authService.currentUserId ?? "",
+                            measurements: allMeasurements,
+                            focus: currentProfile?.measurementFocus ?? .weightLoss,
+                            colorScheme: effectiveColorScheme,
+                            selectedTheme: selectedTheme,
+                            onLogTap: { showBodyLog = true }
+                        )
+
                         // Gym Settings
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
@@ -381,13 +393,188 @@ struct ProfileView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                let days = BodyMeasurementService.shared.daysSinceLastLog(
+                    userId: authService.currentUserId ?? "",
+                    modelContext: modelContext
+                )
+                NotificationService.shared.scheduleWeeklyBodyReminder(daysSinceLastLog: days)
+            }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
             }
             .sheet(isPresented: $showTrainingAdjustment) {
                 TrainingAdjustmentView()
             }
+            .sheet(isPresented: $showBodyLog) {
+                BodyMeasurementLogView(
+                    userId: authService.currentUserId ?? "",
+                    focus: currentProfile?.measurementFocus ?? .weightLoss,
+                    previousMeasurement: allMeasurements.first,
+                    onSaved: {}
+                )
+            }
         }
+    }
+}
+
+// MARK: - BodyMeasurementSectionView
+
+struct BodyMeasurementSectionView: View {
+    let userId: String
+    let measurements: [BodyMeasurement]
+    let focus: MeasurementFocus
+    let colorScheme: ColorScheme
+    let selectedTheme: String
+    let onLogTap: () -> Void
+
+    private var latest: BodyMeasurement? { measurements.first }
+
+    private var daysSinceLog: Int? {
+        guard let last = latest else { return nil }
+        return Calendar.current.dateComponents([.day], from: last.date, to: Date()).day
+    }
+
+    private var needsReminder: Bool { (daysSinceLog ?? 999) >= 6 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                Image(systemName: "scalemass.fill")
+                    .foregroundStyle(Color.textPrimary(for: colorScheme))
+                Text(String(localized: "Vikt & Kroppsmått"))
+                    .font(.title3).fontWeight(.bold)
+                    .foregroundStyle(Color.textPrimary(for: colorScheme))
+                Spacer()
+                if needsReminder {
+                    Text(String(localized: "Logga nu!"))
+                        .font(.caption2).fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Color.red.opacity(0.85))
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+
+            // Summary card
+            VStack(spacing: 10) {
+                if let last = latest {
+                    // Senast loggat datum
+                    HStack {
+                        Text(String(localized: "Senast loggat"))
+                            .font(.caption).foregroundColor(Color.textSecondary(for: colorScheme))
+                        Spacer()
+                        Text(last.date, style: .date)
+                            .font(.caption).foregroundColor(Color.textSecondary(for: colorScheme))
+                    }
+
+                    Divider()
+
+                    // Vikt + top-2 fokuserade mått
+                    if let w = last.weight {
+                        summaryRow(icon: "scalemass", label: String(localized: "Vikt"),
+                                   value: formatVal(w) + " kg",
+                                   delta: weightDelta30d())
+                    }
+                    ForEach(focus.primaryFields.prefix(2), id: \.label) { field in
+                        if let val = last[keyPath: field.keyPath] {
+                            summaryRow(icon: "ruler", label: field.label,
+                                       value: formatVal(val) + " cm",
+                                       delta: delta30d(keyPath: field.keyPath))
+                        }
+                    }
+                } else {
+                    Text(String(localized: "Inga mått loggade ännu — tryck Logga mått för att komma igång!"))
+                        .font(.subheadline)
+                        .foregroundColor(Color.textSecondary(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .padding(.vertical, 8)
+                }
+
+                // Buttons
+                HStack(spacing: 12) {
+                    Button(action: onLogTap) {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                            Text(String(localized: "Logga mått"))
+                        }
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.accentBlue)
+                        .cornerRadius(10)
+                    }
+
+                    NavigationLink(destination: BodyProgressView(userId: userId, focus: focus)) {
+                        HStack {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                            Text(String(localized: "Visa progress"))
+                        }
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundColor(Color.textPrimary(for: colorScheme))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.appBackground(for: colorScheme))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.textSecondary(for: colorScheme).opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                }
+            }
+            .padding()
+            .background(Color.cardBackground(for: colorScheme))
+            .cornerRadius(16)
+            .padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    private func summaryRow(icon: String, label: String, value: String, delta: Double?) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(Color.textSecondary(for: colorScheme))
+                .frame(width: 18)
+            Text(label)
+                .font(.subheadline)
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+            Spacer()
+            Text(value)
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.textPrimary(for: colorScheme))
+            if let d = delta, d != 0 {
+                Text((d > 0 ? "+" : "") + formatVal(d))
+                    .font(.caption2)
+                    .foregroundColor(d < 0 ? .green : .red)
+                    .padding(.horizontal, 5).padding(.vertical, 2)
+                    .background((d < 0 ? Color.green : Color.red).opacity(0.1))
+                    .cornerRadius(5)
+            }
+        }
+    }
+
+    private func formatVal(_ v: Double) -> String {
+        v.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(v)) : String(format: "%.1f", v)
+    }
+
+    private func weightDelta30d() -> Double? {
+        guard let latest = measurements.first?.weight else { return nil }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let old = measurements.last(where: { $0.date <= cutoff && $0.weight != nil })?.weight
+        guard let oldVal = old else { return nil }
+        return latest - oldVal
+    }
+
+    private func delta30d(keyPath: KeyPath<BodyMeasurement, Double?>) -> Double? {
+        guard let latest = measurements.first?[keyPath: keyPath] else { return nil }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        let old = measurements.last(where: { $0.date <= cutoff && $0[keyPath: keyPath] != nil })?[keyPath: keyPath]
+        guard let oldVal = old else { return nil }
+        return latest - oldVal
     }
 }
 

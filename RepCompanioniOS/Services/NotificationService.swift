@@ -153,6 +153,42 @@ class NotificationService: NSObject, ObservableObject {
         }
     }
     
+    /// Schemalägger en veckovis påminnelse att logga vikt och mått — varje måndag kl 09:00.
+    /// Hoppar över om användaren redan loggat inom de senaste 6 dagarna.
+    func scheduleWeeklyBodyReminder(daysSinceLastLog: Int?) {
+        let identifier = "weekly.body.reminder"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+
+        // Skippa om mätning nyligen gjorts
+        if let days = daysSinceLastLog, days < 6 { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Dags att logga vikt & mått 📏")
+        if let days = daysSinceLastLog {
+            content.body = String(format: String(localized: "Du loggade senast för %d dagar sedan. Ta 2 minuter nu!"), days)
+        } else {
+            content.body = String(localized: "Starta din progress-tracking idag — logga vikt och mått!")
+        }
+        content.sound = .default
+        content.userInfo = ["action": "open_body_log"]
+
+        // Måndag (weekday=2 i iOS) kl 09:00
+        var dateComponents = DateComponents()
+        dateComponents.weekday = 2
+        dateComponents.hour = 9
+        dateComponents.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("[NotificationService] ⚠️ Could not schedule body reminder: \(error)")
+            } else {
+                print("[NotificationService] ✅ Weekly body reminder scheduled (Monday 09:00)")
+            }
+        }
+    }
+
     func cancelNotification(identifier: String) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
     }

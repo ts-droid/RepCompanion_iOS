@@ -1435,6 +1435,68 @@ class APIService {
         return try decoder.decode([UserEquipmentResponse].self, from: data)
     }
     
+    // MARK: - Body Measurements
+
+    func fetchBodyMeasurements() async throws -> [BodyMeasurementResponse] {
+        guard let token = authToken else { throw APIError.unauthorized }
+        let url = URL(string: "\(baseURL)/api/body-measurements")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw APIError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode([BodyMeasurementResponse].self, from: data)
+    }
+
+    func createBodyMeasurement(_ m: BodyMeasurement) async throws -> BodyMeasurementResponse {
+        guard let token = authToken else { throw APIError.unauthorized }
+        let url = URL(string: "\(baseURL)/api/body-measurements")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var body: [String: Any?] = [
+            "date": ISO8601DateFormatter().string(from: m.date),
+            "weight": m.weight,
+            "waist": m.waist, "hips": m.hips, "neck": m.neck, "chest": m.chest,
+            "thighRight": m.thighRight, "thighLeft": m.thighLeft,
+            "bicepRight": m.bicepRight, "bicepLeft": m.bicepLeft,
+            "calfRight": m.calfRight, "calfLeft": m.calfLeft,
+            "forearmRight": m.forearmRight, "forearmLeft": m.forearmLeft,
+            "shoulders": m.shoulders, "abdomen": m.abdomen
+        ]
+        // Remove nil values before encoding
+        let cleaned = body.compactMapValues { $0 }
+        request.httpBody = try? JSONSerialization.data(withJSONObject: cleaned)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw APIError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(BodyMeasurementResponse.self, from: data)
+    }
+
+    func deleteBodyMeasurement(id: UUID) async throws {
+        guard let token = authToken else { throw APIError.unauthorized }
+        let url = URL(string: "\(baseURL)/api/body-measurements/\(id.uuidString)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw APIError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+    }
+
     func createGym(name: String, location: String?, latitude: String? = nil, longitude: String? = nil, equipmentIds: [String]? = nil, isPublic: Bool = false) async throws -> GymResponse {
         guard let token = authToken else {
             throw APIError.unauthorized
@@ -2606,6 +2668,30 @@ struct EquipmentCatalogResponse: Codable {
 struct AdminApproveEquipmentResponse: Codable {
     let success: Bool
     let equipment: EquipmentCatalogResponse
+}
+
+// MARK: - Body Measurements Response
+
+struct BodyMeasurementResponse: Codable {
+    let id: UUID
+    let userId: String
+    let date: Date
+    let weight: Double?
+    let waist: Double?
+    let hips: Double?
+    let neck: Double?
+    let chest: Double?
+    let thighRight: Double?
+    let thighLeft: Double?
+    let bicepRight: Double?
+    let bicepLeft: Double?
+    let calfRight: Double?
+    let calfLeft: Double?
+    let forearmRight: Double?
+    let forearmLeft: Double?
+    let shoulders: Double?
+    let abdomen: Double?
+    let createdAt: Date?
 }
 
 // MARK: - Errors
