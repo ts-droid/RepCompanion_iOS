@@ -48,9 +48,9 @@ struct LoginView: View {
                                 Image("GoogleLogo")
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 24, height: 24)
-                                Text("Continue with Google")
-                                    .font(.system(size: 19, weight: .semibold))
+                                    .frame(width: 20, height: 20)
+                                Text(String(localized: "Continue with Google"))
+                                    .font(.system(size: 17, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
@@ -72,18 +72,18 @@ struct LoginView: View {
                             }
                         )
                         .signInWithAppleButtonStyle(.white)
+                        .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .frame(maxWidth: 375) // Avoid layout constraint conflicts (max width is 375 for this button)
-                        .clipShape(Capsule())
+                        .cornerRadius(28)
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
 
                         // Magic Link / Email Flow
                         Button(action: { showEmailSignUp = true }) {
                             HStack(spacing: 12) {
                                 Image(systemName: "link")
-                                    .font(.system(size: 19, weight: .semibold))
-                                Text("Sign in with Magic Link")
-                                    .font(.system(size: 19, weight: .semibold))
+                                    .font(.system(size: 17, weight: .semibold))
+                                Text(String(localized: "Sign in with Magic Link"))
+                                    .font(.system(size: 17, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
