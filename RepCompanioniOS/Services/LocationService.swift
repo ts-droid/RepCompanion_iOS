@@ -129,8 +129,8 @@ class LocationService: NSObject, ObservableObject {
             }
             
             if let mapItems = response?.mapItems {
-                appleGyms = mapItems.compactMap { item in
-                    guard let gymLocation = item.location else { return nil }
+                appleGyms = mapItems.map { item in
+                    let gymLocation = item.location
                     let distance = location.distance(from: gymLocation)
                     let addressString = (item.addressRepresentations[.postalAddress] as? CNPostalAddress)
                         .flatMap { CNPostalAddressFormatter.string(from: $0, style: .mailingAddress) }
