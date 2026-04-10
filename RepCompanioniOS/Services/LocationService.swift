@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 import MapKit
+import Contacts
 import Combine
 
 struct NearbyGym: Identifiable {
@@ -129,13 +130,14 @@ class LocationService: NSObject, ObservableObject {
             
             if let mapItems = response?.mapItems {
                 appleGyms = mapItems.compactMap { item in
-                    // Use placemark.location which is the standard way to get the coordinate
-                    guard let gymLocation = item.placemark.location else { return nil }
+                    guard let gymLocation = item.location else { return nil }
                     let distance = location.distance(from: gymLocation)
-                    
+                    let addressString = (item.addressRepresentations[.postalAddress] as? CNPostalAddress)
+                        .flatMap { CNPostalAddressFormatter.string(from: $0, style: .mailingAddress) }
+
                     return NearbyGym(
                         name: item.name ?? "Unknown gym",
-                        address: item.placemark.title, 
+                        address: addressString,
                         latitude: gymLocation.coordinate.latitude,
                         longitude: gymLocation.coordinate.longitude,
                         distance: distance,

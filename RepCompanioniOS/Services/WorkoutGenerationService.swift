@@ -152,7 +152,6 @@ class WorkoutGenerationService: ObservableObject {
             "rehabilitation": "Rehabilitering",
             "rehabilitering": "Rehabilitering",
             "better_health": "Health and lifestyle",
-            "better_health": "Health and lifestyle",
             "health_lifestyle": "Health and lifestyle",
             "build_muscle": "Muscle growth and hypertrophy",
             "bygga_muskler": "Muscle growth and hypertrophy",
@@ -169,7 +168,6 @@ class WorkoutGenerationService: ObservableObject {
         
         // Map training level
         let levelMap: [String: String] = [
-            "beginner": "Beginner",
             "beginner": "Beginner",
             "intermediate": "Van",
             "van": "Van",

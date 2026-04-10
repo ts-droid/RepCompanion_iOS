@@ -1651,7 +1651,7 @@ class APIService {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var body: [String: Any?] = [
+        let body: [String: Any?] = [
             "date": ISO8601DateFormatter().string(from: m.date),
             "weight": m.weight,
             "waist": m.waist, "hips": m.hips, "neck": m.neck, "chest": m.chest,

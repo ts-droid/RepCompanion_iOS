@@ -2376,7 +2376,7 @@ struct OnboardingView: View {
             endurance = 40
             hypertrophy = 20
             cardio = 10
-        case "better_health", "better_health":
+        case "better_health":
             endurance = 35
             cardio = 35
             strength = 20
@@ -2484,7 +2484,7 @@ struct OnboardingView: View {
         let levelForCalc = trainingLevel.isEmpty ? "van" : trainingLevel
         
         switch levelForCalc.lowercased() {
-        case "beginner", "beginner":
+        case "beginner":
             // For "build_muscle", keep higher strength/hypertrophy even for beginners
             if motivationType.lowercased() == "build_muscle" || motivationType.lowercased() == "bygga_muskler" || motivationType.lowercased() == "hypertrofi" || motivationType.lowercased() == "fitness" {
                 // Smaller adjustment for muscle building - still prioritize strength/hypertrophy

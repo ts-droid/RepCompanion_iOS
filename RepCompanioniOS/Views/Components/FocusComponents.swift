@@ -76,7 +76,6 @@ struct FocusFlowLayout: Layout {
     }
     
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let maxWidth = bounds.width
         var x = bounds.minX
         var y = bounds.minY
         var rowHeight: CGFloat = 0
@@ -101,7 +100,6 @@ struct FocusFlowLayout: Layout {
     
     // Helper to fix the layout implementation if needed
     func placeSubviewsManual(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let maxWidth = bounds.width
         var x = bounds.minX
         var y = bounds.minY
         var rowHeight: CGFloat = 0
