@@ -224,7 +224,9 @@ struct ActiveWorkoutView: View {
                 }
             }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("WatchSyncRequested"))) { _ in
+            #if DEBUG
             print("[ActiveWorkoutView] Received sync request via notification")
+            #endif
             WatchConnectivityManager.shared.sendWorkoutStart(
                 session: session,
                 template: template,
@@ -854,7 +856,9 @@ struct ActiveWorkoutView: View {
                 modelContext: modelContext
             )
         } catch {
+            #if DEBUG
             print("Error updating exercise stats: \(error)")
+            #endif
         }
         
         // Check if this was the last set of the exercise

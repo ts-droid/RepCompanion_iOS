@@ -40,20 +40,28 @@ class GoogleSignInService: ObservableObject {
     
     private func configureGoogleSignIn() {
         #if canImport(GoogleSignIn)
+        #if DEBUG
         print("[GoogleSignInService] 🔍 Checking for GoogleService-Info.plist...")
+        #endif
         guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") else {
+            #if DEBUG
             print("[GoogleSignInService] ⚠️ GoogleService-Info.plist not found in bundle.")
+            #endif
             return
         }
         
         guard let plist = NSDictionary(contentsOfFile: path),
               let clientId = plist["CLIENT_ID"] as? String else {
+            #if DEBUG
             print("[GoogleSignInService] ⚠️ Could not find CLIENT_ID in GoogleService-Info.plist.")
+            #endif
             return
         }
         
         if clientId.contains("PLACEHOLDER") {
+            #if DEBUG
             print("[GoogleSignInService] ⚠️ Google Sign-In is using a PLACEHOLDER Client ID. It will not work until you replace it with a real one.")
+            #endif
             return
         }
         
@@ -61,9 +69,13 @@ class GoogleSignInService: ObservableObject {
         
         GIDSignIn.sharedInstance.configuration = config
         isConfigured = true
+        #if DEBUG
         print("[GoogleSignInService] ✅ Configured successfully with ID: \(clientId)")
+        #endif
         #else
+        #if DEBUG
         print("[GoogleSignInService] ❌ GoogleSignIn framework (SDK) is NOT found. Please add it via SPM.")
+        #endif
         #endif
     }
     

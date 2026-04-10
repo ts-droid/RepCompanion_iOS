@@ -203,10 +203,14 @@ struct WatchContentView: View {
         
         do {
             try modelContext.save()
+            #if DEBUG
             print("[Watch] Started session for template: \(template.templateName)")
+            #endif
             navigateToWorkout = true
         } catch {
+            #if DEBUG
             print("[Watch] Error starting session: \(error)")
+            #endif
         }
     }
 }

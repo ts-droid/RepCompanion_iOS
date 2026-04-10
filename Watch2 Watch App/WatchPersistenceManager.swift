@@ -69,9 +69,13 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
             
             do {
                 container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+                #if DEBUG
                 print("[Watch] SwiftData container created (persistent)")
+                #endif
             } catch {
+                #if DEBUG
                 print("[Watch] Error creating SwiftData container: \(error)")
+                #endif
                 container = nil
             }
         } else {
@@ -88,12 +92,18 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
             
             if watchSession?.activationState != .activated {
                 watchSession?.activate()
+                #if DEBUG
                 print("[Watch] WCSession activate called")
+                #endif
             } else {
+                #if DEBUG
                 print("[Watch] WCSession already activated")
+                #endif
             }
         } else {
+             #if DEBUG
              print("[Watch] Watch Connectivity not supported")
+             #endif
         }
     }
     
@@ -111,9 +121,13 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         }
         
         if let error = error {
+            #if DEBUG
             print("[Watch] WCSession activation failed: \(error.localizedDescription)")
+            #endif
         } else {
+            #if DEBUG
             print("[Watch] WCSession activated: \(activationState.rawValue)")
+            #endif
             if activationState == .activated {
                 Task { @MainActor [weak self] in
                     self?.processQueuedSyncs()
@@ -126,12 +140,16 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         DispatchQueue.main.async {
              self.isReachable = session.isReachable
         }
+        #if DEBUG
         print("[Watch] Reachability changed: \(session.isReachable)")
+        #endif
     }
     
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         if let type = message["type"] as? String, type == "workout_start" {
+            #if DEBUG
             print("[Watch] Received workout start from iPhone")
+            #endif
             Task { @MainActor in
                 self.handleWorkoutStart(message: message)
             }
@@ -223,9 +241,13 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         
         do {
             try context.save()
+            #if DEBUG
             print("[Watch] Saved to SwiftData: \(exerciseName) - Set \(setNumber)")
+            #endif
         } catch {
+            #if DEBUG
             print("[Watch] Error saving to SwiftData: \(error)")
+            #endif
         }
     }
     
@@ -255,7 +277,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         workoutData["lastUpdated"] = Date().timeIntervalSince1970
         
         UserDefaults.standard.set(workoutData, forKey: key)
+        #if DEBUG
         print("[Watch] Saved to UserDefaults: \(exerciseName) - Set \(setNumber)")
+        #endif
     }
     
     @MainActor
@@ -322,9 +346,13 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
             ]
             
             session.sendMessage(message, replyHandler: { _ in
+                #if DEBUG
                 print("[Watch] Synced to iPhone")
+                #endif
             }, errorHandler: { [weak self] error in
+                #if DEBUG
                 print("[Watch] Error syncing to iPhone: \(error.localizedDescription)")
+                #endif
                 self?.queueForSync(sessionId: sessionId, exerciseName: exerciseName, exerciseOrderIndex: exerciseOrderIndex, setNumber: setNumber, reps: reps, weight: weight)
             })
         } else {
@@ -343,7 +371,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         
         if session.isReachable {
             session.sendMessage(message, replyHandler: nil, errorHandler: { [weak self] error in
+                #if DEBUG
                 print("[Watch] Error syncing completion: \(error.localizedDescription)")
+                #endif
                 self?.queueMessageForSync(message)
             })
         } else {
@@ -376,7 +406,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
             "timestamp": Date().timeIntervalSince1970
         ])
         saveOfflineQueue(queue)
+        #if DEBUG
         print("[Watch] Queued for sync: \(exerciseName) - Set \(setNumber)")
+        #endif
     }
     
     @MainActor
@@ -385,7 +417,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         let queue = getOfflineQueue()
         guard !queue.isEmpty else { return }
         
+        #if DEBUG
         print("[Watch] Processing \(queue.count) queued items...")
+        #endif
         var remainingQueue: [[String: Any]] = []
         
         for item in queue {
@@ -400,7 +434,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
             
             let message = item // ... simplified
             session.sendMessage(message, replyHandler: { _ in
+                #if DEBUG
                 print("[Watch] Synced queued item: \(exerciseName)")
+                #endif
             }, errorHandler: { _ in
                 remainingQueue.append(item)
             })
@@ -434,7 +470,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
               let sessionId = UUID(uuidString: sessionIdString),
               let timestamp = message["startedAt"] as? TimeInterval,
               let templateIdString = message["templateId"] as? String else {
+            #if DEBUG
             print("[Watch] Invalid start message")
+            #endif
             return
         }
         
@@ -455,7 +493,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
                  startedAt: Date(timeIntervalSince1970: timestamp)
              )
              context.insert(newSession)
+             #if DEBUG
              print("[Watch] Created new session: \(sessionId)")
+             #endif
         }
         
         // Handle Exercises
@@ -492,49 +532,73 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         guard let session = watchSession else { return }
         if session.activationState != .activated { session.activate() }
         if session.isReachable {
+            #if DEBUG
             print("[Watch] 📤 Requesting program sync via sendMessage with replyHandler...")
+            #endif
             session.sendMessage(["type": "fetch_program"], replyHandler: { [weak self] reply in
+                #if DEBUG
                 print("[Watch] 📥 Received reply with keys: \(reply.keys)")
+                #endif
                 if let templatesData = reply["templates"] as? [[String: Any]] {
+                    #if DEBUG
                     print("[Watch] ✅ Received \(templatesData.count) templates in reply")
+                    #endif
                     Task { @MainActor in
                         self?.handleProgramSync(userInfo: reply)
                     }
                 } else {
+                    #if DEBUG
                     print("[Watch] ⚠️ Reply didn't contain templates")
+                    #endif
                 }
             }, errorHandler: { error in
+                #if DEBUG
                 print("[Watch] ❌ Error requesting program via message: \(error.localizedDescription)")
+                #endif
                 // Fallback to userInfo (async, may take time)
                 session.transferUserInfo(["type": "fetch_program"])
             })
         } else {
+            #if DEBUG
             print("[Watch] Session not reachable, requesting via transferUserInfo...")
+            #endif
             session.transferUserInfo(["type": "fetch_program"])
         }
     }
     
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
+        #if DEBUG
         print("[Watch] 📥 didReceiveUserInfo called with keys: \(userInfo.keys)")
+        #endif
         if let type = userInfo["type"] as? String {
+            #if DEBUG
             print("[Watch] 📥 UserInfo type: \(type)")
+            #endif
             if type == "program_sync" {
+                #if DEBUG
                 print("[Watch] ✅ Received program sync via UserInfo")
+                #endif
                 if let templates = userInfo["templates"] as? [[String: Any]] {
+                    #if DEBUG
                     print("[Watch] 📦 Contains \(templates.count) templates")
+                    #endif
                 }
                 Task { @MainActor in
                     self.handleProgramSync(userInfo: userInfo)
                 }
             } else if type == "workout_start" {
                 // Fallback for workout start via UserInfo (background)
+                #if DEBUG
                 print("[Watch] Received workout start via UserInfo")
+                #endif
                 Task { @MainActor in
                     self.handleWorkoutStart(message: userInfo)
                 }
             }
         } else {
+            #if DEBUG
             print("[Watch] ⚠️ UserInfo has no 'type' key")
+            #endif
         }
     }
     
@@ -543,7 +607,9 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         guard let templatesData = userInfo["templates"] as? [[String: Any]],
               let context = mainContext else { return }
         
+        #if DEBUG
         print("[Watch] Processing \(templatesData.count) templates...")
+        #endif
         
         for templateData in templatesData {
             guard let idString = templateData["id"] as? String,
@@ -605,9 +671,13 @@ class WatchPersistenceManager: NSObject, ObservableObject, WCSessionDelegate {
         
         do {
             try context.save()
+            #if DEBUG
             print("[Watch] Program templates synced successfully")
+            #endif
         } catch {
+            #if DEBUG
             print("[Watch] Error saving templates: \(error)")
+            #endif
         }
     }
 }

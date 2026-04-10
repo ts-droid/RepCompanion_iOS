@@ -32,7 +32,9 @@ class CloudKitSyncService: ObservableObject {
             isAvailable = true
         } else {
             // No CloudKit entitlement, set to nil
+            #if DEBUG
             print("[CloudKitSyncService] ⚠️ CloudKit entitlement not found - service will be unavailable")
+            #endif
             container = nil
             privateDatabase = nil
             isAvailable = false
@@ -113,7 +115,9 @@ class CloudKitSyncService: ObservableObject {
                     sessions.append(session)
                 }
             case .failure(let error):
+                #if DEBUG
                 print("Error fetching record: \(error)")
+                #endif
             }
         }
         

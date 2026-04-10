@@ -182,25 +182,24 @@ struct SettingsView: View {
                     }
                 }
                 
-                // Social Features
-                Section(String(localized: "Social")) {
-                    NavigationLink(destination: ChallengesView()) {
-                        HStack {
-                            Image(systemName: "trophy.fill")
-                                .foregroundColor(.yellow)
-                            Text(String(localized: "Challenges"))
-                        }
-                    }
-                    
-                    NavigationLink(destination: LeaderboardView()) {
-                        HStack {
-                            Image(systemName: "chart.bar.fill")
-                                .foregroundColor(.blue)
-                            Text(String(localized: "Leaderboard"))
-                        }
-                    }
-                }
-                
+                // Social Features — hidden until fully implemented
+                // Section(String(localized: "Social")) {
+                //     NavigationLink(destination: ChallengesView()) {
+                //         HStack {
+                //             Image(systemName: "trophy.fill")
+                //                 .foregroundColor(.yellow)
+                //             Text(String(localized: "Challenges"))
+                //         }
+                //     }
+                //     NavigationLink(destination: LeaderboardView()) {
+                //         HStack {
+                //             Image(systemName: "chart.bar.fill")
+                //                 .foregroundColor(.blue)
+                //             Text(String(localized: "Leaderboard"))
+                //         }
+                //     }
+                // }
+
                 // Program Management
                 Section(String(localized: "Program management")) {
                     Button(role: .none) {
@@ -307,7 +306,9 @@ struct SettingsView: View {
         if let profile = currentProfile {
             profile.currentPassNumber = 1
             try? modelContext.save()
+            #if DEBUG
             print("[SettingsView] ✅ Reset currentPassNumber to 1")
+            #endif
         }
     }
     
@@ -318,27 +319,39 @@ struct SettingsView: View {
             // Delete all templates on server first
             do {
                 try await APIService.shared.deleteAllTemplates()
+                #if DEBUG
                 print("[SettingsView] ✅ Deleted all templates on server")
+                #endif
             } catch {
+                #if DEBUG
                 print("[SettingsView] ⚠️ Warning: Failed to delete templates on server: \(error.localizedDescription)")
+                #endif
                 // Continue anyway - templates will be cleared on next onboarding
             }
             
             // Delete all gyms on server
             do {
                 try await APIService.shared.deleteAllGyms()
+                #if DEBUG
                 print("[SettingsView] ✅ Deleted all gyms on server")
+                #endif
             } catch {
+                #if DEBUG
                 print("[SettingsView] ⚠️ Warning: Failed to delete gyms on server: \(error.localizedDescription)")
+                #endif
                 // Continue anyway - gyms will be cleared on next onboarding
             }
             
             // Reset profile values on server (sessionsPerWeek, etc.)
             do {
                 try await APIService.shared.resetProfile()
+                #if DEBUG
                 print("[SettingsView] ✅ Reset profile values on server")
+                #endif
             } catch {
+                #if DEBUG
                 print("[SettingsView] ⚠️ Warning: Failed to reset profile on server: \(error.localizedDescription)")
+                #endif
                 // Continue anyway - profile will be reset locally
             }
             
@@ -391,14 +404,18 @@ struct SettingsView: View {
             
             do {
                 try modelContext.save()
+                #if DEBUG
                 print("[SettingsView] ✅ Onboarding reset:")
                 print("[SettingsView]   • Deleted \(templateCount) program templates locally")
                 print("[SettingsView]   • Deleted \(gymCount) gym(s) locally")
                 print("[SettingsView]   • Reset all user profile settings")
                 print("[SettingsView]   • Set selectedGymId = nil")
                 print("[SettingsView]   • Set onboardingCompleted = false")
+                #endif
             } catch {
+                #if DEBUG
                 print("[SettingsView] ❌ Error resetting onboarding: \(error)")
+                #endif
             }
         }
     }
@@ -408,7 +425,9 @@ struct SettingsView: View {
             // Step 1: Delete all ProgramTemplateExercise entities first
             let exerciseDescriptor = FetchDescriptor<ProgramTemplateExercise>()
             if let exercises = try? modelContext.fetch(exerciseDescriptor) {
+                #if DEBUG
                 print("[SettingsView] 🗑️ Deleting \(exercises.count) template exercises...")
+                #endif
                 for exercise in exercises {
                     modelContext.delete(exercise)
                 }
@@ -416,26 +435,38 @@ struct SettingsView: View {
             
             // Step 2: Delete all ProgramTemplate entities
             let templateCount = programTemplates.count
+            #if DEBUG
             print("[SettingsView] 🗑️ Deleting \(templateCount) program templates...")
+            #endif
             for template in programTemplates {
                 modelContext.delete(template)
             }
             
             do {
                 try modelContext.save()
+                #if DEBUG
                 print("[SettingsView] ✅ Deleted all local templates and exercises")
+                #endif
             } catch {
+                #if DEBUG
                 print("[SettingsView] ❌ Error deleting templates: \(error)")
+                #endif
             }
             
             // Step 3: Re-sync from server
             if let userId = AuthService.shared.currentUserId {
+                #if DEBUG
                 print("[SettingsView] 🔄 Re-syncing templates from server...")
+                #endif
                 do {
                     try await SyncService.shared.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                    #if DEBUG
                     print("[SettingsView] ✅ Re-sync complete!")
+                    #endif
                 } catch {
+                    #if DEBUG
                     print("[SettingsView] ❌ Re-sync failed: \(error.localizedDescription)")
+                    #endif
                 }
             }
         }
@@ -475,7 +506,9 @@ struct ChallengesView: View {
             do {
                 try await socialService.fetchChallenges()
             } catch {
+                #if DEBUG
                 print("Error fetching challenges: \(error)")
+                #endif
             }
             isLoading = false
         }

@@ -77,7 +77,9 @@ class LocationService: NSObject, ObservableObject {
         dispatchGroup.enter()
         Task {
             do {
+                #if DEBUG
                 print("[LocationService] 🌍 Fetching nearby gyms from API with radius \(radiusKm)km...")
+                #endif
                 let apiResponse = try await APIService.shared.fetchNearbyGyms(
                     lat: location.coordinate.latitude,
                     lng: location.coordinate.longitude,
@@ -98,9 +100,13 @@ class LocationService: NSObject, ObservableObject {
                         isRepCompanionGym: gym.isVerified ?? false
                     )
                 }
+                #if DEBUG
                 print("[LocationService] ✅ API found \(apiGyms.count) gyms")
+                #endif
             } catch {
+                #if DEBUG
                 print("[LocationService] ❌ API fetch failed: \(error)")
+                #endif
             }
             dispatchGroup.leave()
         }
@@ -116,7 +122,9 @@ class LocationService: NSObject, ObservableObject {
         let search = MKLocalSearch(request: request)
         search.start { response, error in
             if let error = error {
+                #if DEBUG
                 print("[LocationService] 🗺️ Apple Maps search error: \(error.localizedDescription)")
+                #endif
             }
             
             if let mapItems = response?.mapItems {
@@ -135,7 +143,9 @@ class LocationService: NSObject, ObservableObject {
                         isRepCompanionGym: false
                     )
                 }
+                #if DEBUG
                 print("[LocationService] 🗺️ Apple Maps found \(appleGyms.count) gyms items")
+                #endif
             }
             dispatchGroup.leave()
         }
@@ -181,7 +191,9 @@ class LocationService: NSObject, ObservableObject {
             
             // Final sort by distance
             self.nearbyGyms = mergedGyms.sorted(by: { $0.distance < $1.distance })
+            #if DEBUG
             print("[LocationService] 🏁 Final merged list has \(self.nearbyGyms.count) gyms")
+            #endif
         }
     }
 }
@@ -210,6 +222,8 @@ extension LocationService: MKLocalSearchCompleterDelegate {
     }
     
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        #if DEBUG
         print("Completer failed: \(error.localizedDescription)")
+        #endif
     }
 }

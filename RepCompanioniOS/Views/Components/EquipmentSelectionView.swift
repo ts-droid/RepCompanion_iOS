@@ -198,7 +198,9 @@ struct EquipmentSelectionView: View {
                 }
             } catch {
                 await MainActor.run {
+                    #if DEBUG
                     print("Failed to load equipment: \(error)")
+                    #endif
                     isLoading = false
                 }
             }

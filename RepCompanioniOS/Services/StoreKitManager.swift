@@ -35,7 +35,9 @@ class StoreKitManager: ObservableObject {
             let products = try await Product.products(for: [Self.removeAdsProductId])
             removeAdsProduct = products.first
         } catch {
+            #if DEBUG
             print("[StoreKit] Failed to load products: \(error)")
+            #endif
         }
     }
 
@@ -94,7 +96,9 @@ class StoreKitManager: ObservableObject {
                         await transaction.finish()
                     }
                 } catch {
+                    #if DEBUG
                     print("[StoreKit] Transaction verification failed: \(error)")
+                    #endif
                 }
             }
         }

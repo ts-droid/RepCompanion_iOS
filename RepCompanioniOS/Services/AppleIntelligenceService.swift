@@ -43,16 +43,22 @@ class AppleIntelligenceService {
             if modelId.hasPrefix(compatibleModel) {
                 // Additional check: Verify Apple Intelligence is enabled
                 // This would check system settings in production
+                #if DEBUG
                 print("[Apple Intelligence] ✅ Device \(modelId) is compatible")
+                #endif
                 return true
             }
         }
         
+        #if DEBUG
         print("[Apple Intelligence] ⚠️ Device \(modelId) is not compatible")
+        #endif
         
         // For development/testing, allow on simulator if iOS 18+
         #if targetEnvironment(simulator)
+        #if DEBUG
         print("[Apple Intelligence] ✅ Simulator detected, allowing for testing")
+        #endif
         return true
         #endif
         #endif
@@ -84,7 +90,9 @@ class AppleIntelligenceService {
             throw AppleIntelligenceError.notAvailable
         }
         
+        #if DEBUG
         print("[Apple Intelligence] 🧠 Generating workout program on-device...")
+        #endif
         
         // Build prompt for Apple Intelligence
         let systemPrompt = buildSystemPrompt()
@@ -102,7 +110,9 @@ class AppleIntelligenceService {
             throw AppleIntelligenceError.apiNotAvailable
             
         } catch {
+            #if DEBUG
             print("[Apple Intelligence] ⚠️ On-device generation failed: \(error)")
+            #endif
             throw error
         }
     }

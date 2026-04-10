@@ -47,9 +47,13 @@ class PersistenceController {
         // Ensure Application Support directory exists
         do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+            #if DEBUG
             print("✅ Application Support directory created/verified: \(url.path)")
+            #endif
         } catch {
+            #if DEBUG
             print("⚠️ Could not create Application Support directory: \(error)")
+            #endif
         }
         
         // Update model configuration to use explicit URL
@@ -79,8 +83,10 @@ class PersistenceController {
             
             // Don't create default profile - let onboarding handle it
         } catch {
+            #if DEBUG
             print("⚠️ ModelContainer creation failed: \(error.localizedDescription)")
             print("🔄 Attempting automatic recovery by deleting old store files...")
+            #endif
             
             let fileManager = FileManager.default
             let storeFiles = [
@@ -94,19 +100,27 @@ class PersistenceController {
                 if fileManager.fileExists(atPath: filePath) {
                     do {
                         try fileManager.removeItem(atPath: filePath)
+                        #if DEBUG
                         print("✅ Deleted: \(filePath)")
+                        #endif
                         deletedFiles = true
                     } catch {
+                        #if DEBUG
                         print("⚠️ Could not delete \(filePath): \(error.localizedDescription)")
+                        #endif
                     }
                 }
             }
             
             if deletedFiles {
+                #if DEBUG
                 print("🔄 Retrying ModelContainer creation with fresh store...")
+                #endif
                 do {
                     createdContainer = try ModelContainer(for: schema, configurations: [modelConfigurationWithURL])
+                    #if DEBUG
                     print("✅ Successfully created ModelContainer after automatic recovery")
+                    #endif
                     
                     // Set default values after recovery
                     Task { @MainActor in
@@ -128,16 +142,22 @@ class PersistenceController {
                     3. Or manually delete the database file:
                        \(storeURL.path)
                     """
+                    #if DEBUG
                     print(errorMessage)
+                    #endif
                     fatalError("Could not create ModelContainer even after recovery attempt: \(recoveryError)")
                 }
             } else {
                 // Fallback to in-memory only if persistent storage fails and we couldn't delete files
+                #if DEBUG
                 print("⚠️ Could not delete old store files, falling back to in-memory storage")
+                #endif
                 let fallbackConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
                 do {
                     createdContainer = try ModelContainer(for: schema, configurations: [fallbackConfig])
+                    #if DEBUG
                     print("⚠️ Using in-memory storage as fallback (data will be lost on app restart)")
+                    #endif
                 } catch {
                     let errorMessage = """
                     ❌ ModelContainer creation failed and could not delete old store files.
@@ -153,7 +173,9 @@ class PersistenceController {
                     3. Or manually delete the database file:
                        \(storeURL.path)
                     """
+                    #if DEBUG
                     print(errorMessage)
+                    #endif
                     fatalError("Could not create ModelContainer even with fallback: \(error)")
                 }
             }

@@ -12,7 +12,9 @@ extension ModelContext {
         do {
             return try fetch(descriptor)
         } catch {
+            #if DEBUG
             print("[ERROR] ModelContext.safeFetch failed for \(T.self): \(error.localizedDescription)")
+            #endif
             #if DEBUG
             print("[ERROR] Full error: \(error)")
             #endif
@@ -28,7 +30,9 @@ extension ModelContext {
             try save()
             return true
         } catch {
+            #if DEBUG
             print("[ERROR] ModelContext.safeSave failed: \(error.localizedDescription)")
+            #endif
             #if DEBUG
             print("[ERROR] Full error: \(error)")
             #endif
@@ -50,7 +54,9 @@ extension ModelContext {
         do {
             return try fetchCount(descriptor)
         } catch {
+            #if DEBUG
             print("[ERROR] ModelContext.safeFetchCount failed for \(T.self): \(error.localizedDescription)")
+            #endif
             return 0
         }
     }

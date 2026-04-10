@@ -248,7 +248,9 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error = error {
+            #if DEBUG
             print("Error capturing photo: \(error)")
+            #endif
             completion(nil)
             return
         }

@@ -37,14 +37,18 @@ struct ActiveWorkoutView: View {
     @State private var originalReps: Int = 10
     
     init() {
+        #if DEBUG
         print("[ActiveWorkoutView] Init called")
+        #endif
     }
     
     private var activeSession: WorkoutSession? {
         // Filter in memory
         let session = allSessions.first(where: { $0.status == "active" })
         if let s = session {
+             #if DEBUG
              print("[ActiveWorkoutView] Found activeSession: \(s.id.uuidString)")
+             #endif
         }
         return session
     }
@@ -330,7 +334,9 @@ struct ActiveWorkoutView: View {
             if let completedIndex = sortedTemplates.firstIndex(where: { $0.id == session.templateId }) {
                 let nextIndex = (completedIndex + 1) % max(sortedTemplates.count, 1)
                 profile.currentPassNumber = nextIndex + 1
+                #if DEBUG
                 print("[Watch ActiveWorkoutView] Completed pass at index \(completedIndex). Set next pass to \(profile.currentPassNumber)")
+                #endif
             } else {
                 profile.currentPassNumber += 1
             }
@@ -338,7 +344,9 @@ struct ActiveWorkoutView: View {
         
         try? modelContext.save()
         
+        #if DEBUG
         print("[ActiveWorkoutView] Workout completed, showing celebration directly")
+        #endif
     }
     
     func completeRest() {

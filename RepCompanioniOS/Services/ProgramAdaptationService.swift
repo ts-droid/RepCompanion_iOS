@@ -16,7 +16,9 @@ class ProgramAdaptationService: ObservableObject {
         targetGymId: String,
         modelContext: ModelContext
     ) async throws {
+        #if DEBUG
         print("[ProgramAdaptation] 🔄 Adapting program from \(sourceGymId ?? "Global") to \(targetGymId)")
+        #endif
         
         // 1. Fetch source templates
         let sourceDescriptor = FetchDescriptor<ProgramTemplate>(
@@ -25,7 +27,9 @@ class ProgramAdaptationService: ObservableObject {
         let sourceTemplates = try modelContext.fetch(sourceDescriptor)
         
         if sourceTemplates.isEmpty {
+            #if DEBUG
             print("[ProgramAdaptation] ⚠️ No source templates found to adapt.")
+            #endif
             return
         }
         
@@ -43,7 +47,9 @@ class ProgramAdaptationService: ObservableObject {
             predicate: #Predicate { $0.id == targetGymId }
         )
         guard let targetGym = try modelContext.fetch(gymDescriptor).first else {
+            #if DEBUG
             print("[ProgramAdaptation] ❌ Target gym not found.")
+            #endif
             return
         }
         let targetEquipment = Set(targetGym.equipmentIds)
@@ -77,9 +83,13 @@ class ProgramAdaptationService: ObservableObject {
                     newExercises.append(newEx)
                 } else {
                     // Find alternative
+                    #if DEBUG
                     print("[ProgramAdaptation] 🔍 Finding alternative for \(sourceEx.exerciseName) (Needs: \(needsEquipment.joined(separator: ", ")))")
+                    #endif
                     if let alternative = await findAlternative(for: sourceEx, availableEquipment: targetEquipment, modelContext: modelContext) {
+                        #if DEBUG
                         print("[ProgramAdaptation] ✅ Found alternative: \(alternative.name)")
+                        #endif
                         let newEx = ProgramTemplateExercise(
                             gymId: targetGymId,
                             exerciseKey: alternative.id,
@@ -97,7 +107,9 @@ class ProgramAdaptationService: ObservableObject {
                         newExercises.append(newEx)
                     } else {
                         // Fallback: Copy anyway but add a note (or skip? let's copy and note)
+                        #if DEBUG
                         print("[ProgramAdaptation] ⚠️ No alternative found for \(sourceEx.exerciseName). Keeping original with note.")
+                        #endif
                         let newEx = copyExercise(sourceEx, template: newTemplate, gymId: targetGymId)
                         newEx.notes = (newEx.notes ?? "") + " (⚠️ Utrustning saknas)"
                         modelContext.insert(newEx)
@@ -109,7 +121,9 @@ class ProgramAdaptationService: ObservableObject {
         }
         
         try modelContext.save()
+        #if DEBUG
         print("[ProgramAdaptation] ✅ Program adaptation completed.")
+        #endif
     }
     
     private func copyExercise(_ source: ProgramTemplateExercise, template: ProgramTemplate, gymId: String) -> ProgramTemplateExercise {

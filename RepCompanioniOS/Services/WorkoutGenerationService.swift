@@ -225,28 +225,40 @@ class WorkoutGenerationService: ObservableObject {
             let appleIntelligence = AppleIntelligenceService.shared
             if appleIntelligence.isAvailable() {
                 do {
+                    #if DEBUG
                     print("[WorkoutGeneration] 🧠 Attempting Apple Intelligence generation...")
+                    #endif
                     let program = try await appleIntelligence.generateWorkoutProgram(for: input)
                     
                     // Save program templates to SwiftData
                     try await saveProgramTemplates(from: program, userId: userId, gymId: input.gymId, modelContext: modelContext)
                     
+                    #if DEBUG
                     print("[WorkoutGeneration] ✅ Successfully generated program using Apple Intelligence")
+                    #endif
                     return program
                 } catch let error as AppleIntelligenceError {
+                    #if DEBUG
                     print("[WorkoutGeneration] ⚠️ Apple Intelligence failed: \(error.localizedDescription)")
+                    #endif
                     // Fall through to server-side generation
                 } catch {
+                    #if DEBUG
                     print("[WorkoutGeneration] ⚠️ Apple Intelligence error: \(error.localizedDescription)")
+                    #endif
                     // Fall through to server-side generation
                 }
             } else {
+                #if DEBUG
                 print("[WorkoutGeneration] ℹ️ Apple Intelligence not available on this device")
+                #endif
             }
         }
         
         // Step 2: Fall back to server-side generation via API
+        #if DEBUG
         print("[WorkoutGeneration] 🌐 Using server-side V4 generation...")
+        #endif
         do {
             let v4Response = try await APIService.shared.generateProgramV4()
             let program = convertV4ToLegacyFormat(v4Response.program, input: input)
@@ -254,11 +266,15 @@ class WorkoutGenerationService: ObservableObject {
             // Save program templates to SwiftData
             try await saveProgramTemplates(from: program, userId: userId, gymId: input.gymId, modelContext: modelContext)
             
+            #if DEBUG
             print("[WorkoutGeneration] ✅ Successfully generated program using V4 API")
+            #endif
             return program
         } catch {
             // Final fallback to mock if API fails (for development/testing)
+            #if DEBUG
             print("[WorkoutGeneration] ⚠️ V4 generation failed, using mock: \(error)")
+            #endif
             let mockProgram = createMockProgram(for: input)
             
             // Save program templates to SwiftData
@@ -544,7 +560,9 @@ class WorkoutGenerationService: ObservableObject {
     }
     
     func saveProgramTemplates(from program: WorkoutProgram, userId: String, gymId: String?, modelContext: ModelContext) async throws {
+        #if DEBUG
         print("[WorkoutGenerationService] 🧹 Starting cleanup for user: \(userId), gym: \(gymId ?? "none")")
+        #endif
         
         // Clear existing templates for THIS gym specifically
         // Also clear legacy "current-user" templates to avoid duplicates
@@ -554,16 +572,22 @@ class WorkoutGenerationService: ObservableObject {
         
         do {
             let existingTemplates = try modelContext.fetch(descriptor)
+            #if DEBUG
             print("[WorkoutGenerationService] 🗑️ Found \(existingTemplates.count) existing templates to delete")
+            #endif
             for template in existingTemplates {
                 modelContext.delete(template)
             }
         } catch {
+            #if DEBUG
             print("[WorkoutGenerationService] ⚠️ Cleanup fetch failed: \(error)")
+            #endif
         }
         
         // Create new templates from generated program
+        #if DEBUG
         print("[WorkoutGenerationService] 📝 Saving \(program.weeklySessions.count) new sessions")
+        #endif
         
         for session in program.weeklySessions {
             let template = ProgramTemplate(
@@ -576,7 +600,9 @@ class WorkoutGenerationService: ObservableObject {
             )
             
             // Add exercises to template
+            #if DEBUG
             print("[WorkoutGenerationService]   - Session: \(session.sessionName), Exercises: \(session.mainWork.count)")
+            #endif
             
             for (exerciseIndex, exercise) in session.mainWork.enumerated() {
                 let templateExercise = ProgramTemplateExercise(
@@ -604,9 +630,13 @@ class WorkoutGenerationService: ObservableObject {
         
         do {
             try modelContext.save()
+            #if DEBUG
             print("[WorkoutGenerationService] ✅ Successfully saved all templates and exercises")
+            #endif
         } catch {
+            #if DEBUG
             print("[WorkoutGenerationService] ❌ Failed to save context: \(error)")
+            #endif
             throw error
         }
     }

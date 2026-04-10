@@ -38,9 +38,13 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         }
         
         if let error = error {
+            #if DEBUG
             print("WCSession activation failed: \(error.localizedDescription)")
+            #endif
         } else {
+            #if DEBUG
             print("WCSession activated with state: \(activationState.rawValue)")
+            #endif
         }
     }
     
@@ -66,7 +70,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         guard let wcsession = self.session, wcsession.activationState == .activated else { return }
         
         if let payload = pendingWorkoutStart {
+            #if DEBUG
             print("[WatchConnectivity] Flushing pending workout start...")
+            #endif
             if wcsession.isReachable {
                 wcsession.sendMessage(payload, replyHandler: nil) { error in
                      // Fallback to transferUserInfo
@@ -80,7 +86,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         
         while !pendingFileQueues.isEmpty {
             let payload = pendingFileQueues.removeFirst()
+            #if DEBUG
             print("[WatchConnectivity] Flushing pending set completion...")
+            #endif
              if wcsession.isReachable {
                  wcsession.sendMessage(payload, replyHandler: nil)
             } else {
@@ -92,24 +100,32 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         if let type = message["type"] as? String {
              if type == "request_sync" {
+                #if DEBUG
                 print("[iOS] Received sync request from Watch")
+                #endif
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(name: NSNotification.Name("WatchSyncRequested"), object: nil)
                     self.flushPendingMessages()
                 }
              } else if type == "fetch_program" {
                  // No-reply version - fallback, sends via transferUserInfo
+                 #if DEBUG
                  print("[iOS] Received fetch_program request from Watch (no reply expected)")
+                 #endif
                  Task {
                      handleSyncRequest()
                  }
              } else if type == "workout_update" {
+                 #if DEBUG
                  print("[iOS] 📥 Received workout_update from Watch")
+                 #endif
                  Task { @MainActor in
                      self.handleWorkoutUpdate(message: message)
                  }
              } else if type == "workout_complete" {
+                 #if DEBUG
                  print("[iOS] 📥 Received workout_complete from Watch")
+                 #endif
                  Task { @MainActor in
                      self.handleWorkoutComplete(message: message)
                  }
@@ -157,7 +173,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         context.insert(log)
         try? context.save()
         
+        #if DEBUG
         print("[iOS] ✅ Logged set from Watch: \(exerciseName) Set \(setNumber)")
+        #endif
         NotificationCenter.default.post(name: NSNotification.Name("WatchLogReceived"), object: nil)
     }
     
@@ -183,7 +201,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 session.lastStartTime = nil
                 
                 try? context.save()
+                #if DEBUG
                 print("[iOS] ✅ Workout completed from Watch: \(sessionIdString)")
+                #endif
                 NotificationCenter.default.post(name: NSNotification.Name("WatchWorkoutCompleted"), object: nil)
             }
         }
@@ -192,7 +212,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     // With reply handler - for immediate sync response
     func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
         if let type = message["type"] as? String, type == "fetch_program" {
+            #if DEBUG
             print("[iOS] 📥 Received fetch_program with replyHandler - responding immediately")
+            #endif
             
             Task { @MainActor in
                 let context = ModelContext(PersistenceController.shared.container)
@@ -200,7 +222,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                 
                 do {
                     let templates = try context.fetch(descriptor)
+                    #if DEBUG
                     print("[iOS] ✅ Fetched \(templates.count) templates, sending in reply")
+                    #endif
                     
                     let templatesData = templates.map { template -> [String: Any] in
                         var dict: [String: Any] = [
@@ -228,7 +252,9 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
                     
                     replyHandler(["templates": templatesData, "count": templates.count])
                 } catch {
+                    #if DEBUG
                     print("[iOS] ❌ Failed to fetch templates: \(error)")
+                    #endif
                     replyHandler(["error": error.localizedDescription])
                 }
             }
@@ -251,10 +277,14 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     // MARK: - Callbacks
     
     public func forceSync() {
+        #if DEBUG
         print("[iOS] Force sync requested from UI")
+        #endif
         
         guard let session = session, session.isPaired, session.isWatchAppInstalled else {
+             #if DEBUG
              print("[WatchConnectivity] Cannot sync: Watch is not paired or app is not installed.")
+             #endif
              return
         }
         
@@ -270,10 +300,14 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
         
         do {
             let templates = try context.fetch(descriptor)
+            #if DEBUG
             print("[WatchConnectivity] Fetched \(templates.count) templates for sync")
+            #endif
             sendProgramTemplates(templates)
         } catch {
+            #if DEBUG
             print("[WatchConnectivity] Failed to fetch templates: \(error)")
+            #endif
         }
     }
 }
@@ -318,12 +352,16 @@ extension WatchConnectivityManager {
             "timestamp": Date().timeIntervalSince1970
         ]
         
+        #if DEBUG
         print("[WatchConnectivity] Sending \(templates.count) templates to Watch")
+        #endif
         
         if wcsession.activationState == .activated {
             wcsession.transferUserInfo(payload)
         } else {
+             #if DEBUG
              print("[WatchConnectivity] WCSession not activated, cannot send program")
+             #endif
              // Could implement queuing for this too if crucial, but usually requested when active
         }
     }
@@ -356,7 +394,9 @@ extension WatchConnectivityManager {
         
         // Safety check: ensure session is activated before trying to send
         guard wcsession.activationState == .activated else {
+            #if DEBUG
             print("[WatchConnectivity] WCSession not activated, QUEUING workout start")
+            #endif
             self.pendingWorkoutStart = payload
             if wcsession.activationState == .notActivated { wcsession.activate() }
             return
@@ -365,14 +405,18 @@ extension WatchConnectivityManager {
         // Send immediately
         if wcsession.isReachable {
             wcsession.sendMessage(payload, replyHandler: nil) { error in
+                #if DEBUG
                 print("Error sending workout start message: \(error.localizedDescription)")
+                #endif
                 wcsession.transferUserInfo(payload)
             }
         } else {
             wcsession.transferUserInfo(payload)
         }
         
+        #if DEBUG
         print("[WatchConnectivity] Sent workout start for session: \(session.id)")
+        #endif
     }
     
     // Function to update ongoing session state (like completed sets)
@@ -390,7 +434,9 @@ extension WatchConnectivityManager {
          ]
 
          guard wcsession.activationState == .activated else {
+             #if DEBUG
              print("[WatchConnectivity] WCSession not activated, QUEUING set completion")
+             #endif
              self.pendingFileQueues.append(payload)
              return
          }

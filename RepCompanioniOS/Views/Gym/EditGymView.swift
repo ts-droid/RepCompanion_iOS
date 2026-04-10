@@ -369,7 +369,9 @@ struct EditGymView: View {
                     }
                 }
             } catch {
+                #if DEBUG
                 print("Error saving gym: \(error)")
+                #endif
                 dismiss()
             }
         }

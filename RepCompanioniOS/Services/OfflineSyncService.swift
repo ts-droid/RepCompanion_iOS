@@ -36,7 +36,9 @@ class OfflineSyncService: ObservableObject {
                 
                 if !wasOnline && self?.isOnline == true {
                     // Network just came back - trigger sync
+                    #if DEBUG
                     print("[OfflineSync] Network available, starting sync...")
+                    #endif
                     await self?.syncPendingItems()
                 }
             }
@@ -115,7 +117,9 @@ class OfflineSyncService: ObservableObject {
         syncLock.lock()
         guard isOnline, !isSyncing else {
             syncLock.unlock()
+            #if DEBUG
             print("[OfflineSync] Cannot sync - offline or already syncing")
+            #endif
             return
         }
         isSyncing = true
@@ -123,7 +127,9 @@ class OfflineSyncService: ObservableObject {
 
         defer { isSyncing = false }
         
+        #if DEBUG
         print("[OfflineSync] Starting sync of pending items...")
+        #endif
         
         // Sync workout sessions
         await syncWorkoutSessions()
@@ -135,14 +141,18 @@ class OfflineSyncService: ObservableObject {
         await syncSessionCompletions()
         
         updatePendingCount()
+        #if DEBUG
         print("[OfflineSync] Sync completed")
+        #endif
     }
     
     private func syncWorkoutSessions() async {
         let queue = getQueue(key: workoutQueueKey)
         guard !queue.isEmpty else { return }
         
+        #if DEBUG
         print("[OfflineSync] Syncing \(queue.count) workout sessions...")
+        #endif
         
         var failedItems: [Data] = []
         
@@ -181,9 +191,13 @@ class OfflineSyncService: ObservableObject {
             do {
                 // Try to sync to server via APIService
                 try await APIService.shared.createWorkoutSession(session)
+                #if DEBUG
                 print("[OfflineSync] Synced workout session: \(session.id)")
+                #endif
             } catch {
+                #if DEBUG
                 print("[OfflineSync] Failed to sync workout session: \(error)")
+                #endif
                 failedItems.append(data)
             }
         }
@@ -196,7 +210,9 @@ class OfflineSyncService: ObservableObject {
         let queue = getQueue(key: exerciseLogQueueKey)
         guard !queue.isEmpty else { return }
         
+        #if DEBUG
         print("[OfflineSync] Syncing \(queue.count) exercise logs...")
+        #endif
         
         var failedItems: [Data] = []
         
@@ -234,9 +250,13 @@ class OfflineSyncService: ObservableObject {
             do {
                 // Try to sync to server via APIService
                 try await APIService.shared.createExerciseLog(log)
+                #if DEBUG
                 print("[OfflineSync] Synced exercise log: \(log.id)")
+                #endif
             } catch {
+                #if DEBUG
                 print("[OfflineSync] Failed to sync exercise log: \(error)")
+                #endif
                 failedItems.append(data)
             }
         }
@@ -249,7 +269,9 @@ class OfflineSyncService: ObservableObject {
         let queue = getQueue(key: sessionCompleteQueueKey)
         guard !queue.isEmpty else { return }
         
+        #if DEBUG
         print("[OfflineSync] Syncing \(queue.count) session completions...")
+        #endif
         
         var failedItems: [Data] = []
         
@@ -265,9 +287,13 @@ class OfflineSyncService: ObservableObject {
             do {
                 // Try to complete session on server
                 try await APIService.shared.completeWorkoutSession(sessionId: sessionId, movergyScore: movergyScore)
+                #if DEBUG
                 print("[OfflineSync] Synced session completion: \(sessionId)")
+                #endif
             } catch {
+                #if DEBUG
                 print("[OfflineSync] Failed to sync session completion: \(error)")
+                #endif
                 failedItems.append(data)
             }
         }

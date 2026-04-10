@@ -402,10 +402,14 @@ struct TrainingAdjustmentView: View {
                 
                 // 2. Generate Program for EACH Gym
                 // This ensures all gyms have updated programs based on new parameters
+                #if DEBUG
                 print("🔄 Starting multi-gym generation for \(gyms.count) gyms...")
+                #endif
                 
                 for gym in gyms {
+                    #if DEBUG
                     print("🏋️ Generating for gym: \(gym.name) (ID: \(gym.id))")
+                    #endif
                     
                     // Call API to generate program (profile already updated with new goals above)
                     // The server will use the updated profile data that was just saved

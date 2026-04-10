@@ -137,7 +137,9 @@ struct ExerciseListView: View {
             do {
                 try await catalogService.syncExercises(modelContext: modelContext)
             } catch {
+                #if DEBUG
                 print("Error syncing exercises: \(error)")
+                #endif
             }
             isLoading = false
         }

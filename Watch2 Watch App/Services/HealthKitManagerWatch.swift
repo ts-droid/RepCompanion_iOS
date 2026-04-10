@@ -52,7 +52,9 @@ class HealthKitManagerWatch: ObservableObject {
             try await healthStore.requestAuthorization(toShare: writeTypes, read: readTypes)
             checkAuthorization()
         } catch {
+            #if DEBUG
             print("[Watch] HealthKit authorization failed: \(error.localizedDescription)")
+            #endif
         }
     }
 }

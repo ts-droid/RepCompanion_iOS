@@ -51,7 +51,9 @@ class GymService: ObservableObject {
                 )
                 serverId = response.id
             } catch {
+                #if DEBUG
                 print("Failed to sync public gym to server: \(error)")
+                #endif
                 // we still save locally
             }
         }
@@ -114,7 +116,9 @@ class GymService: ObservableObject {
                     isPublic: true
                 )
             } catch {
+                #if DEBUG
                 print("Failed to sync gym update to server: \(error)")
+                #endif
             }
         }
         

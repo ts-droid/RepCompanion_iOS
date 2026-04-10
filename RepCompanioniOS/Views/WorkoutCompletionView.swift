@@ -237,7 +237,9 @@ struct WorkoutCompletionView: View {
             if let completedIndex = sortedTemplates.firstIndex(where: { $0.id == session.templateId }) {
                 let nextIndex = (completedIndex + 1) % max(sortedTemplates.count, 1)
                 profile.currentPassNumber = nextIndex + 1
+                #if DEBUG
                 print("[WorkoutCompletionView] Completed pass at index \(completedIndex). Set next pass to \(profile.currentPassNumber)")
+                #endif
             } else {
                 // Fallback to simple increment if template not found
                 profile.currentPassNumber += 1

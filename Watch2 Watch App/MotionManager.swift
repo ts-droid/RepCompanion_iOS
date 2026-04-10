@@ -7,11 +7,15 @@ class MotionManager: ObservableObject {
     @Published var isDetecting = false
     
     func startDetecting() {
+        #if DEBUG
         print("[MotionManager] Simulated start (Stub)")
+        #endif
     }
     
     func stopDetecting() {
+        #if DEBUG
         print("[MotionManager] Simulated stop (Stub)")
+        #endif
     }
     
     func resetCount() {
@@ -79,7 +83,9 @@ class MotionManager: ObservableObject {
                 if now.timeIntervalSince(lastRepTime) > cooldownTime {
                     repCount += 1
                     lastRepTime = now
+                    #if DEBUG
                     print("[Motion] Rep detected! Count: \(repCount)")
+                    #endif
                 }
             }
         }

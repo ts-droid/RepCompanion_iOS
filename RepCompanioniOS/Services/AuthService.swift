@@ -173,7 +173,9 @@ class AuthService: ObservableObject {
             }
         } catch {
             // If register fails, try login (user might already exist)
+            #if DEBUG
             print("[AuthService] Register failed, trying login: \(error.localizedDescription)")
+            #endif
             try await signInWithEmail(email: email, password: password, modelContext: modelContext)
         }
     }
@@ -184,7 +186,9 @@ class AuthService: ObservableObject {
         do {
             try await SyncService.shared.syncAllData(userId: userId, modelContext: modelContext)
         } catch {
+            #if DEBUG
             print("Error syncing user data: \(error.localizedDescription)")
+            #endif
             // Don't fail authentication if sync fails - user can still use app
         }
     }

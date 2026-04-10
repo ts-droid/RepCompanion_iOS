@@ -310,7 +310,9 @@ struct OnboardingView: View {
             }
             .onChange(of: programGenerationComplete) { _, newValue in
                 if newValue && showGenerationProgress {
+                    #if DEBUG
                     print("[Onboarding] ✅ Background generation completed while waiting, finalizing...")
+                    #endif
                     // Add a small delay for smoother UX
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         finalizeOnboarding()
@@ -1201,7 +1203,9 @@ struct OnboardingView: View {
             // 1RM calculation should already be started when user clicked "Continue" on Personal Info step
             // Values should be ready by the time user reaches 1RM step
             if oneRmCalculated {
+                #if DEBUG
                 print("[Onboarding] ✅ 1RM values already calculated and ready")
+                #endif
             }
         }
     }
@@ -1321,6 +1325,7 @@ struct OnboardingView: View {
                 .padding(.top, 8)
         }
         .onAppear {
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             print("[Onboarding] 💪 1RM STEP - onAppear")
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -1339,17 +1344,23 @@ struct OnboardingView: View {
             print("  • trainingLevel: \(trainingLevel)")
             print("  • motivationType: \(motivationType)")
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
             
             // 1RM values should already be calculated from Training Goals step
             // If not, try to calculate now (fallback)
             if !oneRmCalculated && age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
+                #if DEBUG
                 print("[Onboarding] ⚠️ 1RM values not ready, calculating now (fallback)...")
                 print("[Onboarding] 📊 Data: age=\(age!), weight=\(bodyWeight!), height=\(height!), sex=\(sex), level=\(trainingLevel), motivation=\(motivationType)")
+                #endif
                 calculateSuggestedOneRm()
             } else if oneRmCalculated {
+                #if DEBUG
                 print("[Onboarding] ✅ 1RM values already calculated and ready")
                 print("[Onboarding] 📊 Current values: Bench=\(oneRmBench?.description ?? "nil"), OHP=\(oneRmOhp?.description ?? "nil"), Deadlift=\(oneRmDeadlift?.description ?? "nil"), Squat=\(oneRmSquat?.description ?? "nil"), Latpull=\(oneRmLatpull?.description ?? "nil")")
+                #endif
             } else {
+                #if DEBUG
                 print("[Onboarding] ⚠️ Cannot calculate 1RM - missing data:")
                 print("  • age: \(age?.description ?? "nil")")
                 print("  • bodyWeight: \(bodyWeight?.description ?? "nil")")
@@ -1357,8 +1368,11 @@ struct OnboardingView: View {
                 print("  • sex: \(sex.isEmpty ? "empty" : sex)")
                 print("  • trainingLevel: \(trainingLevel)")
                 print("  • motivationType: \(motivationType)")
+                #endif
             }
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
         }
     }
     
@@ -1979,11 +1993,15 @@ struct OnboardingView: View {
             if currentStep == 6 && !oneRmCalculated {
                 // Check if we have all required data for 1RM calculation
                 if age != nil && bodyWeight != nil && height != nil && !sex.isEmpty && !trainingLevel.isEmpty && !motivationType.isEmpty {
+                    #if DEBUG
                     print("[Onboarding] 🚀 Starting 1RM calculation in background (user finished Level step)...")
                     print("[Onboarding] 📊 Data: level=\(trainingLevel), motivation=\(motivationType), info ready")
+                    #endif
                     calculateSuggestedOneRm()
                 } else {
+                    #if DEBUG
                     print("[Onboarding] ⚠️ Missing data for 1RM calculation: level=\(trainingLevel), motivation=\(motivationType)")
+                    #endif
                 }
             }
             
@@ -1991,7 +2009,9 @@ struct OnboardingView: View {
             // This can now happen either from Gym Details (9) if skipped equipment,
             // or Equipment (10) if not skipped.
             if (currentStep == 9 && selectedNearbyGymId != nil) || (currentStep == 10) {
+                #if DEBUG
                 print("[Onboarding] 🚀 Starting program generation...")
+                #endif
                 startProgramGeneration()
             }
             
@@ -2045,13 +2065,19 @@ struct OnboardingView: View {
                 // Upsert gym: create if new, update if returning
                 // Check if user selected a verified gym from the list
                 if let verifiedGymId = selectedNearbyGymId {
+                    #if DEBUG
                     print("[Onboarding] 🏋️ Using verified gym with ID: \(verifiedGymId)")
+                    #endif
                     await MainActor.run {
                         lastCreatedGymId = verifiedGymId
                     }
+                    #if DEBUG
                     print("[Onboarding] ✅ Verified gym associated")
+                    #endif
                 } else if let gymId = lastCreatedGymId {
+                    #if DEBUG
                     print("[Onboarding] 🏋️ Updating existing gym '\(gymName)' (id: \(gymId))")
+                    #endif
                     
                     // Fetch the gym object to update
                     let descriptor = FetchDescriptor<Gym>(
@@ -2068,10 +2094,14 @@ struct OnboardingView: View {
                             isPublic: gymIsPublic,
                             modelContext: modelContext
                         )
+                        #if DEBUG
                         print("[Onboarding] ✅ Gym updated successfully")
+                        #endif
                     }
                 } else {
+                    #if DEBUG
                     print("[Onboarding] 🏋️ Creating gym '\(gymName)' with \(selectedEquipment.count) equipment items")
+                    #endif
                     let newGym = try await GymService.shared.createGym(
                         name: gymName,
                         location: gymAddress.isEmpty ? nil : gymAddress,
@@ -2083,7 +2113,9 @@ struct OnboardingView: View {
                     await MainActor.run {
                         lastCreatedGymId = newGym.id
                     }
+                    #if DEBUG
                     print("[Onboarding] ✅ Gym created with ID: \(newGym.id)")
+                    #endif
                 }
                 
                 // Mark that generation started early
@@ -2093,7 +2125,9 @@ struct OnboardingView: View {
                 }
                 
                 // Start the actual program generation in background
+                #if DEBUG
                 print("[Onboarding] 🚀 Starting program generation in background from Gym Details step...")
+                #endif
                 
                 let profileData = APIService.OnboardingCompleteRequest.ProfileData(
                     motivationType: motivationType,
@@ -2119,7 +2153,9 @@ struct OnboardingView: View {
                     theme: selectedTheme
                 )
                 
+                #if DEBUG
                 print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding...")
+                #endif
                 let response = try await APIService.shared.completeOnboarding(
                     profile: profileData,
                     equipment: selectedEquipment,
@@ -2127,8 +2163,10 @@ struct OnboardingView: View {
                     useV4: true
                 )
                 
+                #if DEBUG
                 print("[Onboarding] ✅ Program generation started, response received")
                 print("[Onboarding] 📋 Response: success=\(response.success), hasProgram=\(response.hasProgram ?? false), templatesCreated=\(response.templatesCreated ?? 0)")
+                #endif
                 
                 if let jobId = response.program?.jobId {
                     await MainActor.run {
@@ -2139,11 +2177,15 @@ struct OnboardingView: View {
                 if response.success && (response.hasProgram == true || (response.templatesCreated ?? 0) > 0) {
                     await MainActor.run {
                         programGenerationComplete = true
+                        #if DEBUG
                         print("[Onboarding] ✅ Background program generation complete!")
+                        #endif
                     }
                 }
             } catch {
+                #if DEBUG
                 print("[Onboarding] ❌ Error in startProgramGeneration: \(error.localizedDescription)")
+                #endif
                 await MainActor.run {
                     isGeneratingProgram = false
                     programGenerationStartedEarly = false
@@ -2313,7 +2355,9 @@ struct OnboardingView: View {
     
     /// Calculate preset goals based on motivationType and trainingLevel (local calculation)
     private func calculatePresetGoals() {
+        #if DEBUG
         print("[Onboarding] 🎯 Calculating preset training goals based on \(motivationType) + \(trainingLevel)...")
+        #endif
         
         var strength = 25
         var hypertrophy = 25
@@ -2483,7 +2527,9 @@ struct OnboardingView: View {
         
         goalsCalculated = true
         
+        #if DEBUG
         print("[Onboarding] ✅ Preset goals calculated: Strength=\(goalStrength)%, Hypertrophy=\(goalHypertrophy)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%")
+        #endif
         
         // If sport is 'other' or unknown, fetch AI suggestions
         // Otherwise we use the hardcoded presets above to avoid API latency
@@ -2499,7 +2545,9 @@ struct OnboardingView: View {
     private func calculateSuggestedGoals() {
         Task {
             do {
+                #if DEBUG
                 print("[Onboarding] 🎯 Calculating suggested training goals via API...")
+                #endif
                 
                 // Use custom name if "other", otherwise specificSport (which shouldn't happen here due to optimization, but safe to keep)
                 let sportToQuery = (specificSport == "other" && !customSportName.isEmpty) ? customSportName : specificSport
@@ -2534,10 +2582,14 @@ struct OnboardingView: View {
                     
                     goalsCalculated = true
                     
+                    #if DEBUG
                     print("[Onboarding] ✅ Suggested goals calculated: Strength=\(goalStrength)%, Hypertrophy=\(goalHypertrophy)%, Endurance=\(goalEndurance)%, Cardio=\(goalCardio)%, Tags=\(focusTags)")
+                    #endif
                 }
             } catch {
+                #if DEBUG
                 print("[Onboarding] ⚠️ Error calculating suggested goals: \(error.localizedDescription)")
+                #endif
                 // Keep default values if calculation fails
                 await MainActor.run {
                     goalsCalculated = true // Mark as calculated to avoid retrying
@@ -2548,14 +2600,17 @@ struct OnboardingView: View {
     
     private func calculateSuggestedOneRm() {
         let taskStartTime = Date()
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[Onboarding] 💪 STARTING 1RM CALCULATION (LOCAL)")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
         
         Task {
             await calculateLocalFallbackOneRm()
             
             let totalDuration = Date().timeIntervalSince(taskStartTime)
+            #if DEBUG
             print("[Onboarding] ✅ 1RM Calculation Completed Locally")
             print("[Onboarding] 📊 Final Values:")
             print("  • Bench: \(oneRmBench ?? 0) kg")
@@ -2565,11 +2620,14 @@ struct OnboardingView: View {
             print("  • Latpull: \(oneRmLatpull ?? 0) kg")
             print("[Onboarding] ⏱️  Total time: \(String(format: "%.2f", totalDuration)) seconds")
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
         }
     }
     
     private func calculateLocalFallbackOneRm() async {
+        #if DEBUG
         print("[Onboarding] ⚠️ Using local fallback for 1RM calculation")
+        #endif
         
         let userWeight = Double(bodyWeight ?? 75)
         let isMale = (sex == "male" || sex == "man" || sex.isEmpty)
@@ -2590,7 +2648,9 @@ struct OnboardingView: View {
             oneRmLatpull = Int(userWeight * latpullMultiplier)
             
             oneRmCalculated = true
+            #if DEBUG
             print("[Onboarding] ✅ Local fallback calculation applied")
+            #endif
         }
     }
     
@@ -2610,7 +2670,9 @@ struct OnboardingView: View {
                         }
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] No weight data available in HealthKit: \(error.localizedDescription)")
+                    #endif
                 }
                 
                 do {
@@ -2621,7 +2683,9 @@ struct OnboardingView: View {
                         }
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] No height data available in HealthKit: \(error.localizedDescription)")
+                    #endif
                 }
 
                 // Fetch biological sex
@@ -2635,7 +2699,9 @@ struct OnboardingView: View {
                         }
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] No sex data available in HealthKit: \(error.localizedDescription)")
+                    #endif
                 }
 
                 // Fetch date of birth
@@ -2648,7 +2714,9 @@ struct OnboardingView: View {
                         calculateAgeFromBirthDate()
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] No birth date data available in HealthKit: \(error.localizedDescription)")
+                    #endif
                 }
                 
                 // Mark as fetched even if no data was found (user can still proceed)
@@ -2656,7 +2724,9 @@ struct OnboardingView: View {
                     healthDataFetched = true
                 }
             } catch {
+                #if DEBUG
                 print("[Onboarding] Error fetching health data: \(error.localizedDescription)")
+                #endif
                 // Still allow user to proceed - mark as attempted
                 await MainActor.run {
                     healthDataFetched = true
@@ -2666,25 +2736,37 @@ struct OnboardingView: View {
     }
     
     private func loadEquipmentCatalog() {
+        #if DEBUG
         print("[Onboarding] 🔄 loadEquipmentCatalog() called")
+        #endif
         Task {
             await MainActor.run {
                 isLoadingEquipment = true
+                #if DEBUG
                 print("[Onboarding] 📊 Set isLoadingEquipment = true")
+                #endif
             }
             
             do {
+                #if DEBUG
                 print("[Onboarding] 🔍 Fetching equipment from local database...")
+                #endif
                 let descriptor = FetchDescriptor<EquipmentCatalog>(
                     sortBy: [SortDescriptor(\.name)]
                 )
                 let equipment = try modelContext.fetch(descriptor)
                 
+                #if DEBUG
                 print("[Onboarding] 📊 Fetched \(equipment.count) items from database")
+                #endif
                 if equipment.count > 0 {
+                    #if DEBUG
                     print("[Onboarding] 📋 First 5 items:")
+                    #endif
                     for (index, item) in equipment.prefix(5).enumerated() {
+                        #if DEBUG
                         print("  \(index + 1). \(item.name) (id: \(item.id))")
+                        #endif
                     }
                 }
                 
@@ -2692,28 +2774,40 @@ struct OnboardingView: View {
                     availableEquipment = equipment
                     isLoadingEquipment = false
                     
+                    #if DEBUG
                     print("[Onboarding] 💾 Updated state:")
                     print("  • availableEquipment.count: \(availableEquipment.count)")
                     print("  • isLoadingEquipment: \(isLoadingEquipment)")
+                    #endif
                     
                     if equipment.isEmpty {
+                        #if DEBUG
                         print("[Onboarding] ⚠️ No equipment found in local database. Will retry sync when equipment step is reached.")
+                        #endif
                     } else {
+                        #if DEBUG
                         print("[Onboarding] ✅ Loaded \(equipment.count) equipment items from local database")
+                        #endif
                     }
                 }
             } catch {
+                #if DEBUG
                 print("[Onboarding] ❌ Error loading equipment:")
                 print("  • Error type: \(type(of: error))")
                 print("  • Error description: \(error.localizedDescription)")
+                #endif
                 if let nsError = error as NSError? {
+                    #if DEBUG
                     print("  • Error domain: \(nsError.domain)")
                     print("  • Error code: \(nsError.code)")
                     print("  • Error userInfo: \(nsError.userInfo)")
+                    #endif
                 }
                 await MainActor.run {
                     isLoadingEquipment = false
+                    #if DEBUG
                     print("[Onboarding] 📊 Set isLoadingEquipment = false (after error)")
+                    #endif
                 }
             }
         }
@@ -2727,9 +2821,13 @@ struct OnboardingView: View {
             do {
                 let syncService = SyncService.shared
                 try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
+                #if DEBUG
                 print("[Onboarding] ✅ Profile synced from server (no program generated)")
+                #endif
             } catch {
+                #if DEBUG
                 print("[Onboarding] ⚠️ Warning: Failed to sync profile from server: \(error.localizedDescription)")
+                #endif
             }
             
             // Update profile to mark onboarding as completed
@@ -2740,12 +2838,16 @@ struct OnboardingView: View {
                 profile.onboardingCompleted = true
                 profile.theme = selectedTheme
                 try? modelContext.save()
+                #if DEBUG
                 print("[Onboarding] ✅ Profile updated: onboardingCompleted=true (no program generated)")
+                #endif
             }
             
             // Save step goal to UserDefaults
             UserDefaults.standard.set(dailyStepGoal, forKey: "dailyStepGoal")
+            #if DEBUG
             print("[Onboarding] ✅ Step goal saved: \(dailyStepGoal) steps")
+            #endif
             
             await MainActor.run {
                 isGeneratingProgram = false
@@ -2768,7 +2870,9 @@ struct OnboardingView: View {
             
             if startedEarly {
                 if complete {
+                    #if DEBUG
                     print("[Onboarding] ✅ Generation already complete, showing completion animation...")
+                    #endif
                     await MainActor.run {
                         generationStatus = String(localized: "Finalizing...")
                     }
@@ -2778,7 +2882,9 @@ struct OnboardingView: View {
                     
                     finalizeOnboarding()
                 } else {
+                    #if DEBUG
                     print("[Onboarding] ⏳ Generation still in progress, waiting for completion...")
+                    #endif
                     waitForGenerationCompletion()
                 }
             } else {
@@ -2814,7 +2920,9 @@ struct OnboardingView: View {
                     let minDuration = TimeInterval(10)
                     let startTime = Date()
                     
+                    #if DEBUG
                     print("[Onboarding] 📡 Calling APIService.shared.completeOnboarding (late flow)...")
+                    #endif
                     let response = try await APIService.shared.completeOnboarding(
                         profile: profileData,
                         equipment: selectedEquipment,
@@ -2826,24 +2934,32 @@ struct OnboardingView: View {
                     let remaining = minDuration - elapsed
                     
                     if remaining > 0 {
+                        #if DEBUG
                         print("[Onboarding] ⏳ Waiting \(remaining)s to meet minimum animation time...")
+                        #endif
                         try await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
                     }
                     
                     if response.success {
                         if let jobId = response.program?.jobId, let userId = authService.currentUserId {
+                            #if DEBUG
                             print("[Onboarding] 🚀 Background generation started with jobId: \(jobId)")
+                            #endif
                             await MainActor.run {
                                 self.generationJobId = jobId
                             }
                             await pollGenerationStatus(jobId: jobId, userId: userId)
                             finalizeOnboarding()
                         } else if response.hasProgram == true || (response.templatesCreated ?? 0) > 0 {
+                            #if DEBUG
                             print("[Onboarding] ✅ Immediate success! Passing response to finalize...")
+                            #endif
                             finalizeOnboarding(response: response)
                         } else {
                             // Fallback to finalize if no jobId but success (should not happen in V4)
+                            #if DEBUG
                             print("[Onboarding] ⚠️ Success but no program or jobId. Finalizing anyway...")
+                            #endif
                             finalizeOnboarding(response: response)
                         }
                     } else {
@@ -2855,7 +2971,9 @@ struct OnboardingView: View {
                         }
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] ❌ Error completing onboarding: \(error.localizedDescription)")
+                    #endif
                     await MainActor.run {
                         generationError = String(format: String(localized: "An unexpected error occurred: %@"), error.localizedDescription)
                         showGenerationErrorAlert = true
@@ -2869,7 +2987,9 @@ struct OnboardingView: View {
     
     private func waitForGenerationCompletion() {
         Task {
+            #if DEBUG
             print("[Onboarding] 🕒 Waiting for background generation to complete...")
+            #endif
             var attempts = 0
             let userId = authService.currentUserId
             
@@ -2889,16 +3009,22 @@ struct OnboardingView: View {
                 attempts += 1
                 
                 if attempts % 5 == 0 {
+                    #if DEBUG
                     print("[Onboarding] ⏳ Still waiting for generation... (\(attempts)s)")
+                    #endif
                 }
             }
             
             await MainActor.run {
                 if programGenerationComplete {
+                    #if DEBUG
                     print("[Onboarding] ✅ Detected generation completion!")
+                    #endif
                     finalizeOnboarding()
                 } else {
+                    #if DEBUG
                     print("[Onboarding] ❌ Generation wait timed out after 300s (5 minutes)")
+                    #endif
                     generationError = String(localized: "Program generation took too long. Please try again.")
                     showGenerationErrorAlert = true
                     isGeneratingProgram = false
@@ -2909,7 +3035,9 @@ struct OnboardingView: View {
     }
     
     private func finalizeOnboarding(response: APIService.OnboardingCompleteResponse? = nil) {
+        #if DEBUG
         print("[Onboarding] 🏁 Finalizing onboarding...")
+        #endif
         
         Task {
             // Update profile
@@ -2923,7 +3051,9 @@ struct OnboardingView: View {
                     
                     // Sync profile data from API response if available
                     if let apiProfile = response?.profile {
+                        #if DEBUG
                         print("[Onboarding] 📥 Syncing profile data from API response...")
+                        #endif
                         profile.age = apiProfile.age
                         profile.sex = apiProfile.sex
                         profile.bodyWeight = apiProfile.bodyWeight
@@ -2939,22 +3069,32 @@ struct OnboardingView: View {
                         profile.sessionDuration = apiProfile.sessionDuration ?? 60
                         profile.selectedGymId = apiProfile.selectedGymId
                         
+                        #if DEBUG
                         print("[Onboarding] 🏋️ Set selectedGymId = \(apiProfile.selectedGymId ?? "nil")")
+                        #endif
                     }
                     
                     try? modelContext.save()
+                    #if DEBUG
                     print("[Onboarding] ✅ Profile marked as onboarding completed and synced")
                     print("[Onboarding] 🏋️ Confirmed selectedGymId in profile: \(profile.selectedGymId ?? "nil")")
+                    #endif
                     
                     // Force a full profile sync from server to ensure all fields (including computed ones) are correct
+                    #if DEBUG
                     print("[Onboarding] 🔄 Performing full profile sync from server...")
+                    #endif
                     try? await SyncService.shared.syncUserProfile(userId: userId, modelContext: modelContext)
                     
                     // Fetch the generated program templates immediately so they appear on HomeView
+                    #if DEBUG
                     print("[Onboarding] 🔄 Fetching generated program templates...")
+                    #endif
                     try? await SyncService.shared.syncProgramTemplates(userId: userId, modelContext: modelContext)
                     try? await SyncService.shared.syncGymsAndEquipment(userId: userId, modelContext: modelContext)
+                    #if DEBUG
                     print("[Onboarding] ✅ Program templates synced")
+                    #endif
                 }
             }
             
@@ -2972,16 +3112,22 @@ struct OnboardingView: View {
         var pollCount = 0
         let maxPolls = 300 // 5 minutes max (300 * 1 second)
         
+        #if DEBUG
         print("[Onboarding] 🔄 Starting to poll job status: \(jobId)")
+        #endif
         
         while pollCount < maxPolls {
             do {
                 try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
                 
+                #if DEBUG
                 print("[Onboarding] 📡 Polling job status (attempt \(pollCount + 1)/\(maxPolls))...")
+                #endif
                 let status = try await APIService.shared.getGenerationStatus(jobId: jobId)
                 
+                #if DEBUG
                 print("[Onboarding] 📊 Job status: \(status.status), progress: \(status.progress)%")
+                #endif
                 
                 await MainActor.run {
                     generationStatus = status.status
@@ -2990,7 +3136,9 @@ struct OnboardingView: View {
                 
                 if status.status == "completed" {
                     // Sync program templates
+                    #if DEBUG
                     print("[Onboarding] ✅ Program generation completed, syncing...")
+                    #endif
                     let syncService = SyncService.shared
                     
                     // Try syncing templates multiple times if needed
@@ -3002,17 +3150,23 @@ struct OnboardingView: View {
                             try await syncService.syncUserProfile(userId: userId, modelContext: modelContext)
                             let templates = try modelContext.fetch(FetchDescriptor<ProgramTemplate>())
                             if !templates.isEmpty {
+                                #if DEBUG
                                 print("[Onboarding] ✅ Templates synced successfully: \(templates.count) templates")
+                                #endif
                                 syncSuccess = true
                             } else {
+                                #if DEBUG
                                 print("[Onboarding] ⚠️ Sync completed but no templates found, attempt \(syncAttempts + 1)/5")
+                                #endif
                                 syncAttempts += 1
                                 if syncAttempts < 5 {
                                     try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second before retry
                                 }
                             }
                         } catch {
+                            #if DEBUG
                             print("[Onboarding] ❌ Error syncing templates (attempt \(syncAttempts + 1)/5): \(error.localizedDescription)")
+                            #endif
                             syncAttempts += 1
                             if syncAttempts < 5 {
                                 try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second before retry
@@ -3021,7 +3175,9 @@ struct OnboardingView: View {
                     }
                     
                     if !syncSuccess {
+                        #if DEBUG
                         print("[Onboarding] ❌ Failed to sync templates after 5 attempts")
+                        #endif
                         await MainActor.run {
                             generationError = String(localized: "The program is ready but could not be loaded. Please try opening the app again.")
                             showGenerationErrorAlert = true
@@ -3043,7 +3199,9 @@ struct OnboardingView: View {
                         profile.theme = selectedTheme
                         
                         // Create default gym with selected equipment from onboarding
+                        #if DEBUG
                         print("[Onboarding] 🏋️ Creating default gym with \(selectedEquipment.count) equipment items")
+                        #endif
                         _ = try await GymService.shared.createGym(
                             name: String(localized: "My Gym"),
                             location: String(localized: "Standard location"),
@@ -3053,7 +3211,9 @@ struct OnboardingView: View {
                         )
                         
                         try? modelContext.save()
+                        #if DEBUG
                         print("[Onboarding] ✅ Profile updated and Default Gym created")
+                        #endif
                     }
                     
                     await MainActor.run {
@@ -3062,7 +3222,9 @@ struct OnboardingView: View {
                         showGenerationProgress = false
                         dismiss()
                     }
+                    #if DEBUG
                     print("[Onboarding] ✅ Onboarding completed successfully!")
+                    #endif
                     return
                 } else if status.status == "failed" {
                     await MainActor.run {
@@ -3083,13 +3245,17 @@ struct OnboardingView: View {
                     }
                 }
             } catch {
+                #if DEBUG
                 print("[Onboarding] ❌ Error polling generation status: \(error.localizedDescription)")
+                #endif
                 pollCount += 1
             }
         }
         
         // Timeout after max polls - JUST PROCEED
+        #if DEBUG
         print("[Onboarding] ⚠️ Polling timed out. Proceeding to home screen anyway.")
+        #endif
         await MainActor.run {
             // Instead of showing an error, we let the user into the app
             // The program might appear later if it finishes in background
@@ -3146,9 +3312,11 @@ struct OnboardingView: View {
     }
     
     private func syncEquipmentCatalogEarly() {
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[Onboarding] 🔄 syncEquipmentCatalogEarly() called")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
         
         Task {
             var retryCount = 0
@@ -3156,56 +3324,78 @@ struct OnboardingView: View {
             
             while retryCount < maxRetries {
                 do {
+                    #if DEBUG
                     print("[Onboarding] 🔄 Syncing equipment catalog (attempt \(retryCount + 1)/\(maxRetries))...")
+                    #endif
                     let syncStartTime = Date()
                     
                     try await ExerciseCatalogService.shared.syncEquipmentCatalog(modelContext: modelContext)
                     
                     let syncDuration = Date().timeIntervalSince(syncStartTime)
+                    #if DEBUG
                     print("[Onboarding] ⏱️  Sync completed in \(String(format: "%.2f", syncDuration)) seconds")
+                    #endif
                     
                     await MainActor.run {
+                        #if DEBUG
                         print("[Onboarding] 📥 Calling loadEquipmentCatalog() after sync...")
+                        #endif
                         loadEquipmentCatalog()
                     }
                     
                     // Check if we got equipment
                     let descriptor = FetchDescriptor<EquipmentCatalog>()
                     if let equipment = try? modelContext.fetch(descriptor), !equipment.isEmpty {
+                        #if DEBUG
                         print("[Onboarding] ✅ Equipment catalog synced successfully (\(equipment.count) items)")
                         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                        #endif
                         return
                     } else {
+                        #if DEBUG
                         print("[Onboarding] ⚠️ Sync completed but no equipment found in database")
                         print("[Onboarding] 📊 Checking database state...")
+                        #endif
                         let allEquipment = try? modelContext.fetch(descriptor)
+                        #if DEBUG
                         print("[Onboarding] 📊 Total items in database: \(allEquipment?.count ?? 0)")
+                        #endif
                     }
                 } catch {
+                    #if DEBUG
                     print("[Onboarding] ❌ Error syncing equipment catalog (attempt \(retryCount + 1)):")
                     print("  • Error type: \(type(of: error))")
                     print("  • Error description: \(error.localizedDescription)")
+                    #endif
                     if let nsError = error as NSError? {
+                        #if DEBUG
                         print("  • Error domain: \(nsError.domain)")
                         print("  • Error code: \(nsError.code)")
+                        #endif
                     }
                     retryCount += 1
                     
                     if retryCount < maxRetries {
                         let waitTime = pow(2.0, Double(retryCount))
+                        #if DEBUG
                         print("[Onboarding] ⏳ Waiting \(waitTime) seconds before retry...")
+                        #endif
                         // Wait before retry (exponential backoff)
                         try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
                     }
                 }
             }
             
+            #if DEBUG
             print("[Onboarding] ⚠️ All sync attempts failed, loading from cache...")
+            #endif
             // Final attempt to load from cache even if sync failed
             await MainActor.run {
                 loadEquipmentCatalog()
             }
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
         }
     }
 }

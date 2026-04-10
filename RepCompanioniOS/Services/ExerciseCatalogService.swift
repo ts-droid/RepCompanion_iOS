@@ -61,24 +61,36 @@ class ExerciseCatalogService: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[ExerciseCatalogService] 🔄 STARTING EQUIPMENT CATALOG SYNC")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
         
         // Fetch equipment from server
+        #if DEBUG
         print("[ExerciseCatalogService] 📡 Calling APIService.shared.fetchEquipmentCatalog()...")
+        #endif
         let fetchStartTime = Date()
         let equipment = try await APIService.shared.fetchEquipmentCatalog()
         let fetchDuration = Date().timeIntervalSince(fetchStartTime)
+        #if DEBUG
         print("[ExerciseCatalogService] ⏱️  Fetch completed in \(String(format: "%.2f", fetchDuration)) seconds")
         print("[ExerciseCatalogService] ✅ Fetched \(equipment.count) equipment items from server")
+        #endif
         
         if equipment.isEmpty {
+            #if DEBUG
             print("[ExerciseCatalogService] ⚠️ WARNING: Server returned empty equipment list!")
+            #endif
         } else {
+            #if DEBUG
             print("[ExerciseCatalogService] 📋 First 5 items:")
+            #endif
             for (index, item) in equipment.prefix(5).enumerated() {
+                #if DEBUG
                 print("  \(index + 1). \(item.name) (id: \(item.id), category: \(item.category))")
+                #endif
             }
         }
         
@@ -87,7 +99,9 @@ class ExerciseCatalogService: ObservableObject {
         let existing = try modelContext.fetch(descriptor)
         let existingById = Dictionary(uniqueKeysWithValues: existing.map { ($0.id, $0) })
         
+        #if DEBUG
         print("[ExerciseCatalogService] 📊 Found \(existing.count) existing equipment items in database")
+        #endif
         
         // Upsert: Update existing or insert new
         var updatedCount = 0
@@ -127,33 +141,45 @@ class ExerciseCatalogService: ObservableObject {
         if equipment.count > 0 {
             let itemsToDelete = existing.filter { !processedIds.contains($0.id) }
             if !itemsToDelete.isEmpty {
+                #if DEBUG
                 print("[ExerciseCatalogService] 🗑️ Deleting \(itemsToDelete.count) obsolete equipment items...")
+                #endif
                 for item in itemsToDelete {
                     modelContext.delete(item)
                 }
             }
         }
         
+        #if DEBUG
         print("[ExerciseCatalogService] 💾 Updated \(updatedCount) and inserted \(insertedCount) equipment items...")
         print("[ExerciseCatalogService] 📊 Processed IDs: \(processedIds.count) unique items")
+        #endif
         
+        #if DEBUG
         print("[ExerciseCatalogService] 💾 Saving to database...")
+        #endif
         let saveStartTime = Date()
         try modelContext.save()
         let saveDuration = Date().timeIntervalSince(saveStartTime)
+        #if DEBUG
         print("[ExerciseCatalogService] ⏱️  Save completed in \(String(format: "%.2f", saveDuration)) seconds")
+        #endif
         
         // Verify what's in database now
         let verifyDescriptor = FetchDescriptor<EquipmentCatalog>()
         if let savedEquipment = try? modelContext.fetch(verifyDescriptor) {
+            #if DEBUG
             print("[ExerciseCatalogService] ✅ Verification: \(savedEquipment.count) items now in database")
+            #endif
         }
         
         let totalDuration = Date().timeIntervalSince(syncStartTime)
+        #if DEBUG
         print("[ExerciseCatalogService] ⏱️  Total sync time: \(String(format: "%.2f", totalDuration)) seconds")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[ExerciseCatalogService] ✅ EQUIPMENT CATALOG SYNC COMPLETED SUCCESSFULLY")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
         
         lastSyncDate = Date()
     }

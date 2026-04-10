@@ -271,7 +271,9 @@ struct EditProgramTemplateView: View {
             hasChanges = false
             dismiss()
         } catch {
+            #if DEBUG
             print("Error saving changes: \(error)")
+            #endif
         }
     }
     

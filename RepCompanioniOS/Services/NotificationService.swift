@@ -93,7 +93,9 @@ class NotificationService: NSObject, ObservableObject {
         
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
+                #if DEBUG
                 print("Error scheduling notification: \(error)")
+                #endif
             }
         }
     }
@@ -123,7 +125,9 @@ class NotificationService: NSObject, ObservableObject {
         
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
+                #if DEBUG
                 print("Error scheduling motivational message: \(error)")
+                #endif
             }
         }
     }
@@ -182,9 +186,13 @@ class NotificationService: NSObject, ObservableObject {
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
+                #if DEBUG
                 print("[NotificationService] ⚠️ Could not schedule body reminder: \(error)")
+                #endif
             } else {
+                #if DEBUG
                 print("[NotificationService] ✅ Weekly body reminder scheduled (Monday 09:00)")
+                #endif
             }
         }
     }

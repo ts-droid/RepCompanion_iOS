@@ -268,17 +268,25 @@ struct WorkoutListView: View {
                     }
                     .refreshable {
                         // Pull-to-refresh: Sync templates from server
+                        #if DEBUG
                         print("[WorkoutListView] 🔄 Pull-to-refresh triggered")
+                        #endif
                         if let userId = authService.currentUserId {
                             do {
                                 // Sync specifically for the user (SyncService might need updates to handle per-gym sync if server supports it, otherwise generic sync)
                                 try await SyncService.shared.syncProgramTemplates(userId: userId, modelContext: modelContext)
+                                #if DEBUG
                                 print("[WorkoutListView] ✅ Templates synced successfully")
+                                #endif
                             } catch {
+                                #if DEBUG
                                 print("[WorkoutListView] ❌ Error syncing templates: \(error.localizedDescription)")
+                                #endif
                             }
                         } else {
+                            #if DEBUG
                             print("[WorkoutListView] ⚠️ No user ID for sync")
+                            #endif
                         }
                     }
                 }

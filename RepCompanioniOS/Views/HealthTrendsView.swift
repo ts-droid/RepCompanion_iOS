@@ -205,7 +205,9 @@ struct HealthTrendsView: View {
             do {
                 try await healthService.syncFromHealthKit(userId: userId, modelContext: modelContext)
             } catch {
+                #if DEBUG
                 print("Error syncing health data: \(error)")
+                #endif
             }
             isLoading = false
         }

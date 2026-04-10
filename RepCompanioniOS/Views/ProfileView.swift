@@ -61,7 +61,9 @@ struct ProfileView: View {
                             HStack(alignment: .center, spacing: 0) {
                                 // Settings button to the left
                                 Button(action: {
+                                    #if DEBUG
                                     print("[ProfileView] 🔧 Settings button tapped")
+                                    #endif
                                     showSettings = true
                                 }) {
                                     Image(systemName: "gearshape.fill")

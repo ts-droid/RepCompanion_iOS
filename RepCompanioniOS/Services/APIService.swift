@@ -40,15 +40,23 @@ class APIService {
 
     // Log baseURL on initialization to verify configuration
     init() {
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[APIService] 🔧 INITIALIZED")
         print("[APIService] 🌐 Base URL: \(baseURL)")
+        #endif
         #if targetEnvironment(simulator)
+        #if DEBUG
         print("[APIService] 📱 Running on: iOS Simulator")
+        #endif
         #else
+        #if DEBUG
         print("[APIService] 📱 Running on: Physical Device")
         #endif
+        #endif
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
     }
     
     var authToken: String? {
@@ -63,27 +71,37 @@ class APIService {
             let (data, response) = try await URLSession.shared.data(for: request)
             return (data, response)
         } catch let error as NSError {
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             print("[APIService] ❌ NETWORK ERROR")
             print("[APIService] 🌐 URL: \(request.url?.absoluteString ?? "Unknown")")
             print("[APIService] 🏷️ Domain: \(error.domain)")
             print("[APIService] 🔢 Code: \(error.code)")
             print("[APIService] 💬 Description: \(error.localizedDescription)")
+            #endif
             
             // Check for Local Network Prohibited
             if error.domain == NSURLErrorDomain {
                 let errorString = "\(error)"
                 if errorString.contains("Local network prohibited") {
+                    #if DEBUG
                     print("[APIService] ⚠️ CRITICAL: Local Network access is prohibited!")
                     print("[APIService] 👉 Please ensure you have accepted the Local Network permission dialog.")
                     print("[APIService] 👉 Go to Settings > RepCompanion > Local Network and toggle it ON.")
+                    #endif
                 } else if error.code == -1004 {
+                    #if DEBUG
                     print("[APIService] ⚠️ Could not connect to server. Ensure the backend is running at \(baseURL)")
+                    #endif
                 } else if error.code == -1009 {
+                    #if DEBUG
                     print("[APIService] ⚠️ Internet appears to be offline.")
+                    #endif
                 }
             }
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
             throw error
         }
     }
@@ -423,7 +441,9 @@ class APIService {
     }
     
     func completeOnboarding(profile: OnboardingCompleteRequest.ProfileData, equipment: [String], selectedGymId: String? = nil, useV4: Bool = true) async throws -> OnboardingCompleteResponse {
+        #if DEBUG
         print("[APIService] 🚀 Using V4 AI architecture: \(useV4)")
+        #endif
         
         var urlComponents = URLComponents(string: "\(baseURL)/api/onboarding/complete")!
         if useV4 {
@@ -431,12 +451,16 @@ class APIService {
         }
         
         guard let url = urlComponents.url else {
+            #if DEBUG
             print("[APIService] ❌ ERROR: Failed to create URL from components")
+            #endif
             throw APIError.invalidResponse
         }
         
+        #if DEBUG
         print("[APIService] 🌐 Request URL: \(url.absoluteString)")
         print("[APIService] 📋 Base URL: \(baseURL)")
+        #endif
         
         // Use singleton long timeout session for AI generation (5 minutes)
         var request = URLRequest(url: url)
@@ -446,15 +470,21 @@ class APIService {
         // Add auth token if available
         if let token = UserDefaults.standard.string(forKey: "authToken") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[APIService] ✅ Using auth token for onboarding")
+            #endif
         } else {
+            #if DEBUG
             print("[APIService] ⚠️  No auth token found - request may fail")
+            #endif
         }
         
         let body = OnboardingCompleteRequest(profile: profile, equipment: equipment, selectedGymId: selectedGymId)
         request.httpBody = try JSONEncoder().encode(body)
         
+        #if DEBUG
         print("[APIService] ⏱️ Starting onboarding completion (timeout: 5 minutes for AI generation)...")
+        #endif
         
         // Check server health before making request
         do {
@@ -462,11 +492,15 @@ class APIService {
             let healthRequest = URLRequest(url: healthURL, timeoutInterval: 5.0)
             let (_, healthResponse) = try await URLSession.shared.data(for: healthRequest)
             if let httpResponse = healthResponse as? HTTPURLResponse {
+                #if DEBUG
                 print("[APIService] ✅ Server health check: \(httpResponse.statusCode)")
+                #endif
             }
         } catch {
+            #if DEBUG
             print("[APIService] ⚠️  Server health check failed: \(error.localizedDescription)")
             print("[APIService] ⚠️  Continuing with request anyway...")
+            #endif
         }
         
         do {
@@ -479,7 +513,9 @@ class APIService {
             guard (200...299).contains(httpResponse.statusCode) else {
                 // Try to decode error message for better feedback
                 if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    #if DEBUG
                     print("[APIService] ❌ Onboarding failed: \(errorResponse.message)")
+                    #endif
                     throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
                 }
                 
@@ -500,9 +536,13 @@ class APIService {
             // Handle program response (cached or async)
             if let programResponse = onboardingResponse.program {
                 if programResponse.cached == true {
+                    #if DEBUG
                     print("[APIService] ✅ Program from cache")
+                    #endif
                 } else if let jobId = programResponse.jobId {
+                    #if DEBUG
                     print("[APIService] ⏳ Program generation started, jobId: \(jobId)")
+                    #endif
                 }
             }
             
@@ -510,24 +550,34 @@ class APIService {
         } catch let decodeError {
             // Log the actual JSON for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
+                #if DEBUG
                 print("[APIService] ❌ Failed to decode response. JSON: \(jsonString)")
+                #endif
             }
+            #if DEBUG
             print("[APIService] ❌ Decoding error: \(decodeError)")
+            #endif
             throw decodeError
         }
         } catch let error as URLError {
+            #if DEBUG
             print("[APIService] ❌ NETWORK ERROR in onboarding completion:")
             print("[APIService] Error code: \(error.code.rawValue)")
             print("[APIService] Error description: \(error.localizedDescription)")
             print("[APIService] Failed to connect to \(baseURL)")
+            #endif
             
             // Retry logic for connection errors
             if error.code == .cannotConnectToHost || error.code == .timedOut || error.code == .networkConnectionLost {
+                #if DEBUG
                 print("[APIService] 🔄 Retrying onboarding completion (connection error detected)...")
+                #endif
                 // Simple retry without recursive call
                 for attempt in 1...2 {
                     let waitTime = 3.0 * Double(attempt)
+                    #if DEBUG
                     print("[APIService] ⏳ Retry attempt \(attempt)/2 after \(waitTime)s...")
+                    #endif
                     try await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
                     
                     do {
@@ -555,7 +605,9 @@ class APIService {
             
             throw APIError.networkError(error.localizedDescription)
         } catch {
+            #if DEBUG
             print("[APIService] ❌ ERROR in onboarding completion: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -642,6 +694,7 @@ class APIService {
         height: Int,
         useV3: Bool = false
     ) async throws -> SuggestedOneRmResponse {
+        #if DEBUG
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("[APIService] 🚀 STARTING 1RM SUGGESTION REQUEST")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -654,6 +707,7 @@ class APIService {
         print("  • height: \(height) cm")
         print("  • useV3: \(useV3)")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        #endif
         
         var urlComponents = URLComponents(string: "\(baseURL)/api/profile/suggest-onerm")!
         if useV3 {
@@ -661,12 +715,16 @@ class APIService {
         }
         
         guard let url = urlComponents.url else {
+            #if DEBUG
             print("[APIService] ❌ ERROR: Failed to create URL from components")
+            #endif
             throw APIError.invalidResponse
         }
         
+        #if DEBUG
         print("[APIService] 🌐 Request URL: \(url.absoluteString)")
         print("[APIService] 📋 Base URL: \(baseURL)")
+        #endif
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -681,15 +739,21 @@ class APIService {
             "height": height
         ]
         
+        #if DEBUG
         print("[APIService] 📦 Request Body:")
+        #endif
         if let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted),
            let jsonString = String(data: jsonData, encoding: .utf8) {
+            #if DEBUG
             print(jsonString)
+            #endif
         }
         
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
+        #if DEBUG
         print("[APIService] ⏳ Sending HTTP request...")
+        #endif
         let startTime = Date()
         
         // Check server health before making request
@@ -698,11 +762,15 @@ class APIService {
             let healthRequest = URLRequest(url: healthURL, timeoutInterval: 5.0)
             let (_, healthResponse) = try await URLSession.shared.data(for: healthRequest)
             if let httpResponse = healthResponse as? HTTPURLResponse {
+                #if DEBUG
                 print("[APIService] ✅ Server health check: \(httpResponse.statusCode)")
+                #endif
             }
         } catch {
+            #if DEBUG
             print("[APIService] ⚠️  Server health check failed: \(error.localizedDescription)")
             print("[APIService] ⚠️  Continuing with request anyway...")
+            #endif
         }
         
         // Use singleton medium timeout session for 1RM suggestions (30 seconds)
@@ -710,39 +778,56 @@ class APIService {
             let (data, response) = try await mediumTimeoutSession.data(for: request)
             let duration = Date().timeIntervalSince(startTime)
             
+            #if DEBUG
             print("[APIService] ⏱️  Request completed in \(String(format: "%.2f", duration)) seconds")
+            #endif
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                #if DEBUG
                 print("[APIService] ❌ ERROR: Invalid response type")
+                #endif
                 throw APIError.invalidResponse
             }
             
+            #if DEBUG
             print("[APIService] 📡 HTTP Response:")
             print("  • Status Code: \(httpResponse.statusCode)")
             print("  • Headers: \(httpResponse.allHeaderFields)")
             print("  • Data Size: \(data.count) bytes")
+            #endif
             
             guard (200...299).contains(httpResponse.statusCode) else {
+                #if DEBUG
                 print("[APIService] ❌ ERROR: HTTP status code \(httpResponse.statusCode)")
+                #endif
                 if let responseString = String(data: data, encoding: .utf8) {
+                    #if DEBUG
                     print("[APIService] Response body: \(responseString)")
+                    #endif
                 }
                 if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    #if DEBUG
                     print("[APIService] Decoded error: \(errorResponse.message)")
+                    #endif
                     throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorResponse.message])
                 }
                 throw APIError.httpError(httpResponse.statusCode)
             }
             
+            #if DEBUG
             print("[APIService] ✅ HTTP Status: SUCCESS")
+            #endif
             
             if let responseString = String(data: data, encoding: .utf8) {
+                #if DEBUG
                 print("[APIService] 📄 Response Body:")
                 print(responseString)
+                #endif
             }
             
             let decodedResponse = try JSONDecoder().decode(SuggestedOneRmResponse.self, from: data)
             
+            #if DEBUG
             print("[APIService] ✅ Decoded Response:")
             print("  • oneRmBench: \(decodedResponse.oneRmBench) kg")
             print("  • oneRmOhp: \(decodedResponse.oneRmOhp) kg")
@@ -752,22 +837,29 @@ class APIService {
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             print("[APIService] ✅ REQUEST COMPLETED SUCCESSFULLY")
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
             
             return decodedResponse
         } catch let error as URLError {
             let duration = Date().timeIntervalSince(startTime)
+            #if DEBUG
             print("[APIService] ❌ NETWORK ERROR after \(String(format: "%.2f", duration)) seconds:")
             print("[APIService] Error code: \(error.code.rawValue)")
             print("[APIService] Error description: \(error.localizedDescription)")
             print("[APIService] Failed to connect to \(baseURL)")
+            #endif
             
             // Retry logic for connection errors
             if error.code == .cannotConnectToHost || error.code == .timedOut || error.code == .networkConnectionLost {
+                #if DEBUG
                 print("[APIService] 🔄 Retrying request (connection error detected)...")
+                #endif
                 // Simple retry without recursive call to avoid infinite loop
                 for attempt in 1...2 {
                     let waitTime = 2.0 * Double(attempt)
+                    #if DEBUG
                     print("[APIService] ⏳ Retry attempt \(attempt)/2 after \(waitTime)s...")
+                    #endif
                     try await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
                     
                     do {
@@ -794,15 +886,21 @@ class APIService {
             throw APIError.networkError(error.localizedDescription)
         } catch {
             let duration = Date().timeIntervalSince(startTime)
+            #if DEBUG
             print("[APIService] ❌ ERROR after \(String(format: "%.2f", duration)) seconds:")
             print("[APIService] Error type: \(type(of: error))")
             print("[APIService] Error description: \(error.localizedDescription)")
+            #endif
             if let nsError = error as NSError? {
+                #if DEBUG
                 print("[APIService] Error domain: \(nsError.domain)")
                 print("[APIService] Error code: \(nsError.code)")
                 print("[APIService] Error userInfo: \(nsError.userInfo)")
+                #endif
             }
+            #if DEBUG
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            #endif
             throw error
         }
     }
@@ -881,22 +979,30 @@ class APIService {
                     continue
                 }
                 
+                #if DEBUG
                 print("[API] Program status response (\(endpoint)): \(httpResponse.statusCode)")
+                #endif
                 
                 if (200...299).contains(httpResponse.statusCode) {
                     return try JSONDecoder().decode(ProgramStatusResponse.self, from: data)
                 } else if httpResponse.statusCode == 404 {
                     let errorBody = String(data: data, encoding: .utf8) ?? "No error body"
+                    #if DEBUG
                     print("[API] ⚠️ 404 on \(endpoint): \(errorBody)")
+                    #endif
                     continue
                 } else {
                     let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                    #if DEBUG
                     print("[API] ⚠️ HTTP error \(httpResponse.statusCode) on \(endpoint): \(errorBody)")
+                    #endif
                     throw APIError.httpError(httpResponse.statusCode)
                 }
             } catch {
                 lastError = error
+                #if DEBUG
                 print("[API] ⚠️ Failed to fetch \(endpoint): \(error.localizedDescription)")
+                #endif
             }
         }
         
@@ -923,30 +1029,42 @@ class APIService {
         // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[API] 🔑 Using auth token for templates request")
+            #endif
         } else {
+            #if DEBUG
             print("[API] ⚠️ No auth token available, trying without (dev mode)")
+            #endif
         }
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                #if DEBUG
                 print("[API] ❌ Invalid response type")
+                #endif
                 throw APIError.invalidResponse
             }
             
+            #if DEBUG
             print("[API] 📡 Templates response: \(httpResponse.statusCode)")
+            #endif
             
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                #if DEBUG
                 print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                #endif
                 throw APIError.httpError(httpResponse.statusCode)
             }
         
             // Log raw response for debugging
             if let responseString = String(data: data, encoding: .utf8) {
+                #if DEBUG
                 print("[API] 📄 Raw response (first 1000 chars): \(String(responseString.prefix(1000)))")
+                #endif
             }
         
         let decoder = JSONDecoder()
@@ -976,14 +1094,20 @@ class APIService {
                     exercises: meta.exercises // Inject the exercises from the wrapper!
                 )
             }
+            #if DEBUG
             print("[API] ✅ Decoded \(templates.count) templates from response")
+            #endif
             return templates
         } catch let error as URLError {
+            #if DEBUG
             print("[API] ❌ Network error: \(error.localizedDescription)")
             print("[API] ❌ Failed to connect to \(baseURL)")
+            #endif
             throw APIError.networkError(error.localizedDescription)
         } catch {
+            #if DEBUG
             print("[API] ❌ Decoding error: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -996,34 +1120,50 @@ class APIService {
         // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[API] 🔑 Using auth token for delete templates request")
+            #endif
         } else {
+            #if DEBUG
             print("[API] ⚠️ No auth token available, trying without (dev mode)")
+            #endif
         }
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                #if DEBUG
                 print("[API] ❌ Invalid response type")
+                #endif
                 throw APIError.invalidResponse
             }
             
+            #if DEBUG
             print("[API] 📡 Delete templates response: \(httpResponse.statusCode)")
+            #endif
             
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                #if DEBUG
                 print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                #endif
                 throw APIError.httpError(httpResponse.statusCode)
             }
             
+            #if DEBUG
             print("[API] ✅ Successfully deleted all templates on server")
+            #endif
         } catch let error as URLError {
+            #if DEBUG
             print("[API] ❌ Network error: \(error.localizedDescription)")
             print("[API] ❌ Failed to connect to \(baseURL)")
+            #endif
             throw APIError.networkError(error.localizedDescription)
         } catch {
+            #if DEBUG
             print("[API] ❌ Error deleting templates: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -1036,34 +1176,50 @@ class APIService {
         // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[API] 🔑 Using auth token for delete gyms request")
+            #endif
         } else {
+            #if DEBUG
             print("[API] ⚠️ No auth token available, trying without (dev mode)")
+            #endif
         }
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                #if DEBUG
                 print("[API] ❌ Invalid response type")
+                #endif
                 throw APIError.invalidResponse
             }
             
+            #if DEBUG
             print("[API] 📡 Delete gyms response: \(httpResponse.statusCode)")
+            #endif
             
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                #if DEBUG
                 print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                #endif
                 throw APIError.httpError(httpResponse.statusCode)
             }
             
+            #if DEBUG
             print("[API] ✅ Successfully deleted all gyms on server")
+            #endif
         } catch let error as URLError {
+            #if DEBUG
             print("[API] ❌ Network error: \(error.localizedDescription)")
             print("[API] ❌ Failed to connect to \(baseURL)")
+            #endif
             throw APIError.networkError(error.localizedDescription)
         } catch {
+            #if DEBUG
             print("[API] ❌ Error deleting gyms: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -1078,34 +1234,50 @@ class APIService {
         // Add auth token if available, but don't fail if missing (dev mode allows unauthenticated)
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[API] 🔑 Using auth token for reset profile request")
+            #endif
         } else {
+            #if DEBUG
             print("[API] ⚠️ No auth token available, trying without (dev mode)")
+            #endif
         }
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse else {
+                #if DEBUG
                 print("[API] ❌ Invalid response type")
+                #endif
                 throw APIError.invalidResponse
             }
             
+            #if DEBUG
             print("[API] 📡 Reset profile response: \(httpResponse.statusCode)")
+            #endif
             
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+                #if DEBUG
                 print("[API] ❌ HTTP Error \(httpResponse.statusCode): \(errorBody)")
+                #endif
                 throw APIError.httpError(httpResponse.statusCode)
             }
             
+            #if DEBUG
             print("[API] ✅ Successfully reset profile on server")
+            #endif
         } catch let error as URLError {
+            #if DEBUG
             print("[API] ❌ Network error: \(error.localizedDescription)")
             print("[API] ❌ Failed to connect to \(baseURL)")
+            #endif
             throw APIError.networkError(error.localizedDescription)
         } catch {
+            #if DEBUG
             print("[API] ❌ Error resetting profile: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -1327,8 +1499,10 @@ class APIService {
     func fetchEquipmentCatalog() async throws -> [EquipmentCatalogResponse] {
         // Can be called without auth for public catalog
         let url = URL(string: "\(baseURL)/api/equipment/catalog")!
+        #if DEBUG
         print("[APIService] 🔄 Fetching equipment catalog from: \(url.absoluteString)")
         print("[APIService] 📋 Base URL: \(baseURL)")
+        #endif
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -1336,9 +1510,13 @@ class APIService {
         
         if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            #if DEBUG
             print("[APIService] ✅ Using auth token")
+            #endif
         } else {
+            #if DEBUG
             print("[APIService] ⚠️ No auth token - using public endpoint")
+            #endif
         }
         
         let (data, response) = try await performRequest(request)
@@ -1351,7 +1529,9 @@ class APIService {
             throw APIError.httpError(httpResponse.statusCode)
         }
         
+        #if DEBUG
         print("[APIService] ✅ Response OK, data size: \(data.count) bytes")
+        #endif
         
         // Try to decode
         let decoder = JSONDecoder()
@@ -1359,17 +1539,27 @@ class APIService {
         
         do {
             let equipment = try decoder.decode([EquipmentCatalogResponse].self, from: data)
+            #if DEBUG
             print("[APIService] ✅ Successfully decoded \(equipment.count) equipment items")
+            #endif
             if equipment.isEmpty {
+                #if DEBUG
                 print("[APIService] ⚠️ WARNING: Decoded empty array!")
+                #endif
             } else {
+                #if DEBUG
                 print("[APIService] 📋 First few items: \(equipment.prefix(3).map { $0.name }.joined(separator: ", "))")
+                #endif
             }
             return equipment
         } catch {
+            #if DEBUG
             print("[APIService] ❌ Decode error: \(error)")
+            #endif
             if let jsonString = String(data: data, encoding: .utf8) {
+                #if DEBUG
                 print("[APIService] 📄 Response body (first 500 chars): \(String(jsonString.prefix(500)))")
+                #endif
             }
             throw error
         }
@@ -1850,17 +2040,23 @@ class APIService {
                     throw APIError.httpError(httpResponse.statusCode)
                 }
                 
+                #if DEBUG
                 print("[APIService] Workout session synced to server")
+                #endif
             } catch {
                 // If online but sync fails, queue it
                 OfflineSyncService.shared.queueWorkoutSession(session)
+                #if DEBUG
                 print("[APIService] Failed to sync workout session, queued: \(error)")
+                #endif
                 throw error
             }
         } else {
             // Offline - queue it
             OfflineSyncService.shared.queueWorkoutSession(session)
+            #if DEBUG
             print("[APIService] Workout session queued for offline sync")
+            #endif
         }
     }
     
@@ -1915,15 +2111,21 @@ class APIService {
                     throw APIError.httpError(httpResponse.statusCode)
                 }
                 
+                #if DEBUG
                 print("[APIService] Exercise log synced to server")
+                #endif
             } catch {
                 OfflineSyncService.shared.queueExerciseLog(log)
+                #if DEBUG
                 print("[APIService] Failed to sync exercise log, queued: \(error)")
+                #endif
                 throw error
             }
         } else {
             OfflineSyncService.shared.queueExerciseLog(log)
+            #if DEBUG
             print("[APIService] Exercise log queued for offline sync")
+            #endif
         }
     }
     
@@ -1959,15 +2161,21 @@ class APIService {
                     throw APIError.httpError(httpResponse.statusCode)
                 }
                 
+                #if DEBUG
                 print("[APIService] Session completion synced to server")
+                #endif
             } catch {
                 OfflineSyncService.shared.queueSessionCompletion(sessionId: sessionId, movergyScore: movergyScore)
+                #if DEBUG
                 print("[APIService] Failed to sync session completion, queued: \(error)")
+                #endif
                 throw error
             }
         } else {
             OfflineSyncService.shared.queueSessionCompletion(sessionId: sessionId, movergyScore: movergyScore)
+            #if DEBUG
             print("[APIService] Session completion queued for offline sync")
+            #endif
         }
     }
     
@@ -2200,7 +2408,9 @@ class APIService {
         do {
             return try JSONDecoder().decode(V4ProgramResponse.self, from: data)
         } catch {
+            #if DEBUG
             print("[APIService] ❌ DECODING ERROR (V4): \(error)")
+            #endif
             throw APIError.decodingError
         }
     }

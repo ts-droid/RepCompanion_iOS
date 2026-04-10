@@ -55,7 +55,9 @@ class SyncService: ObservableObject {
             
             syncProgress = 1.0
         } catch {
+            #if DEBUG
             print("Error syncing data: \(error)")
+            #endif
             throw error
         }
     }
@@ -85,37 +87,51 @@ class SyncService: ObservableObject {
     }
     
     func syncProgramTemplates(userId: String, modelContext: ModelContext) async throws {
+        #if DEBUG
         print("[SYNC] 🔄 Starting template sync for user: \(userId)")
+        #endif
         
         // Fetch templates from API
         var templatesData: [ProgramTemplateResponse]
         do {
             templatesData = try await apiService.fetchProgramTemplates()
+            #if DEBUG
             print("[SYNC] ✅ Fetched \(templatesData.count) templates from API")
+            #endif
         } catch let error as URLError {
+            #if DEBUG
             print("[SYNC] ❌ Network error: \(error.localizedDescription)")
             print("[SYNC] ❌ Error code: \(error.code.rawValue)")
             print("[SYNC] ❌ Failed to connect to server - check your internet connection or server availability")
             print("[SYNC] ❌ URL error details:")
             print("[SYNC]    - Code: \(error.code)")
+            #endif
             if let url = error.failingURL {
+                #if DEBUG
                 print("[SYNC]    - Failed URL: \(url)")
+                #endif
             }
             throw error
         } catch {
+            #if DEBUG
             print("[SYNC] ❌ Error fetching templates from API: \(error.localizedDescription)")
             print("[SYNC] ❌ Error type: \(type(of: error))")
+            #endif
             if let nsError = error as NSError? {
+                #if DEBUG
                 print("[SYNC] ❌ NSError domain: \(nsError.domain)")
                 print("[SYNC] ❌ NSError code: \(nsError.code)")
                 print("[SYNC] ❌ NSError userInfo: \(nsError.userInfo)")
+                #endif
             }
             throw error
         }
         
         if templatesData.isEmpty {
+            #if DEBUG
             print("[SYNC] ⚠️ No templates returned from API - server may still be generating")
             print("[SYNC] ⚠️ This is normal during program generation, continuing to poll...")
+            #endif
             // Don't throw error - allow calling code to continue polling
             return
         }
@@ -138,12 +154,16 @@ class SyncService: ObservableObject {
             existingTemplateMap[template.id.uuidString] = template
         }
 
+        #if DEBUG
         print("[SYNC] 🔄 Starting safe upsert: \(existingTemplates.count) existing, \(templatesData.count) from API")
+        #endif
 
         // Step 1: Delete templates that no longer exist on server (safe - data is gone from server anyway)
         for template in existingTemplates {
             if !newTemplateIds.contains(template.id.uuidString) {
+                #if DEBUG
                 print("[SYNC] 🗑️ Removing obsolete template: \(template.templateName)")
+                #endif
                 modelContext.delete(template)
             }
         }
@@ -152,7 +172,9 @@ class SyncService: ObservableObject {
         for templateData in templatesData {
             if let existingTemplate = existingTemplateMap[templateData.id] {
                 // UPDATE existing template
+                #if DEBUG
                 print("[SYNC] 📝 Updating existing template: \(templateData.templateName)")
+                #endif
                 updateTemplate(existingTemplate, with: templateData)
 
                 // Update exercises - remove old ones for this template and add new
@@ -178,7 +200,9 @@ class SyncService: ObservableObject {
 
             } else {
                 // CREATE new template
+                #if DEBUG
                 print("[SYNC] ➕ Creating new template: \(templateData.templateName)")
+                #endif
                 let template = createTemplate(from: templateData, userId: userId)
                 template.gymId = activeGymId
                 modelContext.insert(template)
@@ -204,16 +228,22 @@ class SyncService: ObservableObject {
         // Step 3: Save all changes in one transaction
         do {
             try modelContext.save()
+            #if DEBUG
             print("[SYNC] ✅ Successfully synced \(templatesData.count) templates to local database")
+            #endif
 
             // Verify templates were saved
             let verifyDescriptor = FetchDescriptor<ProgramTemplate>(
                 predicate: #Predicate { $0.userId == userId && $0.gymId == activeGymId }
             )
             let savedTemplates = try modelContext.fetch(verifyDescriptor)
+            #if DEBUG
             print("[SYNC] ✅ Verification: \(savedTemplates.count) templates now in local database for current gym")
+            #endif
         } catch {
+            #if DEBUG
             print("[SYNC] ❌ Error saving templates to database: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -289,13 +319,17 @@ class SyncService: ObservableObject {
         let serverGymIds = Set(gymsData.map { $0.id })
         for existingGym in existingGyms {
             if !serverGymIds.contains(existingGym.id) {
+                #if DEBUG
                 print("[SyncService] 🗑️ Deleting stale gym: \(existingGym.name) (ID: \(existingGym.id))")
+                #endif
                 modelContext.delete(existingGym)
             }
         }
         
         try modelContext.save()
+        #if DEBUG
         print("[SyncService] ✅ Gyms synced: \(gymsData.count) from server, \(existingGyms.count - gymsData.count) stale gyms deleted")
+        #endif
         
         // Fetch equipment from API
         let equipmentData = try await apiService.fetchUserEquipment()
@@ -336,7 +370,9 @@ class SyncService: ObservableObject {
         try modelContext.save()
         
         // RECONCILE: Update Gym.equipmentIds from UserEquipment
+        #if DEBUG
         print("[SYNC] 🔄 Reconciling Gym equipment collections...")
+        #endif
         let allGyms = (try? modelContext.fetch(FetchDescriptor<Gym>(predicate: #Predicate { $0.userId == userId }))) ?? []
         let allEquipment = (try? modelContext.fetch(FetchDescriptor<UserEquipment>(predicate: #Predicate { $0.userId == userId }))) ?? []
         
@@ -347,7 +383,9 @@ class SyncService: ObservableObject {
             
             if !gymEquipIds.isEmpty {
                 gym.equipmentIds = gymEquipIds
+                #if DEBUG
                 print("[SYNC] ✅ Updated gym '\(gym.name)' with \(gymEquipIds.count) units of equipment")
+                #endif
             }
         }
         
@@ -419,7 +457,9 @@ class SyncService: ObservableObject {
         profile.selectedGymId = data.selectedGymId
         
         if previousGymId != data.selectedGymId {
+            #if DEBUG
             print("[SyncService] 🏋️ Updated selectedGymId: \(previousGymId ?? "nil") → \(data.selectedGymId ?? "nil")")
+            #endif
         }
     }
     

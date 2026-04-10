@@ -115,7 +115,9 @@ struct GymListView: View {
         let profile = profiles.first { $0.userId == currentUserId }
         
         if profile?.selectedGymId == nil {
+            #if DEBUG
             print("[GymListView] 🔄 Auto-selecting first gym: \(firstGym.name)")
+            #endif
             gymService.selectGym(gym: firstGym, modelContext: modelContext)
         }
     }
